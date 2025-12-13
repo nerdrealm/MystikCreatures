@@ -3,15 +3,15 @@ document.addEventListener("DOMContentLoaded", function() {
   // 1. INJECT THE HAMBURGER BUTTON
   const menuBtn = document.createElement("button");
   menuBtn.id = "mobile-menu-btn";
-  menuBtn.innerHTML = "☰ MENU";
-  document.body.prepend(menuBtn); // Adds it to the very top of the body
+  menuBtn.innerHTML = "&#9776;"; // The Unicode Hamburger Symbol
+  document.body.prepend(menuBtn);
 
   // 2. INJECT THE MOBILE CSS STYLES
   const style = document.createElement('style');
   style.innerHTML = `
     /* --- DESKTOP (Default) --- */
     #mobile-menu-btn {
-      display: none; /* Hidden on computer */
+      display: none;
     }
 
     /* --- MOBILE (Max Width 800px) --- */
@@ -20,36 +20,46 @@ document.addEventListener("DOMContentLoaded", function() {
       /* MAIN LAYOUT ADJUSTMENT */
       body {
         position: relative;
-        overflow-x: hidden; /* Prevents side scrolling when menu opens */
+        overflow-x: hidden;
       }
 
-      /* THE BUTTON */
+      /* PUSH MAIN CONTENT DOWN SLIGHTLY SO BUTTON DOESN'T COVER TITLE */
+      .main {
+        padding-top: 60px !important; 
+      }
+
+      /* THE BUTTON (Icon Only, Top Left) */
       #mobile-menu-btn {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         position: fixed;
         top: 15px;
-        right: 15px;
+        left: 15px; /* MOVED TO LEFT */
         z-index: 10000;
+        
+        width: 45px;  /* Square shape */
+        height: 45px;
+        font-size: 24px; /* Large Icon */
+        
         background-color: #4fd1c5; /* Your Accent Color */
         color: #05070b;
         border: none;
-        padding: 10px 16px;
         border-radius: 8px;
-        font-weight: bold;
-        font-family: system-ui, sans-serif;
         box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         cursor: pointer;
+        transition: background 0.2s;
       }
 
       /* HIDE SIDEBAR BY DEFAULT */
       .sidebar {
-        position: fixed !important; /* Force fixed over static */
+        position: fixed !important;
         top: 0;
         left: 0;
         height: 100vh !important;
         width: 280px !important;
         z-index: 9999;
-        transform: translateX(-100%); /* Push it off-screen to the left */
+        transform: translateX(-100%); /* Push off-screen left */
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 5px 0 15px rgba(0,0,0,0.7);
         border-right: 1px solid #2d3748;
@@ -57,15 +67,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
       /* OPEN STATE */
       .sidebar.mobile-open {
-        transform: translateX(0); /* Slide it back in */
+        transform: translateX(0);
       }
 
-      /* DIM THE BACKGROUND CONTENT WHEN OPEN */
+      /* DIM BACKGROUND */
       .sidebar.mobile-open::before {
         content: '';
         position: fixed;
         top: 0;
-        left: 280px; /* Starts where sidebar ends */
+        left: 280px;
         width: 100vw;
         height: 100vh;
         background: rgba(0,0,0,0.6);
@@ -77,34 +87,36 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // 3. ADD CLICK EVENT LISTENER
   menuBtn.addEventListener('click', function(e) {
-    e.stopPropagation(); // Prevent immediate closing
+    e.stopPropagation();
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('mobile-open');
     
-    // Toggle button text
+    // Toggle Icon and Color
     if (sidebar.classList.contains('mobile-open')) {
-      menuBtn.innerHTML = "✕ CLOSE";
-      menuBtn.style.backgroundColor = "#f56565"; // Red color when open
+      menuBtn.innerHTML = "&#10005;"; // The 'X' symbol
+      menuBtn.style.backgroundColor = "#f56565"; // Red
+      menuBtn.style.color = "#fff";
     } else {
-      menuBtn.innerHTML = "☰ MENU";
-      menuBtn.style.backgroundColor = "#4fd1c5"; // Green color when closed
+      menuBtn.innerHTML = "&#9776;"; // The Hamburger symbol
+      menuBtn.style.backgroundColor = "#4fd1c5"; // Green/Teal
+      menuBtn.style.color = "#05070b";
     }
   });
 
-  // Close sidebar if clicking outside of it
+  // Close sidebar if clicking outside
   document.addEventListener('click', function(e) {
     const sidebar = document.querySelector('.sidebar');
     const btn = document.getElementById('mobile-menu-btn');
     
-    // If sidebar is open, and click is NOT on sidebar and NOT on button
     if (sidebar.classList.contains('mobile-open') && !sidebar.contains(e.target) && e.target !== btn) {
       sidebar.classList.remove('mobile-open');
-      btn.innerHTML = "☰ MENU";
+      btn.innerHTML = "&#9776;";
       btn.style.backgroundColor = "#4fd1c5";
+      btn.style.color = "#05070b";
     }
   });
 
-  // 4. ORIGINAL FOOTER CONTENT
+  // 4. LEGAL FOOTER
   const footerContent = `
     <style>
       .legal-footer {
