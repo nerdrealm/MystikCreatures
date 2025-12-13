@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function() {
         justify-content: center;
         position: fixed;
         top: 15px;
-        left: 15px; /* MOVED TO LEFT */
+        right: 12px;
         z-index: 10000;
         
         width: 45px;  /* Square shape */
