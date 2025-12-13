@@ -118,6 +118,7 @@
     .filters label {
       font-size: 0.78rem;
       color: var(--text-muted);
+      width: 100%; /* Allows label to contain full width elements on mobile */
     }
     .filters select {
       background: var(--bg-panel-soft);
@@ -179,8 +180,7 @@
       color: var(--text-main);
     }
     .table-wrapper {
-      max-height: 60vh;
-      overflow: auto;
+      /* Removed overflow:auto here to allow wrapping text instead of scrolling */
       border-radius: 8px;
       border: 1px solid #1a202c;
     }
@@ -190,19 +190,25 @@
       font-size: 0.8rem;
       background: #05070c;
       min-width: 100%;
+      table-layout: fixed; /* Ensures columns respect width */
     }
     thead {
-      position: sticky;
-      top: 0;
       background: #111320;
-      z-index: 1;
     }
     th, td {
       padding: 0.45rem 0.6rem;
       border-bottom: 1px solid #1a202c;
       text-align: left;
-      white-space: nowrap;
+      /* WRAPPING FIXES FOR MOBILE */
+      white-space: normal; 
+      word-wrap: break-word;
+      vertical-align: top;
     }
+    
+    /* Column Widths */
+    th:first-child { width: 25%; } /* Label Column */
+    th:nth-child(2), th:nth-child(3) { width: 37.5%; } /* Card Columns */
+
     th {
       font-weight: 600;
       font-size: 0.78rem;
@@ -227,8 +233,6 @@
       font-size: 0.8rem;
       color: var(--text-muted);
       white-space: normal;
-      min-width: 200px;
-      max-width: 400px;
       line-height: 1.4;
     }
     .sub-header {
@@ -273,6 +277,8 @@
       color: var(--text-muted);
       font-size: 0.9rem;
     }
+
+    /* --- MOBILE RESPONSIVENESS --- */
     @media (max-width: 800px) {
       body {
         flex-direction: column;
@@ -286,10 +292,52 @@
       }
       .main {
         max-width: 100%;
-        padding: 1rem 1rem 2rem;
+        padding: 0.8rem; /* Reduced padding for mobile */
+      }
+      section {
+        padding: 0.8rem; /* Reduce internal padding to widen content */
       }
       .preview-row {
         flex-direction: column;
+      }
+      
+      /* DROPDOWN FIXES */
+      .filters label {
+          display: block;
+          margin-bottom: 15px;
+      }
+      .filters label > div {
+          display: flex; 
+          flex-wrap: wrap; /* Allow wrapping */
+          gap: 5px;
+      }
+
+      /* TYPE and LEVEL Filters (1st and 2nd child) */
+      .filters select:nth-child(1),
+      .filters select:nth-child(2) {
+          flex: 1; /* Grow to fill space equally */
+          min-width: 40%; /* Ensure they don't get squished too small */
+          width: auto;
+          margin-bottom: 2px;
+          height: 40px;
+      }
+
+      /* CARD NAME Filter (3rd child) */
+      .filters select:nth-child(3) {
+          flex: 1 1 100%; /* Force full width on a new line */
+          width: 100%;
+          height: 40px;
+      }
+
+      /* TABLE FIXES */
+      th, td {
+          font-size: 0.7rem; /* Smaller text to fit */
+          padding: 6px 3px;
+      }
+      /* Ensure pills wrap */
+      .type-pill {
+          margin-bottom: 4px;
+          display: inline-block;
       }
     }
     /* Sidebar Image Styles */
@@ -395,26 +443,27 @@
         <div class="filters">
           <label>
             Card A
+            <!-- Added wrapper div with flex-wrap logic in CSS -->
             <div style="display: flex; gap: 0.4rem; margin-top: 0.3rem;">
-              <select id="filter-type-a" onchange="buildDropdownA()" style="min-width: 120px;">
+              <select id="filter-type-a" onchange="buildDropdownA()">
                 <option value="">All Types</option>
               </select>
-              <select id="filter-level-a" onchange="buildDropdownA()" style="min-width: 100px;">
+              <select id="filter-level-a" onchange="buildDropdownA()">
                 <option value="">All Levels</option>
               </select>
-              <select id="select-a" style="min-width: 180px;"></select>
+              <select id="select-a"></select>
             </div>
           </label>
           <label>
             Card B
             <div style="display: flex; gap: 0.4rem; margin-top: 0.3rem;">
-              <select id="filter-type-b" onchange="buildDropdownB()" style="min-width: 120px;">
+              <select id="filter-type-b" onchange="buildDropdownB()">
                 <option value="">All Types</option>
               </select>
-              <select id="filter-level-b" onchange="buildDropdownB()" style="min-width: 100px;">
+              <select id="filter-level-b" onchange="buildDropdownB()">
                 <option value="">All Levels</option>
               </select>
-              <select id="select-b" style="min-width: 180px;"></select>
+              <select id="select-b"></select>
             </div>
           </label>
         </div>
