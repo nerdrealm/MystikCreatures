@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mystik Creatures™ — Deck Builder</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+        :root {
+            /* Palette from index.html */
+            --bg: #05070b;
+            --bg-panel: #0b0f19;
+            --bg-panel-soft: #101522;
+            --accent: #4fd1c5;
+            --accent-soft: rgba(79, 209, 197, 0.12);
+            --text-main: #f7fafc;
+            --text-muted: #a0aec0;
+            --border-subtle: #2d3748;
+            --danger: #f56565;
+            --radius-lg: 18px;
+            --radius-sm: 10px;
+            --shadow-soft: 0 24px 60px rgba(0, 0, 0, 0.7);
+
+            /* Status Colors */
+            --color-yellow-status: #f1c40f;
+            --color-red-status: #e74c3c;
+            --color-green-status: #2ecc71;
+            --color-blue-status: #3498db;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #141824 0, #05070b 55%);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 270px;
+            background: linear-gradient(180deg, #05070c, #05070b);
+            border-right: 1px solid #1a202c;
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .sidebar h1 { margin: 0 0 0.3rem; font-size: 1.2rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-main); }
+        .sidebar .subtitle { margin: 0; font-size: 0.8rem; color: var(--text-muted); }
+        .sidebar-nav { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.25rem; }
+        .sidebar-nav a {
+            padding: 0.45rem 0.7rem;
+            border-radius: 999px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: 1px solid transparent;
+            transition: all 0.12s ease-out;
+            display: block;
+        }
+        .sidebar-nav a:hover {
+            border-color: rgba(79, 209, 197, 0.7);
+            color: var(--text-main);
+            background: rgba(15, 23, 42, 0.9);
+        }
+        .sidebar-nav a.active {
+            background: var(--accent-soft);
+            border-color: rgba(79, 209, 197, 0.9);
+            color: var(--accent);
+        }
+
+        /* --- MAIN LAYOUT --- */
+        .main {
+            flex: 1;
+            padding: 1.5rem 1.5rem 2.5rem;
+            max-width: calc(100% - 260px);
+        }
+        .main-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        section {
+            background: rgba(7, 10, 18, 0.95);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(45, 55, 72, 0.9);
+            box-shadow: var(--shadow-soft);
+            padding: 1.4rem 1.5rem 1.3rem;
+        }
+        h2 {
+            margin: 0 0 0.6rem;
+            font-size: 1.05rem;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* --- DECK BUILDER STYLES --- */
+
+        #status {
+            text-align: center;
+            padding: 10px;
+            background-color: var(--bg-panel-soft);
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: var(--accent);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group { 
+            display: flex; 
+            flex-direction: column; 
+            grid-column: 1 / -1; 
+            background: var(--bg-panel-soft);
+            padding: 15px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+        }
+        
+        .control-group label { 
+            margin-bottom: 10px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .theme-hint { 
+            font-size: 0.8em; 
+            color: var(--text-muted); 
+            margin-top: 10px; 
+            margin-bottom: 0; 
+            font-style: italic; 
+            line-height: 1.4;
+        }
+
+        /* --- TYPE BUBBLES --- */
+        .type-selector-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        
+        .type-bubble, .boss-bubble {
+            padding: 6px 14px; 
+            border-radius: 999px; 
+            cursor: pointer; 
+            border: 1px solid var(--border-subtle);
+            background-color: #1a202c; 
+            color: #fff; 
+            font-size: 0.8rem;
+            font-weight: 600; 
+            user-select: none;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy transition */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Base Type Colors */
+        .type-bubble-Dark { border-color: #8e44ad; color: #8e44ad; }
+        .type-bubble-Earth { border-color: #d2b48c; color: #d2b48c; }
+        .type-bubble-Fire { border-color: #e67e22; color: #e67e22; }
+        .type-bubble-Forest { border-color: #27ae60; color: #27ae60; }
+        .type-bubble-Light { border-color: #f1f2f6; color: #f1f2f6; }
+        .type-bubble-Thunder { border-color: var(--color-yellow-status); color: var(--color-yellow-status); }
+        .type-bubble-Water { border-color: #3498db; color: #3498db; }
+        .type-bubble-Wind { border-color: #87CEEB; color: #87CEEB; }
+        .type-bubble-Blank { border-color: #718096; color: #a0aec0; }
+
+        /* HOVER: Highlight as hell (Glow effect) */
+        .type-bubble-Dark:hover, .type-bubble-Dark.selected { background-color: #8e44ad; color: #fff; box-shadow: 0 0 15px #8e44ad; border-color: #8e44ad; }
+        .type-bubble-Earth:hover, .type-bubble-Earth.selected { background-color: #d2b48c; color: #000; box-shadow: 0 0 15px #d2b48c; border-color: #d2b48c; }
+        .type-bubble-Fire:hover, .type-bubble-Fire.selected { background-color: #e67e22; color: #fff; box-shadow: 0 0 15px #e67e22; border-color: #e67e22; }
+        .type-bubble-Forest:hover, .type-bubble-Forest.selected { background-color: #27ae60; color: #fff; box-shadow: 0 0 15px #27ae60; border-color: #27ae60; }
+        .type-bubble-Light:hover, .type-bubble-Light.selected { background-color: #f1f2f6; color: #000; box-shadow: 0 0 15px #f1f2f6; border-color: #f1f2f6; }
+        .type-bubble-Thunder:hover, .type-bubble-Thunder.selected { background-color: var(--color-yellow-status); color: #000; box-shadow: 0 0 15px var(--color-yellow-status); border-color: var(--color-yellow-status); }
+        .type-bubble-Water:hover, .type-bubble-Water.selected { background-color: #3498db; color: #fff; box-shadow: 0 0 15px #3498db; border-color: #3498db; }
+        .type-bubble-Wind:hover, .type-bubble-Wind.selected { background-color: #87CEEB; color: #000; box-shadow: 0 0 15px #87CEEB; border-color: #87CEEB; }
+        .type-bubble-Blank:hover, .type-bubble-Blank.selected { background-color: #4a5568; color: #fff; box-shadow: 0 0 15px #4a5568; border-color: #718096; }
+
+        .type-bubble.selected { transform: scale(1.1); }
+        .type-bubble.disabled { opacity: 0.2; cursor: not-allowed; pointer-events: none; filter: grayscale(100%); box-shadow: none; border-color: #333; }
+
+        /* Boss Selection */
+        .boss-bubble { display: flex; align-items: center; gap: 8px; background-color: var(--bg-panel); border-color: var(--accent); color: var(--accent); }
+        .boss-bubble:hover, .boss-bubble.selected { background-color: var(--accent); color: #000; box-shadow: 0 0 12px var(--accent); }
+        .disabled-section { opacity: 0.4; pointer-events: none; }
+
+        /* --- ARCHETYPE BUTTONS --- */
+        .archetype-options { display: flex; flex-wrap: wrap; gap: 12px; }
+        .archetype-options input[type="radio"] { display: none; }
+        .archetype-options label { 
+            cursor: pointer; 
+            padding: 10px 20px; 
+            background-color: var(--bg); 
+            border: 2px solid var(--border-subtle); 
+            border-radius: 999px; 
+            transition: all 0.2s ease-in-out;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* 1. Balanced (Green) */
+        input[value="Balanced"] + label:hover,
+        input[value="Balanced"]:checked + label {
+            background-color: var(--color-green-status);
+            color: #000;
+            border-color: var(--color-green-status);
+            box-shadow: 0 0 20px var(--color-green-status);
+            transform: translateY(-2px);
+        }
+
+        /* 2. Aggro (Red) */
+        input[value="Aggro"] + label:hover,
+        input[value="Aggro"]:checked + label {
+            background-color: var(--color-red-status);
+            color: #fff;
+            border-color: var(--color-red-status);
+            box-shadow: 0 0 20px var(--color-red-status);
+            transform: translateY(-2px);
+        }
+
+        /* 3. Control (Yellow) */
+        input[value="Control"] + label:hover,
+        input[value="Control"]:checked + label {
+            background-color: var(--color-yellow-status);
+            color: #000;
+            border-color: var(--color-yellow-status);
+            box-shadow: 0 0 20px var(--color-yellow-status);
+            transform: translateY(-2px);
+        }
+
+        /* 4. Energy (Blue) */
+        input[value="Energy"] + label:hover,
+        input[value="Energy"]:checked + label {
+            background-color: var(--color-blue-status);
+            color: #fff;
+            border-color: var(--color-blue-status);
+            box-shadow: 0 0 20px var(--color-blue-status);
+            transform: translateY(-2px);
+        }
+
+        /* Main Buttons */
+        .action-button {
+            grid-column: 1 / -1; 
+            padding: 12px; 
+            font-size: 0.95rem; 
+            font-weight: bold; 
+            color: #05070b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background-color: var(--accent); 
+            border: none; 
+            border-radius: var(--radius-sm); 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+        .action-button:hover { background-color: #81e6d9; transform: translateY(-1px); box-shadow: 0 0 15px var(--accent); }
+        .action-button:disabled { background-color: #2d3748; color: #718096; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* --- DISCLAIMER BOX --- */
+        .disclaimer-box {
+            background: rgba(241, 196, 15, 0.05); /* Slightly lower opacity for footer feel */
+            border: 1px solid rgba(241, 196, 15, 0.2);
+            border-left: 3px solid var(--color-yellow-status); /* Stylish left accent */
+            color: #c7a926; 
+            padding: 15px;
+            border-radius: var(--radius-sm);
+    
+            /* PUSH TO BOTTOM STYLES */
+            margin-top: 40px; 
+            margin-bottom: 0;
+    
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.8rem; /* Slightly smaller text */
+            line-height: 1.5;
+        }
+
+        .disclaimer-box i {
+            margin-top: 2px;
+            font-size: 1.2em;
+        }
+        .disclaimer-box p {
+            margin: 0;
+        }
+        .disclaimer-box strong {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-yellow-status);
+        }
+
+        /* Output Area */
+        #output { display: none; padding-top: 20px; border-top: 1px solid var(--border-subtle); margin-top: 20px; }
+        
+        #Deck-summary { 
+            padding: 20px; 
+            background-color: var(--bg-panel-soft); 
+            border-radius: var(--radius-sm); 
+            margin-bottom: 20px; 
+            text-align: center; 
+            border: 1px solid var(--border-subtle);
+        }
+        #Deck-title-container { margin-bottom: 5px; font-size: 1.4em; font-weight: bold; color: var(--text-main); }
+        #Deck-stats { color: var(--text-muted); font-size: 0.9em; margin-top: 0; }
+        
+        #Deck-list-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        
+        .card-list { background-color: var(--bg-panel-soft); padding: 15px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); }
+        .card-list h3 { 
+            border-bottom: 1px solid var(--border-subtle); 
+            color: var(--accent); 
+            padding-bottom: 10px; 
+            margin-top: 0; 
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .card-list ul { list-style: none; padding: 0; margin: 0; }
+        .card-list li { 
+            padding: 8px 10px; 
+            border-bottom: 1px solid #1a202c; 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 0.85em; 
+            color: var(--text-main);
+            transition: background 0.2s;
+        }
+        .card-list li:hover { background-color: var(--accent-soft); cursor: pointer; color: var(--accent); }
+        
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
+        .modal-content { background: var(--bg-panel); padding: 25px; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); text-align: center; max-width: 90%; box-shadow: var(--shadow-soft); }
+        .image-protection-wrapper { width: 280px; height: 390px; background: #000; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; border: 1px solid #333; }
+        .image-protection-wrapper img { max-width: 100%; max-height: 100%; border-radius: 8px; }
+
+        @media (max-width: 800px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid #1a202c; }
+            .main { padding: 1rem; max-width: 100%; }
+            .controls { grid-template-columns: 1fr; }
+        }
+        /* Sidebar Image Styles */
+        .sidebar-powers {
+            text-align: center;
+            margin: 0.5rem 0 1.5rem 0; /* Spacing around the powers image */
+            padding: 0 0.5rem;
+        }
+        .sidebar-powers img {
+            max-width: 60%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .sidebar-logo-bottom {
+            text-align: center;
+            margin-top: 1rem; /* Pushes it down from the links */
+            margin-bottom: 1rem;
+            padding: 0 0.5rem;
+        }
+        .sidebar-logo-bottom img {
+            max-width: 100%; /* Adjusts the logo size so it's not too huge */
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); /* Optional: adds a nice shadow to the logo */
+        }        
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <h1>Mystik Creatures™</h1>
+        <div class="sidebar-powers">
+          <img src="Powers.png" alt="Elemental Powers">
+        </div>
+        <nav class="sidebar-nav">
+          <a href="index.html">Overview</a>
+          <a href="card_list.html">Card list</a>
+          <a href="search.html">Search by name</a>
+          <a href="compare.html">Compare cards</a>
+          <a href="deck_builder.html" class="active">Deck Builder</a>
+          <a href="https://www.royalroad.com/fiction/142593/the-last-concordant" target="_blank" rel="noopener noreferrer" style="color: #feebc8;">
+          The Last Concordant 
+          <a href="news.html">News/Updates</a>
+        </nav>
+        <div class="sidebar-logo-bottom">
+          <img src="MystikLogo-PNG.png" alt="Mystik Creatures Logo">
+        </div>
+       </aside>
+
+    <main class="main">
+        <div class="main-inner">
+            <section>
+                <h2>Deck Builder</h2>
+
+                <div id="status">Loading card data...</div>
+
+                <!-- Disclaimer Box -->
+
+                <div class="controls">
+                    <!-- Type Selector -->
+                    <div class="control-group" id="Deck-type-group">
+                        <label>Deck Type Theme</label>
+                        <div id="Deck-type-selector" class="type-selector-container"></div>
+                        <p class="theme-hint">
+                            Choose up to 3 themes. 'Blank' is exclusive: it lets you build a deck with ANY creature type using universal Power cards.
+                        </p>
+                    </div>
+
+                    <!-- Archetype Selector -->
+                    <div class="control-group">
+                        <label>Deck Archetype</label>
+                        <div id="archetype-options" class="archetype-options"></div>
+                    </div>
+
+                    <!-- Boss Selector -->
+                    <div class="control-group" id="boss-Creature-group">
+                        <label>Select <em>Boss</em> Creatures (Optional)</label>
+                        <div id="boss-Creature-selector" class="type-selector-container disabled-section"></div>
+                        <p class="theme-hint">Select up to 3 Level 10 Creatures.</p>
+                    </div>
+
+                    <button id="generate-btn" class="action-button" disabled>Generate Deck</button>
+                    <button id="clear-btn" class="action-button" style="display:none; background:transparent; border:1px solid var(--danger); color:var(--danger);">Clear Selections</button>
+                </div>
+
+                <div id="output">
+                    <div id="Deck-summary">
+                        <div id="Deck-title-container"></div>
+                        <p id="Deck-stats"></p>
+                        <button id="reroll-btn" class="action-button" style="width:auto; padding:8px 20px; font-size:0.8em; margin-top:10px;">Re-Roll 🎲</button>
+                    </div>
+                    <p style="text-align:center; font-style:italic; color:var(--text-muted); font-size:0.8em; margin-bottom:15px;">Click card names to view images</p>
+
+                <div class="disclaimer-box">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <p>
+                        <strong>Automated Builder Disclaimer:</strong> 
+                        This tool generates decks using a mathematical algorithm and statistical averages. 
+                        It does <em>not</em> replicate human strategy, meta-game knowledge, or complex combo intuition. 
+                        Results may vary in competitive viability. Always review the output and refine the deck using your own judgment and playstyle.
+                    </p>
+                </div>
+
+                    <div id="Deck-list-container">
+                        <div class="card-list">
+                            <h3 id="Creatures-title">Creatures</h3>
+                            <ul id="Creatures-list"></ul>
+                        </div>
+                        <div class="card-list">
+                            <h3 id="secrets-title">Secrets</h3>
+                            <ul id="secrets-list"></ul>
+                        </div>
+                        <div class="card-list">
+                            <h3 id="power-title">Power</h3>
+                            <ul id="power-list"></ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="card-image-modal-overlay" class="modal-overlay">
+        <div class="modal-content card-image-modal-content">
+            <div class="image-protection-wrapper">
+                <img id="modal-card-image" src="" alt="Card Image">
+                <div id="modal-no-image-text" style="display:none; color:white;">No Image Available</div>
+            </div>
+            <button id="modal-close-btn" class="action-button" style="width:100%;">Close</button>
+        </div>
+    </div>
+
+    <script src="cards_data.js"></script>
+    <script>
+        // --- DATA LOAD ---
+        let all_cards = [];
+        let companion_map = {};
+
+        // Configuration
+        const Deck_ARCHETYPES = {
+            "Balanced": { "Creatures": { "base": 0.40, "flex": 0.04 }, "secrets": { "base": 0.35, "flex": 0.04 } },
+            "Aggro": { "Creatures": { "base": 0.50, "flex": 0.05 }, "secrets": { "base": 0.25, "flex": 0.03 } },
+            "Control": { "Creatures": { "base": 0.30, "flex": 0.03 }, "secrets": { "base": 0.45, "flex": 0.05 } },
+            "Energy": { "Creatures": { "base": 0.35, "flex": 0.03 }, "secrets": { "base": 0.30, "flex": 0.04 } }
+        };
+        const Deck_RULES = {
+            "Deck_size": 60,
+            "Creature_card_limits": { "Common": 4, "Uncommon": 3, "Rare": 2, "UltraRare": 2, "HiddenRare": 1, "Borderless": 1 },
+            "secret_card_limits": { "Common": 3, "Uncommon": 2, "Rare": 1, "HiddenRare": 1, "Borderless": 1 }
+        };
+        
+        // Manual companion mapping based on card text
+        const BOSS_COMPANION_MAP = {
+            "Arcana Temptress": ["Arcana Apprentice"], "Dracoleón": ["Nemean Lion"], "Hydra": ["Nereus"],
+            "Infinity Mage": ["Infinity Apprentice"], "Phoenix, the Rising": ["Phoenic"], "Serpopard": ["Anuket"],
+            "Werelephant": ["Pebblephant"], "Zombified Dragon": ["Dragon Tamer"],
+            "Divine Beast Panterus": ["Winged Beast U'ru", "Winged Beast Wai'ku", "Winged Beast Ra'zu"]
+        };
+
+        // State
+        let selectedTypes = new Set();
+        let selectedBosses = new Set();
+        let currentDeck = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof CARDS !== 'undefined') all_cards = CARDS;
+            else if (typeof CARD_PROFILES !== 'undefined') all_cards = CARD_PROFILES;
+
+            // Ensure UUIDs
+            all_cards.forEach(c => { if(!c.script_uuid) c.script_uuid = crypto.randomUUID(); });
+            
+            initUI();
+            document.getElementById('status').textContent = "System Ready. Select parameters.";
+            document.getElementById('status').style.color = "var(--accent)";
+            document.getElementById('status').style.borderColor = "var(--accent)";
+        });
+
+        function initUI() {
+            // Types
+            const types = ["Fire", "Water", "Thunder", "Earth", "Forest", "Dark", "Wind", "Light", "Blank"];
+            const typeContainer = document.getElementById('Deck-type-selector');
+            types.forEach(t => {
+                const b = document.createElement('div');
+                b.className = `type-bubble type-bubble-${t}`;
+                b.textContent = t;
+                b.onclick = () => toggleType(b, t);
+                typeContainer.appendChild(b);
+            });
+
+            // Archetypes
+            const archContainer = document.getElementById('archetype-options');
+            Object.keys(Deck_ARCHETYPES).forEach(a => {
+                const id = `arch-${a}`;
+                const radio = document.createElement('input');
+                radio.type = 'radio'; radio.name = 'archetype'; radio.value = a; radio.id = id;
+                const label = document.createElement('label');
+                label.htmlFor = id; label.textContent = a;
+                archContainer.appendChild(radio);
+                archContainer.appendChild(label);
+                radio.addEventListener('change', () => {
+                    document.getElementById('generate-btn').disabled = false;
+                });
+            });
+
+            document.getElementById('generate-btn').onclick = runGeneration;
+            document.getElementById('reroll-btn').onclick = runGeneration;
+            document.getElementById('clear-btn').onclick = () => window.location.reload();
+            document.getElementById('modal-close-btn').onclick = () => document.getElementById('card-image-modal-overlay').style.display = 'none';
+        }
+
+        function toggleType(el, type) {
+            // Logic for 'Blank' exclusivity
+            if (type === 'Blank') {
+                // If selecting Blank, clear everything else automatically
+                if (!selectedTypes.has('Blank')) {
+                    selectedTypes.clear(); // Clear the set
+                    // Remove 'selected' visual class from all other bubbles
+                    document.querySelectorAll('.type-bubble').forEach(b => b.classList.remove('selected', 'disabled'));
+                    selectedTypes.add('Blank');
+                } else {
+                    selectedTypes.delete('Blank');
+                }
+            }
+            else {
+                // Regular Type Logic
+                if (selectedTypes.has('Blank')) { 
+                    alert("Deselect Blank first."); 
+                    return; 
+                }
+
+                if (selectedTypes.has(type)) {
+                    // Deselecting is always allowed
+                    selectedTypes.delete(type);
+                } else {
+                    // Selecting new type
+                    
+                    // Check for 3+ Limit
+                    if (selectedTypes.size >= 3) {
+                        alert("You cannot choose more than 3 deck types. Multi-type decks become inconsistent and hard to manage.");
+                        return;
+                    }
+
+                    // Warning for 3rd Type
+                    if (selectedTypes.size === 2) {
+                        const proceed = confirm("Choosing more than 2 deck types can make playing and building complicated. It is recommended to stick to 2 types.\n\nDo you want to continue anyway?");
+                        if (!proceed) return;
+                    }
+
+                    selectedTypes.add(type);
+                }
+            }
+
+            // UI Update
+            el.classList.toggle('selected');
+            
+            // Handle Blank visual states
+            const bubbles = document.querySelectorAll('.type-bubble');
+            if(selectedTypes.has('Blank')) {
+                bubbles.forEach(b => { if(!b.classList.contains('type-bubble-Blank')) b.classList.add('disabled'); });
+            } else if (selectedTypes.size > 0) {
+                document.querySelector('.type-bubble-Blank').classList.add('disabled');
+            } else {
+                bubbles.forEach(b => b.classList.remove('disabled'));
+            }
+            
+            updateBosses();
+            // Enable button only if we have types selected
+            if (selectedTypes.size > 0) {
+                 const archInput = document.querySelector('input[name="archetype"]:checked');
+                 if(archInput) document.getElementById('generate-btn').disabled = false;
+            } else {
+                document.getElementById('generate-btn').disabled = true;
+            }
+        }
+
+        function updateBosses() {
+            const container = document.getElementById('boss-Creature-selector');
+            container.innerHTML = '';
+            selectedBosses.clear();
+
+            if (selectedTypes.size === 0) {
+                container.classList.add('disabled-section');
+                return;
+            }
+            container.classList.remove('disabled-section');
+
+            const bosses = all_cards.filter(c => 
+                c.supertype === 'Creature' && c.level === 10 && 
+                (selectedTypes.has('Blank') || c.types.some(t => selectedTypes.has(t)))
+            );
+            
+            // Deduplicate
+            const unique = [...new Map(bosses.map(item => [item.name, item])).values()];
+            unique.sort((a,b) => a.name.localeCompare(b.name));
+
+            unique.forEach(boss => {
+                const b = document.createElement('div');
+                b.className = 'boss-bubble';
+                b.textContent = boss.name;
+                b.onclick = () => {
+                    if(!selectedBosses.has(boss.script_uuid) && selectedBosses.size >= 3) {
+                        alert("Max 3 bosses."); return;
+                    }
+                    b.classList.toggle('selected');
+                    selectedBosses.has(boss.script_uuid) ? selectedBosses.delete(boss.script_uuid) : selectedBosses.add(boss.script_uuid);
+                };
+                container.appendChild(b);
+            });
+        }
+
+        function runGeneration() {
+            const archInput = document.querySelector('input[name="archetype"]:checked');
+            if(!archInput) { alert("Select an Archetype"); return; }
+            if(selectedTypes.size === 0) { alert("Select a Theme"); return; }
+
+            try {
+                const archetype = archInput.value;
+                const themeStr = Array.from(selectedTypes).join('/');
+                // Get full boss objects
+                const bosses = Array.from(selectedBosses).map(id => all_cards.find(c => c.script_uuid === id)).filter(x => x);
+                
+                const deck = buildDeck(themeStr, archetype, bosses);
+                renderDeck(deck, themeStr, archetype);
+                
+                document.getElementById('output').style.display = 'block';
+                document.getElementById('generate-btn').style.display = 'none';
+                document.getElementById('clear-btn').style.display = 'block';
+                document.getElementById('status').textContent = "Deck Generated Successfully";
+                document.getElementById('status').style.color = "var(--color-green-status)";
+                document.getElementById('status').style.borderColor = "var(--color-green-status)";
+                document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (e) {
+                console.error(e);
+                alert("Error: " + e.message);
+            }
+        }
+
+        function buildDeck(theme, archetype, bosses) {
+            const Deck = { Creatures: [], Secrets: [], Power: [] };
+            const counts = {}; // Track card counts by name
+
+            const config = Deck_ARCHETYPES[archetype];
+            // Calculate targets with randomness
+            const creatureTarget = Math.round(60 * (config.Creatures.base + (Math.random()*0.08 - 0.04)));
+            const secretTarget = Math.round(60 * (config.secrets.base + (Math.random()*0.08 - 0.04)));
+            
+            // 1. Add Bosses & Companions
+            bosses.forEach(boss => {
+                addCard(Deck.Creatures, boss, counts, 4); // Boss limit?
+                const companions = BOSS_COMPANION_MAP[boss.name] || [];
+                companions.forEach(compName => {
+                    const comp = all_cards.find(c => c.name === compName);
+                    if(comp) addCard(Deck.Creatures, comp, counts, 4);
+                });
+            });
+
+            // 2. Fill Creatures (FIXED LOOP)
+            const creaturePool = all_cards.filter(c => 
+                c.supertype === 'Creature' && 
+                (theme === 'Blank' || c.types.some(t => theme.includes(t)))
+            );
+            
+            let safety = 0;
+            while(Deck.Creatures.length < creatureTarget && safety < 1000) {
+                safety++;
+                const card = creaturePool[Math.floor(Math.random() * creaturePool.length)];
+                if(!card) break;
+                const limit = Deck_RULES.Creature_card_limits[card.rarity] || 1;
+                addCard(Deck.Creatures, card, counts, limit);
+            }
+
+            // 3. Fill Secrets (FIXED LOOP)
+            // Filter pool first
+            let secretPool = all_cards.filter(c => c.supertype === 'Secret');
+            
+            safety = 0;
+            while(Deck.Secrets.length < secretTarget && secretPool.length > 0 && safety < 1000) {
+                safety++;
+                // Pick random index
+                const idx = Math.floor(Math.random() * secretPool.length);
+                const card = secretPool[idx];
+                const limit = Deck_RULES.secret_card_limits[card.rarity] || 1;
+                
+                // If we haven't hit limit, add it
+                if((counts[card.name] || 0) < limit) {
+                    Deck.Secrets.push(card);
+                    counts[card.name] = (counts[card.name] || 0) + 1;
+                } else {
+                    // Remove maxed out card from pool so we don't pick it again
+                    secretPool.splice(idx, 1);
+                }
+            }
+
+            // 4. Fill Power
+            const powerTarget = 60 - Deck.Creatures.length - Deck.Secrets.length;
+            const powerPool = all_cards.filter(c => c.supertype === 'Power');
+            // Filter powers to match theme
+            const validPowers = powerPool.filter(p => theme.includes(p.powerType) || p.powerType === 'Blank');
+            
+            safety = 0;
+            while(Deck.Power.length < powerTarget && safety < 500) {
+                safety++;
+                if(validPowers.length === 0) break;
+                const p = validPowers[Math.floor(Math.random() * validPowers.length)];
+                Deck.Power.push(p);
+            }
+
+            return Deck;
+        }
+
+        function addCard(list, card, counts, limit) {
+            if((counts[card.name] || 0) < limit) {
+                list.push(card);
+                counts[card.name] = (counts[card.name] || 0) + 1;
+                return true;
+            }
+            return false;
+        }
+
+        function renderDeck(deck, theme, arch) {
+            document.getElementById('Deck-title-container').innerHTML = `${theme} <span style="color:var(--text-muted); font-size:0.8em;">//</span> ${arch}`;
+            const total = deck.Creatures.length + deck.Secrets.length + deck.Power.length;
+            document.getElementById('Deck-stats').textContent = `Total: ${total} (C:${deck.Creatures.length} S:${deck.Secrets.length} P:${deck.Power.length})`;
+
+            renderList('Creatures', deck.Creatures);
+            renderList('secrets', deck.Secrets);
+            renderList('power', deck.Power);
+        }
+
+        function renderList(id, cards) {
+            const ul = document.getElementById(`${id}-list`);
+            ul.innerHTML = '';
+            
+            // Group counts
+            const grouped = {};
+            const cardRef = {};
+            cards.forEach(c => {
+                const key = c.name + (c.level ? ` (Lvl ${c.level})` : '');
+                grouped[key] = (grouped[key] || 0) + 1;
+                cardRef[key] = c;
+            });
+
+            // Sort alphabetical
+            Object.keys(grouped).sort().forEach(key => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${key}</span> <span style="opacity:0.7; font-weight:bold;">x${grouped[key]}</span>`;
+                li.onclick = () => showCardImage(cardRef[key]);
+                ul.appendChild(li);
+            });
+        }
+
+        function showCardImage(card) {
+            const modal = document.getElementById('card-image-modal-overlay');
+            const img = document.getElementById('modal-card-image');
+            const txt = document.getElementById('modal-no-image-text');
+            
+            const repo = ''; 
+            
+            if(card.images && card.images.small) {
+                let path = card.images.small;
+                if(!path.endsWith('.png') && !path.endsWith('.jpg')) path += '.png';
+                
+                img.src = repo + path;
+                img.style.display = 'block';
+                txt.style.display = 'none';
+            } else {
+                img.style.display = 'none';
+                txt.style.display = 'block';
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+    </script>
+    <script src="footer.js"></script>
+</body>
+</html>
