@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Mystik Creatures™ – Search by Name</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #05070b;
+      --bg-panel: #0b0f19;
+      --bg-panel-soft: #101522;
+      --accent: #4fd1c5;
+      --accent-soft: rgba(79, 209, 197, 0.12);
+      --text-main: #f7fafc;
+      --text-muted: #a0aec0;
+      --border-subtle: #2d3748;
+      --danger: #f56565;
+      --radius-lg: 18px;
+      --radius-sm: 10px;
+      --shadow-soft: 0 24px 60px rgba(0, 0, 0, 0.7);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #141824 0, #05070b 55%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+    }
+    .sidebar {
+      width: 270px;
+      background: linear-gradient(180deg, #05070c, #05070b);
+      border-right: 1px solid #1a202c;
+      padding: 1.5rem 1rem;
+      position: sticky;
+      top: 0;
+      max-height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar h1 {
+      margin: 0 0 0.3rem;
+      font-size: 1.2rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .sidebar .subtitle {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .sidebar-nav {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .sidebar-nav a {
+      padding: 0.45rem 0.7rem;
+      border-radius: 999px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border: 1px solid transparent;
+      transition: all 0.12s ease-out;
+    }
+    .sidebar-nav a:hover {
+      border-color: rgba(79, 209, 197, 0.7);
+      color: var(--text-main);
+      background: rgba(15, 23, 42, 0.9);
+    }
+    .sidebar-nav a.active {
+      background: var(--accent-soft);
+      border-color: rgba(79, 209, 197, 0.9);
+      color: var(--accent);
+    }
+    .main {
+      flex: 1;
+      padding: 1.5rem 1.5rem 2.5rem;
+      max-width: calc(100% - 260px);
+    }
+    .main-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    section {
+      background: rgba(7, 10, 18, 0.95);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(45, 55, 72, 0.9);
+      box-shadow: var(--shadow-soft);
+      padding: 1.4rem 1.5rem 1.3rem;
+    }
+    section h2 {
+      margin: 0 0 0.6rem;
+      font-size: 1.05rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .section-subtitle {
+      margin: 0 0 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .muted {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.9rem;
+    }
+    .search-bar input[type="text"] {
+      flex: 1;
+      background: var(--bg-panel-soft);
+      border-radius: 999px;
+      border: 1px solid #2d3748;
+      padding: 0.3rem 0.75rem;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .search-bar input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+    .results-meta {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    
+    /* --- PILL BOX STYLES --- */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+      white-space: nowrap;
+      margin: 0 2px;
+    }
+    
+    /* Elemental Colors */
+    .pill-Dark    { border-color: #8e44ad; color: #a569bd; background: rgba(142, 68, 173, 0.15); }
+    .pill-Earth   { border-color: #d2b48c; color: #e0cdae; background: rgba(210, 180, 140, 0.15); }
+    .pill-Fire    { border-color: #e67e22; color: #f39c12; background: rgba(230, 126, 34, 0.15); }
+    .pill-Forest  { border-color: #27ae60; color: #2ecc71; background: rgba(39, 174, 96, 0.15); }
+    .pill-Light   { border-color: #f1f2f6; color: #ffffff; background: rgba(241, 242, 246, 0.15); }
+    .pill-Thunder { border-color: #f1c40f; color: #f4d03f; background: rgba(241, 196, 15, 0.15); }
+    .pill-Water   { border-color: #3498db; color: #5dade2; background: rgba(52, 152, 219, 0.15); }
+    .pill-Wind    { border-color: #87CEEB; color: #87CEEB; background: rgba(135, 206, 235, 0.15); }
+    .pill-Blank   { border-color: #718096; color: #a0aec0; background: rgba(113, 128, 150, 0.15); }
+
+    /* TEXT GLOW STYLES */
+    .stat-glow {
+      color: #fff;
+      text-shadow: 0 0 8px #f1c40f; /* Gold Glow */
+      font-weight: bold;
+    }
+    
+    /* Rarity Text Glows */
+    .rarity-text-Common     { color: #fff; text-shadow: 0 0 8px #a0aec0; font-weight: bold; }
+    .rarity-text-Uncommon   { color: #fff; text-shadow: 0 0 8px #2ecc71; font-weight: bold; }
+    .rarity-text-Rare       { color: #fff; text-shadow: 0 0 8px #3498db; font-weight: bold; }
+    .rarity-text-UltraRare  { color: #fff; text-shadow: 0 0 8px #9b59b6; font-weight: bold; }
+    .rarity-text-HiddenRare { color: #fff; text-shadow: 0 0 8px #f1c40f; font-weight: bold; }
+    .rarity-text-Borderless { color: #fff; text-shadow: 0 0 8px #e74c3c; font-weight: bold; }
+
+    .results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      max-height: 70vh;
+      overflow-y: auto;
+      padding-right: 0.3rem;
+    }
+    .card-result {
+      background: #05070c;
+      border-radius: var(--radius-sm);
+      border: 1px solid #1a202c;
+      padding: 0.9rem 1rem;
+    }
+    .card-result-header {
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+      margin-bottom: 0.6rem;
+    }
+    .card-image img {
+      display: block;
+      width: 140px;
+      border-radius: 10px;
+      border: 1px solid #2d3748;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .card-image img:hover {
+      transform: scale(1.05);
+    }
+    .card-title-block h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+    
+    /* --- METADATA LAYOUT --- */
+    .card-title-block .meta-line {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.8; /* Slight increase for readability */
+    }
+    
+    /* The chunks (Label: Value) */
+    .meta-chunk {
+      display: inline-block;
+      white-space: nowrap;
+    }
+    
+    /* Desktop Separator: Adds " | " AFTER the item. 
+       If the line wraps, the pipe stays with the previous item. */
+    .meta-chunk:not(:last-child)::after {
+      content: " | ";
+      margin: 0 6px;
+      color: var(--border-subtle);
+      font-weight: normal;
+    }
+
+    .detail-columns {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.7rem 1rem;
+    }
+    .detail-block h4 {
+      margin: 0 0 0.25rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    .detail-block p {
+      margin: 0 0 0.25rem;
+      font-size: 0.8rem;
+    }
+    .detail-block p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Image enlargement modal */
+    .image-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    .image-modal.active {
+      display: flex;
+    }
+    .image-modal img {
+      max-width: 90%;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(79, 209, 197, 0.3);
+    }
+    .image-modal-text {
+      position: absolute;
+      bottom: 20px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* --- MOBILE STYLES (MATCHING CODEX) --- */
+    @media (max-width: 800px) {
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        position: static;
+        max-height: none;
+        border-right: none;
+        border-bottom: 1px solid #1a202c;
+      }
+      .main {
+        max-width: 100%;
+        padding: 1rem 1rem 2rem;
+      }
+
+      /* Stack Header Elements (Image Top, Text Bottom) */
+      .card-result-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      
+      /* Center the Image */
+      .card-image {
+        margin: 0 auto 1rem auto;
+      }
+      
+      /* Center Icons */
+      .elemental-icon-row {
+        justify-content: center;
+      }
+
+      /* Stack Metadata Vertically (No Pipes) */
+      .meta-chunk {
+        display: block; /* Forces new line */
+        margin-bottom: 3px;
+      }
+      
+      /* Hide the desktop separator on mobile */
+      .meta-chunk:not(:last-child)::after {
+        content: none; 
+      }
+    }
+    
+    /* Sidebar Image Styles */
+    .sidebar-powers {
+      text-align: center;
+      margin: 0.5rem 0 1.5rem 0; /* Spacing around the powers image */
+      padding: 0 0.5rem;
+    }
+    .sidebar-powers img {
+      max-width: 60%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .sidebar-logo-bottom {
+      text-align: center;
+      margin-top: 1rem; /* Pushes it down from the links */
+      margin-bottom: 1rem;
+      padding: 0 0.5rem;
+    }
+    .sidebar-logo-bottom img {
+      max-width: 100%; /* Adjusts the logo size so it's not too huge */
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); /* Optional: adds a nice shadow to the logo */
+    }
+    
+    /* Elemental Icon Styles */
+    .elemental-icon-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-top: 15px;
+    }
+    .element-icon {
+      width: 35px;
+      height: 35px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+    }
+    
+    /* Rarity Borders - HIGH INTENSITY GLOWS */
+    .rarity-Common .card-image img { border: 2px solid #a0aec0; box-shadow: 0 0 15px rgba(160, 174, 192, 0.6), 0 10px 26px rgba(0, 0, 0, 0.6); }
+    .rarity-Uncommon .card-image img { border: 2px solid #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.6), 0 10px 26px rgba(0, 0, 0, 0.6); }
+    .rarity-Rare .card-image img { border: 2px solid #3498db; box-shadow: 0 0 15px rgba(52, 152, 219, 0.6), 0 10px 26px rgba(0, 0, 0, 0.6); }
+    .rarity-UltraRare .card-image img { border: 2px solid #9b59b6; box-shadow: 0 0 20px rgba(155, 89, 182, 0.7), 0 10px 26px rgba(0, 0, 0, 0.6); }
+    .rarity-HiddenRare .card-image img { border: 2px solid #f1c40f; box-shadow: 0 0 20px rgba(241, 196, 15, 0.7), 0 10px 26px rgba(0, 0, 0, 0.6); }
+    .rarity-Borderless .card-image img { border: 2px solid #e74c3c; box-shadow: 0 0 20px rgba(231, 76, 60, 0.7), 0 10px 26px rgba(0, 0, 0, 0.6); }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <h1>Mystik Creatures™</h1>
+    <div class="sidebar-powers">
+      <img src="Powers.png" alt="Elemental Powers">
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html">Overview</a>
+      <a href="card_list.html">Card list</a>
+      <a href="codex.html" >The Mystik Codex</a>
+      <a href="search.html" class="active">Search by name</a>
+      <a href="compare.html">Compare cards</a>
+      <a href="deck_builder.html">Deck Builder</a>
+      <a href="gameplay.html">Gameplay</a>
+      <a href="https://www.royalroad.com/fiction/142593/the-last-concordant" target="_blank" rel="noopener noreferrer" style="color: #feebc8;">
+      The Last Concordant 
+      <a href="news.html">News/Updates</a>
+    </nav>
+    <div class="sidebar-logo-bottom">
+      <img src="MystikLogo-PNG.png" alt="Mystik Creatures Logo">
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="main-inner">
+      <section>
+        <h2>Search by Creature name</h2>
+        <p class="section-subtitle">
+          Start typing a Creature's name. Results only appear while you're typing and will narrow down
+          to the closest name match (prefix first).
+        </p>
+
+        <div class="search-bar">
+          <input id="search-input" type="text" placeholder="Type a Creature name, e.g. Arcana Apprentice" />
+        </div>
+
+        <div class="results-meta">
+          <span id="results-count" class="muted"></span>
+        </div>
+
+        <div id="results" class="results-list"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Image enlargement modal -->
+  <div class="image-modal" id="image-modal" onclick="closeModal()">
+    <img id="modal-image" src="" alt="">
+    <div class="image-modal-text">Click anywhere to close</div>
+  </div>
+
+  <script src="cards_data.js"></script>
+  <script>
+    const IMAGE_EXT = '.png';
+    
+    function hasExtension(path) {
+      return /\.[a-zA-Z0-9]+$/.test(path);
+    }
+
+    function getCardImageUrl(card) {
+      if (!card.images || !card.images.small) return null;
+      const path = card.images.small;
+      return hasExtension(path) ? path : path + IMAGE_EXT;
+    }
+
+    function getElementIconsHTML(card) {
+      if (!card.types || card.types.length === 0) return '';
+      
+      const path = "CardImages/icons/";
+      
+      const iconMap = {
+        "Dark": "PowerDark.png",       
+        "Earth": "PowerEarth.png",     
+        "Fire": "PowerFire.png",       
+        "Forest": "PowerForest.png",   
+        "Light": "PowerLight.png",     
+        "Thunder": "PowerThunder.png", 
+        "Water": "PowerWater.png",     
+        "Wind": "PowerWind.png",       
+        "Blank": "PowerBlank.png" 
+      };
+
+      let html = '<div class="elemental-icon-row">';
+      
+      card.types.forEach(type => {
+        const filename = iconMap[type];
+        if (filename) {
+          html += `<img src="${path}${filename}" class="element-icon" alt="${type}" />`;
+        }
+      });
+      
+      html += '</div>';
+      return html;
+    }
+
+    // Modal logic
+    function enlargeImage(url, name) {
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('modal-image');
+      modalImg.src = url;
+      modalImg.alt = name;
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('image-modal').classList.remove('active');
+    }
+
+    const input = document.getElementById('search-input');
+    const results = document.getElementById('results');
+    const resultsCount = document.getElementById('results-count');
+
+    function renderResults() {
+      const termRaw = (input.value || '').trim();
+      const term = termRaw.toLowerCase();
+
+      if (!term) {
+        results.innerHTML = '';
+        resultsCount.textContent = '0 result(s)';
+        return;
+      }
+
+      let matches = CARDS.filter(c => {
+        if (c.supertype !== 'Creature') return false; // Only search Creatures
+        if (!c.name) return false;
+        return c.name.toLowerCase().startsWith(term);
+      });
+
+      if (matches.length === 0) {
+        matches = CARDS.filter(c => {
+          if (c.supertype !== 'Creature') return false; // Only search Creatures
+          if (!c.name) return false;
+          return c.name.toLowerCase().includes(term);
+        });
+      }
+
+      results.innerHTML = '';
+      resultsCount.textContent = matches.length + ' result(s)';
+
+      matches.forEach(c => {
+        const div = document.createElement('div');
+        
+        // Use remove spaces from rarity for class name (e.g. "Hidden Rare" -> "HiddenRare")
+        const rarityClean = c.rarity ? c.rarity.replace(/\s+/g, '') : '';
+        const rarityClass = c.rarity ? `rarity-${rarityClean}` : '';
+        div.className = `card-result ${rarityClass}`;
+
+        const hp = c.hp ?? '—';
+        const level = c.level ?? '—';
+
+        // Add Gold Glow to Level and HP
+        const levelDisplay = level !== '—' ? `<span class="stat-glow">${level}</span>` : '—';
+        const hpDisplay = hp !== '—' ? `<span class="stat-glow">${hp}</span>` : '—';
+        
+        // Add Color Glow to Rarity Text
+        const rarityDisplay = c.rarity ? `<span class="rarity-text-${rarityClean}">${c.rarity}</span>` : '—';
+        
+        // Create Pills for Types
+        const typeDisplay = (c.types || []).map(t => `<span class="pill pill-${t}">${t}</span>`).join(' ');
+
+        const atk1d = (c.attacks && c.attacks[0]) ? c.attacks[0].damage : null;
+        const atk2d = (c.attacks && c.attacks[1]) ? c.attacks[1].damage : null;
+        
+        const atk1Name = (c.attacks && c.attacks[0]) ? c.attacks[0].name : '—';
+        const atk1Cost = (c.attacks && c.attacks[0] && c.attacks[0].cost) ? formatCost(c.attacks[0].cost) : '—';
+        const atk1Desc = (c.attacks && c.attacks[0]) ? (c.attacks[0].effectText || '') : '';
+
+        const atk2Name = (c.attacks && c.attacks[1]) ? c.attacks[1].name : '—';
+        const atk2Cost = (c.attacks && c.attacks[1] && c.attacks[1].cost) ? formatCost(c.attacks[1].cost) : '—';
+        const atk2Desc = (c.attacks && c.attacks[1]) ? (c.attacks[1].effectText || '') : '';
+
+        const abilityName = (c.abilities && c.abilities[0]) ? c.abilities[0].name : '—';
+        const abilityText = (c.abilities && c.abilities[0]) ? c.abilities[0].effectText : '<span class="muted">No ability.</span>';
+
+        const weakObj = (c.weaknesses && c.weaknesses[0]) ? c.weaknesses[0] : null;
+        const weakPart = weakObj ? `${weakObj.PowerType} (x${weakObj.multiplier})` : '—';
+
+        const resistObj = (c.resistances && c.resistances[0]) ? c.resistances[0] : null;
+        const resistPart = resistObj ? `${resistObj.PowerType} (-${resistObj.reduction})` : '—';
+        
+        let retreatPart = '—';
+        if(c.retreatCost && c.retreatCost.length > 0) {
+            const total = c.retreatCost.reduce((sum, item) => sum + item.count, 0);
+            retreatPart = total;
+        }
+
+        const imgUrl = getCardImageUrl(c);
+        
+        const imgHtml = imgUrl
+          ? `<div class="card-image"><img src="${imgUrl}" alt="${c.name}" onclick="enlargeImage('${imgUrl}', '${c.name.replace(/'/g, "\\'")}')" /></div>`
+          : '<div class="card-image" style="background:#1a202c; height:200px; width:140px; display:flex; align-items:center; justify-content:center; border-radius:10px; color:#555; font-size:0.7rem;">No Image</div>';
+
+        const iconsHtml = getElementIconsHTML(c);
+
+        div.innerHTML = `
+          <div class="card-result-header">
+            ${imgHtml}
+            <div class="card-title-block">
+              <h3>${c.name}</h3>
+              <div class="meta-line">
+                <span class="meta-chunk"><strong>Type:</strong> ${typeDisplay}</span>
+                <span class="meta-chunk"><strong>Level:</strong> ${levelDisplay}</span>
+                <span class="meta-chunk"><strong>HP:</strong> ${hpDisplay}</span>
+                <span class="meta-chunk"><strong>Rarity:</strong> ${rarityDisplay}</span>
+                <span class="meta-chunk"><strong>Set ID:</strong> ${c.collectionNumber || ''}</span>
+              </div>
+              ${iconsHtml}
+            </div>
+          </div>
+          <div class="detail-columns">
+            <div class="detail-block">
+              <h4>Ability</h4>
+              <p><strong>${abilityName}</strong></p>
+              <p>${abilityText}</p>
+            </div>
+            <div class="detail-block">
+              <h4>Attack 1</h4>
+              <p><strong>${atk1Name}</strong> ${atk1d ? `(${atk1d} dmg)` : ''}</p>
+              <p class="muted">Cost: ${atk1Cost}</p>
+              <p>${atk1Desc}</p>
+            </div>
+            <div class="detail-block">
+              <h4>Attack 2</h4>
+              <p><strong>${atk2Name}</strong> ${atk2d ? `(${atk2d} dmg)` : ''}</p>
+              <p class="muted">Cost: ${atk2Cost}</p>
+              <p>${atk2Desc}</p>
+            </div>
+            <div class="detail-block">
+              <h4>Weakness &amp; Retreat</h4>
+              <p><strong>Weakness:</strong> ${weakPart}</p>
+              <p><strong>Resistance:</strong> ${resistPart}</p>
+              <p><strong>Retreat cost:</strong> ${retreatPart}</p>
+            </div>
+          </div>`;
+
+        results.appendChild(div);
+      });
+    }
+
+    function formatCost(costArray) {
+        if(!costArray || costArray.length === 0) return '—';
+        return costArray.map(c => `${c.count} ${c.PowerType}`).join(', ');
+    }
+
+    let debounceTimer;
+    input.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            renderResults();
+        }, 300);
+    });
+  </script>
+  <script src="footer.js"></script>
+</body>
+</html>
