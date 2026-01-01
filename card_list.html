@@ -287,6 +287,24 @@
     }
     .sub-header:first-child { margin-top: 0; }
 
+    /* --- HIGHLIGHT GLOWS (NEW) --- */
+    
+    /* Gold Glow for HP and Level */
+    .stat-glow {
+      color: #fff;
+      text-shadow: 0 0 8px #f1c40f; /* Gold Glow */
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    /* Rarity Text Glows (Matching Border Colors) */
+    .rarity-text-Common     { color: #fff; text-shadow: 0 0 8px #a0aec0; font-weight: 700; }
+    .rarity-text-Uncommon   { color: #fff; text-shadow: 0 0 8px #2ecc71; font-weight: 700; }
+    .rarity-text-Rare       { color: #fff; text-shadow: 0 0 8px #3498db; font-weight: 700; }
+    .rarity-text-UltraRare  { color: #fff; text-shadow: 0 0 8px #9b59b6; font-weight: 700; }
+    .rarity-text-HiddenRare { color: #fff; text-shadow: 0 0 8px #f1c40f; font-weight: 700; }
+    .rarity-text-Borderless { color: #fff; text-shadow: 0 0 8px #e74c3c; font-weight: 700; }
+
     /* --- PAGINATION CONTROLS (Hidden by default, shown on mobile) --- */
     .pagination {
       display: none; /* HIDDEN ON DESKTOP */
@@ -330,7 +348,7 @@
       border-radius: 5px;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
-      border: 1px solid transparent;
+      border: 2px solid transparent; /* Ensure border width is set */
     }
     .card-thumbnail:hover {
       transform: scale(1.1) translateY(-2px);
@@ -338,13 +356,13 @@
       position: relative;
     }
 
-    /* Rarity Glows for Thumbnails */
-    .thumb-Common { border-color: #a0aec0; box-shadow: 0 0 5px rgba(160, 174, 192, 0.4); }
-    .thumb-Uncommon { border-color: #2ecc71; box-shadow: 0 0 5px rgba(46, 204, 113, 0.4); }
-    .thumb-Rare { border-color: #3498db; box-shadow: 0 0 5px rgba(52, 152, 219, 0.4); }
-    .thumb-UltraRare { border-color: #9b59b6; box-shadow: 0 0 8px rgba(155, 89, 182, 0.5); }
-    .thumb-HiddenRare { border-color: #f1c40f; box-shadow: 0 0 8px rgba(241, 196, 15, 0.5); }
-    .thumb-Borderless { border-color: #e74c3c; box-shadow: 0 0 8px rgba(231, 76, 60, 0.5); }
+    /* Rarity Glows for Thumbnails (Matches Search) */
+    .thumb-Common { border-color: #a0aec0; box-shadow: 0 0 8px rgba(160, 174, 192, 0.4); }
+    .thumb-Uncommon { border-color: #2ecc71; box-shadow: 0 0 8px rgba(46, 204, 113, 0.4); }
+    .thumb-Rare { border-color: #3498db; box-shadow: 0 0 8px rgba(52, 152, 219, 0.4); }
+    .thumb-UltraRare { border-color: #9b59b6; box-shadow: 0 0 12px rgba(155, 89, 182, 0.6); }
+    .thumb-HiddenRare { border-color: #f1c40f; box-shadow: 0 0 12px rgba(241, 196, 15, 0.6); }
+    .thumb-Borderless { border-color: #e74c3c; box-shadow: 0 0 12px rgba(231, 76, 60, 0.6); }
 
     /* Image Modal (Overlay) */
     .image-modal {
@@ -401,10 +419,17 @@
       
       /* --- MOBILE CENTERING --- */
       /* Center everything except Name/Image (which is handled by previous CSS usually) */
-      /* Actually, let's force center all data cells in the card view for consistency */
+      
+      /* Force center all data cells in the card view for consistency */
       tbody td {
           text-align: center !important;
       }
+      
+      /* FIX: Force the first column (Name/Image) back to Left Alignment */
+      tbody td:first-child {
+          text-align: left !important;
+      }
+
       /* But Details text must remain Left Aligned for readability */
       tbody td .detail-text {
           text-align: left !important;
@@ -821,14 +846,24 @@
         
         // Prepare Image HTML
         const imgUrl = getCardImageUrl(c);
-        const rarityClass = c.rarity ? `thumb-${c.rarity.replace(/\s+/g, '')}` : '';
+        // Clean Rarity string (remove spaces) for class names
+        const rarityClean = c.rarity ? c.rarity.replace(/\s+/g, '') : '';
+        const rarityClass = c.rarity ? `thumb-${rarityClean}` : '';
+        
         const imgHTML = imgUrl 
           ? `<img src="${imgUrl}" class="card-thumbnail ${rarityClass}" onclick="enlargeImage('${imgUrl}', '${c.name.replace(/'/g, "\\'")}')" alt="${c.name}" title="Click to enlarge">` 
           : '';
 
+        // Prepare Rarity Text with Glow
+        const rarityDisplay = c.rarity ? `<span class="rarity-text-${rarityClean}">${c.rarity}</span>` : '—';
+
         if (currentTab === 'Creature') {
           const type = (c.types || []).map(t => `<span class="pill pill-${t}">${t}</span>`).join(' ');
           
+          // Gold Glow for Level and HP
+          const levelDisplay = c.level ? `<span class="stat-glow">${c.level}</span>` : '—';
+          const hpDisplay = c.hp ? `<span class="stat-glow">${c.hp}</span>` : '—';
+
           let weakStr = '—';
           if (c.weaknesses && c.weaknesses.length > 0) {
             weakStr = c.weaknesses.map(w => 
@@ -857,11 +892,11 @@
                 ${imgHTML}
             </td>
             <td>${type}</td>
-            <td>${c.level || '—'}</td>
-            <td>${c.hp || '—'}</td>
+            <td>${levelDisplay}</td>
+            <td>${hpDisplay}</td>
             <td>${detailsHTML}</td>
             <td>${weakStr}</td>
-            <td>${c.rarity || '—'}</td>
+            <td>${rarityDisplay}</td>
             <td>${c.collectionNumber || c.setId || '—'}</td>
           `;
         } else if (currentTab === 'Secret') {
@@ -874,7 +909,7 @@
             </td>
             <td>${subtype}</td>
             <td><div class="detail-text">${c.effectText || ''}</div></td>
-            <td>${c.rarity || '—'}</td>
+            <td>${rarityDisplay}</td>
             <td>${c.collectionNumber || c.setId || '—'}</td>
           `;
         } else {
@@ -887,7 +922,7 @@
             </td>
             <td>${pType}</td>
             <td>${c.powerValue || '—'}</td>
-            <td>${c.rarity || '—'}</td>
+            <td>${rarityDisplay}</td>
             <td>${c.collectionNumber || c.setId || '—'}</td>
           `;
         }
