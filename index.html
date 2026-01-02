@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Mystik Creatures™</title>
+  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #05070b;
+      --bg-panel: #0b0f19;
+      --bg-panel-soft: #101522;
+      --accent: #4fd1c5;
+      --accent-soft: rgba(79, 209, 197, 0.12);
+      --text-main: #f7fafc;
+      --text-muted: #a0aec0;
+      --border-subtle: #2d3748;
+      --danger: #f56565;
+      --radius-lg: 18px;
+      --radius-sm: 10px;
+      --shadow-soft: 0 24px 60px rgba(0, 0, 0, 0.7);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #141824 0, #05070b 55%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* --- INTRO SPLASH SCREEN STYLES --- */
+    #intro-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      /* Start fully black */
+      background-color: rgba(5, 7, 11, 1); 
+      z-index: 999999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      
+      /* SLOW FADE for the background color only */
+      transition: background-color 3s cubic-bezier(0.4, 0, 0.2, 1);
+      /* Allow clicks to pass through once we start fading */
+      pointer-events: auto; 
+    }
+
+    #intro-logo {
+      /* Initial Splash Size */
+      width: 40vw; 
+      max-width: 600px;
+      height: auto;
+      
+      /* Start slightly larger for effect */
+      transform: scale(1.2);
+      transform-origin: center center;
+      
+      /* SLOW MOVEMENT for the logo position/scale */
+      /* Easing tweaked to start slow, speed up, then slow down gently */
+      transition: transform 3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease;
+      
+      /* Ensure it sits above the fading background */
+      z-index: 1000000;
+      position: relative; 
+      will-change: transform; /* Hint to browser for smoother rendering */
+    }
+
+    /* Helper class to fade the black background to transparent */
+    .intro-bg-transparent {
+      background-color: rgba(5, 7, 11, 0) !important;
+      pointer-events: none !important;
+    }
+    
+    .intro-logo-hidden {
+        opacity: 0;
+    }
+    /* ---------------------------------- */
+
+    .sidebar {
+      width: 270px;
+      background: linear-gradient(180deg, #05070c, #05070b);
+      border-right: 1px solid #1a202c;
+      padding: 1.5rem 1rem;
+      position: sticky;
+      top: 0;
+      max-height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar h1 {
+      margin: 0 0 0.3rem;
+      font-size: 1.2rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .sidebar .subtitle {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .sidebar-nav {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .sidebar-nav a {
+      padding: 0.45rem 0.7rem;
+      border-radius: 999px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border: 1px solid transparent;
+      transition: all 0.12s ease-out;
+    }
+    .sidebar-nav a:hover {
+      border-color: rgba(79, 209, 197, 0.7);
+      color: var(--text-main);
+      background: rgba(15, 23, 42, 0.9);
+    }
+    .sidebar-nav a.active {
+      background: var(--accent-soft);
+      border-color: rgba(79, 209, 197, 0.9);
+      color: var(--accent);
+    }
+    .main {
+      flex: 1;
+      padding: 1.5rem 1.5rem 2.5rem;
+      max-width: calc(100% - 260px);
+    }
+    .main-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    section {
+      background: rgba(7, 10, 18, 0.95);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(45, 55, 72, 0.9);
+      box-shadow: var(--shadow-soft);
+      padding: 1.4rem 1.5rem 1.3rem;
+    }
+    section h2 {
+      margin: 0 0 0.6rem;
+      font-size: 1.05rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .section-subtitle {
+      margin: 0 0 1rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+    .muted {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    @media (max-width: 800px) {
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        position: static;
+        max-height: none;
+        border-right: none;
+        border-bottom: 1px solid #1a202c;
+      }
+      .main {
+        max-width: 100%;
+        padding: 1rem 1rem 2rem;
+      }
+    }
+    /* Sidebar Image Styles */
+    .sidebar-powers {
+      text-align: center;
+      margin: 0.5rem 0 1.5rem 0;
+      padding: 0 0.5rem;
+    }
+    .sidebar-powers img {
+      max-width: 60%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .sidebar-logo-bottom {
+      text-align: center;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      padding: 0 0.5rem;
+    }
+    .sidebar-logo-bottom img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+    }
+    
+    /* Destination Logo Styling */
+    #dest-logo {
+      max-width: 300px; 
+      height: auto; 
+      opacity: 0; /* Hidden initially so we don't see double */
+      /* Slow fade in to ensure it's ready when the animation lands */
+      transition: opacity 0.5s ease-in; 
+    }
+  </style>
+
+</head>
+<body>
+  
+  <!-- INTRO SPLASH SCREEN -->
+  <div id="intro-overlay">
+    <img id="intro-logo" src="MystikLogo-PNG.png" alt="Loading Mystik Creatures...">
+  </div>
+
+  <aside class="sidebar">
+    <h1>Mystik Creatures™</h1>
+    <div class="sidebar-powers">
+      <img src="Powers.png" alt="Elemental Powers">
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html" class="active">Overview</a>
+      <a href="card_list.html">Card list</a>
+      <a href="codex.html" >The Mystik Codex</a>
+      <a href="search.html">Search by name</a>
+      <a href="compare.html">Compare cards</a>
+      <a href="deck_builder.html">Deck Builder</a>
+      <a href="gameplay.html">Gameplay</a>
+      <a href="https://www.royalroad.com/fiction/142593/the-last-concordant" target="_blank" rel="noopener noreferrer" style="color: #feebc8;">
+      The Last Concordant 
+      <a href="news.html">News/Updates</a>
+    </nav>
+    <div class="sidebar-logo-bottom">
+      <img src="MystikLogo-PNG.png" alt="Mystik Creatures Logo">
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="main-inner">
+      <section>
+        <h2>Mystik Creatures™ TCG</h2>
+        
+        <p class="section-subtitle" style="color:var(--text-main);">
+          Mystik Creatures™ is a fantasy trading card game built around powerful Creatures, elemental strategies, and deep tactical combat. Players build decks, summon Creatures, and battle using unique abilities, resource management, and clever timing. With rich lore, expanding card sets, and a growing community, Mystik Creatures™ delivers a fresh and dynamic TCG experience designed for players of all skill levels.
+        </p>
+        
+        <p class="muted">
+          This webpage serves as your complete hub for the game. You can browse the full card library, search for specific cards, compare cards side by side, and build deck ideas using the real Mystik Creatures™ rules and stats. Everything on the site is fully synced with the current Mystik Creatures™ card set.
+          <br><br>
+          <small><strong><em>Please note that Mystik Creatures™ is currently in active development; card images, stats, attacks/abilities, and mechanics are subject to change as we refine the game.</em></strong></small>
+        </p>
+
+        <div style="text-align: center; margin-top: 3rem; margin-bottom: 1rem;">
+            <!-- ID ADDED HERE FOR TARGETING -->
+            <img id="dest-logo" src="MystikLogo-PNG.png" alt="Mystik Creatures Logo">
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="footer.js"></script>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const overlay = document.getElementById('intro-overlay');
+      const splashLogo = document.getElementById('intro-logo');
+      const destLogo = document.getElementById('dest-logo');
+
+      // 1. GET NAVIGATION CONTEXT
+      const navigationEntry = performance.getEntriesByType("navigation")[0];
+      const isRefresh = navigationEntry && navigationEntry.type === 'reload';
+      
+      // Check if the user came from a page on the SAME domain (Internal Link)
+      // Note: checking 'window.location.hostname' ensures we only skip if moving within your own site.
+      const referrer = document.referrer;
+      const isInternalNavigation = referrer && referrer.includes(window.location.hostname);
+
+      // 2. DECIDE: PLAY OR SKIP?
+      // Play ONLY if:
+      // A. It is a hard Refresh
+      // B. OR: It's a fresh session AND they didn't come from another internal page
+      const shouldPlay = isRefresh || (!sessionStorage.getItem('hasSeenIntro') && !isInternalNavigation);
+
+      if (shouldPlay) {
+        
+        // --- PLAY ANIMATION ---
+        sessionStorage.setItem('hasSeenIntro', 'true');
+
+        setTimeout(() => {
+            const startRect = splashLogo.getBoundingClientRect();
+            const endRect = destLogo.getBoundingClientRect();
+
+            const initialScale = 1.2;
+            const unscaledStartWidth = startRect.width / initialScale;
+            const finalScale = endRect.width / unscaledStartWidth;
+
+            const startCenterX = startRect.left + (startRect.width / 2);
+            const startCenterY = startRect.top + (startRect.height / 2);
+            const endCenterX = endRect.left + (endRect.width / 2);
+            const endCenterY = endRect.top + (endRect.height / 2);
+
+            const deltaX = endCenterX - startCenterX;
+            const deltaY = endCenterY - startCenterY;
+
+            overlay.classList.add('intro-bg-transparent');
+            splashLogo.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${finalScale})`;
+            
+            setTimeout(() => {
+                destLogo.style.opacity = '1';
+            }, 2500);
+
+            setTimeout(() => {
+                splashLogo.classList.add('intro-logo-hidden');
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 500);
+            }, 3000);
+
+        }, 1200);
+
+      } else {
+        // --- SKIP ANIMATION (INSTANT APPEARANCE) ---
+        
+        // Ensure session is marked as seen so future refreshes/navs behave correctly
+        sessionStorage.setItem('hasSeenIntro', 'true');
+
+        // 1. Hide the black overlay immediately
+        overlay.style.display = 'none';
+        
+        // 2. Kill the CSS transition so it doesn't "fade in"
+        destLogo.style.transition = 'none';
+        
+        // 3. Show the logo immediately
+        destLogo.style.opacity = '1';
+      }
+    });
+  </script>
+</body>
+</html>
