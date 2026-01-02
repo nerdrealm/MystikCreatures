@@ -271,75 +271,64 @@
 
   <script src="footer.js"></script>
   
-  <!-- Intro Logic -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       const overlay = document.getElementById('intro-overlay');
       const splashLogo = document.getElementById('intro-logo');
       const destLogo = document.getElementById('dest-logo');
 
-      // Check Session Storage
-      if (!sessionStorage.getItem('hasSeenIntro')) {
+      // 1. DETERMINE IF WE SHOULD PLAY THE ANIMATION
+      const navigationEntry = performance.getEntriesByType("navigation")[0];
+      const isRefresh = navigationEntry && navigationEntry.type === 'reload';
+      const isFirstVisit = !sessionStorage.getItem('hasSeenIntro');
+
+      if (isFirstVisit || isRefresh) {
+        
+        // --- PLAY ANIMATION ---
         sessionStorage.setItem('hasSeenIntro', 'true');
 
-        // 1. Initial Delay (Let the user see the big logo)
         setTimeout(() => {
-            
-            // 2. MATH: Calculate Exact Coordinates and Scale
             const startRect = splashLogo.getBoundingClientRect();
             const endRect = destLogo.getBoundingClientRect();
 
-            // CRITICAL FIX: The startRect includes the CSS transform scale(1.2).
-            // We need to calculate the scale relative to the *untransformed* size to avoid double-shrinking.
             const initialScale = 1.2;
             const unscaledStartWidth = startRect.width / initialScale;
-            
-            // Calculate the perfect scale to match the destination
             const finalScale = endRect.width / unscaledStartWidth;
 
-            // Calculate Center-to-Center distance
             const startCenterX = startRect.left + (startRect.width / 2);
             const startCenterY = startRect.top + (startRect.height / 2);
-            
             const endCenterX = endRect.left + (endRect.width / 2);
             const endCenterY = endRect.top + (endRect.height / 2);
 
             const deltaX = endCenterX - startCenterX;
             const deltaY = endCenterY - startCenterY;
 
-            // 3. APPLY ANIMATIONS
-            
-            // Fade out the black background
             overlay.classList.add('intro-bg-transparent');
-
-            // Move and Scale the Logo
-            // We use translate then scale.
             splashLogo.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${finalScale})`;
             
-            // 4. THE OVERLAP TRICK
-            // Wait until the logo is *almost* at its destination (2.5s mark of a 3s animation)
             setTimeout(() => {
-                // Reveal the destination logo BEHIND the splash logo
                 destLogo.style.opacity = '1';
             }, 2500);
 
-            // 5. CLEANUP
-            // Wait for the animation to fully complete (3000ms + buffer)
             setTimeout(() => {
-                // Fade out the splash logo (it is now sitting perfectly on top of the identical dest logo)
                 splashLogo.classList.add('intro-logo-hidden');
-                
-                // Finally remove the overlay layer from flow
                 setTimeout(() => {
                     overlay.style.display = 'none';
-                }, 500); // Wait for the opacity transition of the splash logo
+                }, 500);
             }, 3000);
 
-        }, 1200); // 1.2 second initial pause
+        }, 1200);
 
       } else {
-        // Already seen: Hide overlay immediately, show destination immediately
+        // --- SKIP ANIMATION (INSTANT APPEARANCE) ---
+        
+        // 1. Hide the black overlay immediately
         overlay.style.display = 'none';
+        
+        // 2. Kill the CSS transition so it doesn't "fade in"
+        destLogo.style.transition = 'none';
+        
+        // 3. Show the logo immediately
         destLogo.style.opacity = '1';
       }
     });
