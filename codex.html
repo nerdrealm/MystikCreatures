@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Mystik Creatures™ — The Codex</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #05070b;
+      --bg-panel: #0b0f19;
+      --bg-panel-soft: #101522;
+      --accent: #4fd1c5;
+      --accent-soft: rgba(79, 209, 197, 0.12);
+      --text-main: #f7fafc;
+      --text-muted: #a0aec0;
+      --border-subtle: #2d3748;
+      --radius-lg: 18px;
+      --radius-sm: 10px;
+      --shadow-soft: 0 24px 60px rgba(0, 0, 0, 0.7);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #141824 0, #05070b 55%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar h1 {
+      color: var(--text-main) !important;
+    }
+
+    .main h1, .page-title {
+      color: var(--accent) !important;
+    }
+
+    /* --- SIDEBAR --- */
+    .sidebar {
+      width: 270px;
+      background: linear-gradient(180deg, #05070c, #05070b);
+      border-right: 1px solid #1a202c;
+      padding: 1.5rem 1rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .sidebar h1 { margin: 0 0 0.3rem; font-size: 1.2rem; letter-spacing: 0.12em; text-transform: uppercase; }
+    .sidebar-powers { text-align: center; margin: 0.5rem 0 1.5rem 0; padding: 0 0.5rem; }
+    .sidebar-powers img { max-width: 60%; height: auto; display: block; margin: 0 auto; }
+    .sidebar-nav { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.25rem; }
+    .sidebar-nav a {
+      padding: 0.45rem 0.7rem; border-radius: 999px; text-decoration: none;
+      color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;
+      letter-spacing: 0.1em; border: 1px solid transparent; transition: all 0.12s ease-out;
+    }
+    .sidebar-nav a:hover { border-color: rgba(79, 209, 197, 0.7); color: var(--text-main); background: rgba(15, 23, 42, 0.9); }
+    .sidebar-nav a.active { background: var(--accent-soft); border-color: rgba(79, 209, 197, 0.9); color: var(--accent); }
+    .sidebar-logo-bottom { text-align: center; margin-top: 1rem; margin-bottom: 1rem; padding: 0 0.5rem; }
+    .sidebar-logo-bottom img { max-width: 100%; height: auto; display: block; margin: 0 auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+
+    /* --- MAIN CONTENT --- */
+    .main {
+      flex: 1;
+      padding: 1.5rem 1.5rem 2.5rem;
+      max-width: calc(100% - 260px);
+      min-width: 0;
+    }
+    
+    /* --- FILTERS --- */
+    .filters-bar {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      background: var(--bg-panel);
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      align-items: center;
+      flex-wrap: wrap; 
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 200px;}
+    select, input[type="text"] {
+      background: var(--bg-panel-soft);
+      border: 1px solid var(--border-subtle);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    /* --- TABLE STYLES --- */
+    .table-wrapper {
+      max-height: 75vh;
+      overflow: auto;
+      border-radius: 8px;
+      border: 1px solid #1a202c;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 100%; background: #05070c; }
+    thead { position: sticky; top: 0; background: #111320; z-index: 10; }
+    
+    /* Default Cell Styling (Mobile Friendly Baseline) */
+    th, td { 
+      padding: 0.5rem 0.65rem; 
+      text-align: left; 
+      border-bottom: 1px solid #1a202c; 
+      vertical-align: top; 
+    }
+    
+    /* --- DESKTOP ALIGNMENT RULES --- */
+    @media (min-width: 801px) {
+        th:nth-child(2), td:nth-child(2),
+        th:nth-child(3), td:nth-child(3) {
+            text-align: center;
+            vertical-align: middle;
+        }
+        th:nth-child(4), td:nth-child(4) {
+            vertical-align: middle;
+            text-align: left;
+            padding: 0.5rem 2rem; 
+        }
+    }
+
+    th { font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); cursor: pointer; }
+    tbody tr:nth-child(even) { background: #080a13; }
+    tbody tr:hover { background: rgba(79, 209, 197, 0.1); }
+
+    /* --- PILLS --- */
+    .pill { display: inline-flex; align-items: center; padding: 0.15rem 0.65rem; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.2); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #fff; background: rgba(255, 255, 255, 0.05); white-space: nowrap; }
+    .pill-Dark { border-color: #8e44ad; color: #a569bd; background: rgba(142, 68, 173, 0.15); }
+    .pill-Earth { border-color: #d2b48c; color: #e0cdae; background: rgba(210, 180, 140, 0.15); }
+    .pill-Fire { border-color: #e67e22; color: #f39c12; background: rgba(230, 126, 34, 0.15); }
+    .pill-Forest { border-color: #27ae60; color: #2ecc71; background: rgba(39, 174, 96, 0.15); }
+    .pill-Light { border-color: #f1f2f6; color: #ffffff; background: rgba(241, 242, 246, 0.15); }
+    .pill-Thunder { border-color: #f1c40f; color: #f4d03f; background: rgba(241, 196, 15, 0.15); }
+    .pill-Water { border-color: #3498db; color: #5dade2; background: rgba(52, 152, 219, 0.15); }
+    .pill-Wind { border-color: #87CEEB; color: #87CEEB; background: rgba(135, 206, 235, 0.15); }
+    .pill-Blank { border-color: #718096; color: #a0aec0; background: rgba(113, 128, 150, 0.15); }
+
+    /* Level Range Glows */
+    .level-common   { color: #fff; text-shadow: 0 0 8px #a0aec0; font-weight: 700; }
+    .level-uncommon { color: #fff; text-shadow: 0 0 8px #2ecc71; font-weight: 700; }
+    .level-rare     { color: #fff; text-shadow: 0 0 8px #3498db; font-weight: 700; }
+    .level-ultra    { color: #fff; text-shadow: 0 0 8px #9b59b6; font-weight: 700; }
+    
+    .stat-glow {
+      color: #fff;
+      text-shadow: 0 0 8px #f1c40f;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    /* --- IMAGES & RARITY GLOWS --- */
+    .card-thumbnail {
+      display: block;
+      margin-top: 8px;
+      max-height: 150px;
+      width: auto;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid transparent;
+    }
+    
+    .card-thumbnail:hover {
+      transform: scale(1.1) translateY(-2px);
+      z-index: 5;
+      position: relative;
+    }
+
+    .thumb-Common { border-color: #a0aec0; box-shadow: 0 0 5px rgba(160, 174, 192, 0.4); }
+    .thumb-Uncommon { border-color: #2ecc71; box-shadow: 0 0 5px rgba(46, 204, 113, 0.4); }
+    .thumb-Rare { border-color: #3498db; box-shadow: 0 0 5px rgba(52, 152, 219, 0.4); }
+    .thumb-UltraRare { border-color: #9b59b6; box-shadow: 0 0 8px rgba(155, 89, 182, 0.5); }
+    .thumb-HiddenRare { border-color: #f1c40f; box-shadow: 0 0 8px rgba(241, 196, 15, 0.5); }
+    .thumb-Borderless { border-color: #e74c3c; box-shadow: 0 0 8px rgba(231, 76, 60, 0.5); }
+
+    /* --- LORE TEXT --- */
+    .codex-text { font-size: 0.9rem; line-height: 1.6; color: #e2e8f0; font-family: Georgia, serif; font-style: italic; white-space: normal; }
+
+    /* --- MODAL --- */
+    .image-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 9999; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(4px); }
+    .image-modal.active { display: flex; }
+    .image-modal img { max-width: 90%; max-height: 90vh; border-radius: 12px; box-shadow: 0 0 40px rgba(79, 209, 197, 0.2); border: 1px solid #333; }
+    .image-modal-text { position: absolute; bottom: 20px; color: var(--text-muted); font-size: 0.9rem; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 999px; }
+
+    /* --- PAGINATION CONTROLS --- */
+    .pagination {
+      display: flex; /* Updated: Always Visible */
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .page-btn {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--bg-panel-soft);
+    }
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    #page-info {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #1a202c; }
+      .main { max-width: 100%; padding: 1rem 1rem 2rem; }
+      
+      /* --- MOBILE CARD VIEW --- */
+      .table-wrapper { 
+        max-height: none; 
+        overflow: visible; 
+        border: none;
+      }
+      
+      table, thead, tbody, th, td, tr { 
+        display: block; 
+      }
+      
+      /* Hide Table Headers */
+      thead tr { 
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+      
+      /* Make each row look like a Card */
+      tbody tr { 
+        background: var(--bg-panel-soft);
+        margin-bottom: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        padding: 1.25rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      }
+      
+      td { 
+        border: none;
+        padding: 0.5rem 0;
+        position: relative;
+        width: 100%;
+        text-align: left;
+      }
+
+      .card-thumbnail {
+        max-height: 200px;
+        margin: 10px auto;
+        display: block;
+      }
+      
+      td:first-child {
+        text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      td:nth-child(2)::before { content: "Type: "; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
+      td:nth-child(3)::before { content: "Level: "; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
+    }
+  </style>
+</head>
+<body>
+  
+  <aside class="sidebar">
+    <h1>Mystik Creatures™</h1>
+    <div class="sidebar-powers">
+      <img src="Powers.png" alt="Elemental Powers">
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html">Overview</a>
+      <a href="card_list.html">Card list</a>
+      <a href="codex.html" class="active">The Mystik Codex</a>
+      <a href="search.html">Search by name</a>
+      <a href="compare.html">Compare cards</a>
+      <a href="deck_builder.html">Deck Builder</a>
+      <a href="gameplay.html">Gameplay</a>
+      <a href="https://www.royalroad.com/fiction/142593/the-last-concordant" target="_blank" rel="noopener noreferrer" style="color: #feebc8;">The Last Concordant</a>
+      <a href="news.html">News/Updates</a>
+      <a href="shop.html" style="color:#feb2b2;"><i class="fa-solid fa-shop"></i> Official Shop</a>
+    </nav>
+    <div class="sidebar-logo-bottom">
+      <img src="MystikLogo-PNG.png" alt="Mystik Creatures Logo">
+    </div>
+  </aside>
+
+  <main class="main">
+    <h1>The Mystik Codex</h1>
+    
+    <!-- FILTERS -->
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label>Search Name</label>
+        <input type="text" id="search-input" placeholder="e.g. Owlbear..." onkeyup="resetAndRender()">
+      </div>
+      <div class="filter-group">
+        <label>Filter by Type</label>
+        <select id="type-select" onchange="resetAndRender()">
+            <option value="">All Types</option>
+            <option value="Dark">Dark</option>
+            <option value="Earth">Earth</option>
+            <option value="Fire">Fire</option>
+            <option value="Forest">Forest</option>
+            <option value="Light">Light</option>
+            <option value="Thunder">Thunder</option>
+            <option value="Water">Water</option>
+            <option value="Wind">Wind</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table id="data-table">
+        <thead>
+          <tr>
+            <th width="20%">Creature</th>
+            <th width="10%">Type</th>
+            <th width="5%">Lvl</th>
+            <th>Codex Lore</th>
+          </tr>
+        </thead>
+        <tbody id="codex-body">
+          <!-- Rows injected by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION (Always Visible) -->
+    <div id="pagination" class="pagination">
+      <button id="btn-prev" class="page-btn" onclick="changePage(-1)">Previous</button>
+      <span id="page-info">Page 1 of 1</span>
+      <button id="btn-next" class="page-btn" onclick="changePage(1)">Next</button>
+    </div>
+    
+    <p id="count-display" style="color:var(--text-muted); font-size:0.8rem; margin-top:0.5rem; text-align:center;"></p>
+  </main>
+  
+  <!-- Image Enlargement Modal -->
+  <div class="image-modal" id="image-modal" onclick="closeModal()">
+    <img id="modal-image" src="" alt="">
+    <div class="image-modal-text">Click anywhere to close</div>
+  </div>
+
+  <!-- LOAD YOUR DATA FILE -->
+  <script src="cards_data.js"></script>
+
+  <script>
+    // 1. THE LORE CSV DATA
+    const rawCSV = `Creature Name,Type,Level,Creature Codex
+Anansi,Dark,4,"A weaver of shadows and fate, Anansi lurks in the silken corners of the dark forests. Known as the Keeper of Stories, this trickster spirit traps unsuspecting prey not with strength, but with cunning webs of deception."
+Arcana Apprentice,Dark,8,"Arcana Apprentice is a bewitching enigma in the Mystik Creatures realm. This Level 8 Dark-type creature embodies the essence of an apprentice witch, wielding mystic potential yet to be fully unleashed. Her eyes shimmer with ancient secrets."
+Arcana Temptress,Dark,10,"Once a beacon of radiant magik, she is now an ominous embodiment of dark sorcery. Shrouded in an aura of malevolence, she haunts the shadowy corners of decaying cathedrals, ensnaring unwary souls with twisted promises of power."
+Banshee,Dark,6,"The Banshee drifts through the realms like a chilling fog, its mournful wails echoing through desolate landscapes. Legend says that hearing the Banshee's cry signifies an impending demise."
+Bloodfang Vampire,Dark,5,"With eyes like crimson embers and fangs dripping with the essence of stolen life, the Bloodfang Vampire stalks the night. Driven by an insatiable thirst, it preys upon the unsuspecting, leaving behind a trail of withered husks."
+Buckshot Bill,Dark,2,"A wandering spirit of the old west turned nightmare, Buckshot Bill roams the badlands seeking bounties on souls. With a spectral revolver that never needs reloading, this skeletal gunslinger is a reminder that greed follows a man beyond the grave."
+Daemorous,Dark,9,"In the blood-soaked underworld, Daemorous commands the shadows with an infernal prowess. A malevolent force birthed from the abyss, he stands as the devil's unyielding enforcer, harvesting tormented souls."
+Dark Siren of Rehm,Dark,7,"In the shadowed heart of the impenetrable Ancient Forests of Rehm, the malevolent Dark Siren reigns supreme. Her ethereal voice, both enchanting and deadly, carries through the silence, leading unsuspecting souls to their doom."
+Delphora,Dark,8,"The Oracle of the Void, Delphora floats silently through the abyssal plains. Her multiple eyes see all timelines, but she only speaks of the ones ending in ruin. Sorcerers seek her out for forbidden knowledge."
+Ephemeral Empress,Dark,10,"A spectral ruler of the dark woods, she embodies the enigmatic and transient nature of the forest's cycle of life and decay. Born from the heart of the ancient forest, the Ephemeral Empress is a figure of awe and dread."
+Evela,Dark,3,"Deep within the cold, damp walls of the Abyssal Dungeon, Evela cowers in her own malice. Despite her small stature, she embodies the creeping dread that festers in the darkest corners of Myrithil."
+Fallen Angel,Dark,3,"A once divine being, now plummeting from grace. Stripped of its former light, this Dark Creature wanders the realms in search of redemption, though its presence is often met with dread."
+Gorgonite,Dark,2,"Born from the cursed gaze of an ancient Gorgon, the Gorgonite is a small, statue-like creature. Though its stare is not yet lethal enough to kill, it can stiffen the limbs of its prey, making escape impossible."
+Grimlin,Dark,3,"A dweller of the twilight, the Grimlin is a creature of mischief and malice. It sabotages machinery, steals magical artifacts, and delights in the frustration of others."
+Growler,Dark,1,"A small, furry beast with a mouth far too wide for its face. The Growler hides in the shadows of larger predators, scavenging scraps and mimicking their roars to scare off rivals."
+Havok,Dark,1,"A chaotic spirit bound to a small, impish form. Havok thrives on disorder, causing small accidents wherever it goes. It is said that a swarm of Havoks can bring down a fortress simply by loosening the right stones."
+Hellspawn,Dark,7,"A creature birthed from the deepest pits of the inferno, the Hellspawn is a soldier of the dark armies. Its skin is charred obsidian, and its eyes burn with hate. It wields weapons forged from the bones of the damned."
+"Jespa, the Broken",Dark,6,"Once a court jester who brought joy to the kingdoms of light, Jespa was twisted by a dark sorrow. Now, he dances through the battlefield with a jagged, broken heart, using his unpredictable movements to confuse and terrify."
+Psoglav,Dark,7,"A nightmarish embodiment of legendary folklore. Its lone eye gazes into the abyss, seeking its next prey with an insatiable hunger for darkness. When it emerges, darkness follows."
+Rakshasa,Dark,5,"A shape-shifting demon with a hunger for flesh, the Rakshasa is the ultimate deceiver. It often takes the form of a noble warrior to get close to its prey before revealing its true, tiger-like visage."
+Sinister Imp,Dark,4,"Small, fast, and inherently wicked, the Sinister Imp serves as a scout for greater dark lords. What it lacks in size, it makes up for in cruelty, delighting in sabotaging weapons."
+Smaugom,Dark,9,"A nightmare given flesh. Its massive, twisted form ripples with raw, dark energy. Eyes burning a sickening blood-red, this dragon is an embodiment of death itself, its gaping maw lined with jagged fangs capable of ripping through flesh and soul."
+Tetsu Yami,Dark,10,"In the shadowed lands of Kuroseki, there resides a legendary warrior known as Tetsu Yami. Clad in darkened steel and wielding a blade forged from the essence of shadows, Tetsu Yami is a figure shrouded in mystery and terror."
+Werelephant,Dark,10,"A terrifying Creature born of ancient curses. Legends tell of a once gentle Pebblephant, transformed under the full moon into a formidable beast, merging the strength of an elephant with the ferocity of a predatory nightmare."
+Anuket,Earth,8,"Our unique interpretation of the Egyptian deity, a harmonious fusion of earth and river forces. Anuket embodies the delicate balance of nature, safeguarding her realm with unwavering determination."
+Bristleback,Earth,10,"Deep within the ancient forests of Myrithil, dwells Bristleback. This massive Creature stands as the revered guardian of the forests. Towering above the canopy, Bristleback embodies the raw, untamed power of nature."
+Dolphite,Earth,1,"Small, sturdy, and surprisingly heavy, Dolphites are the playful spirits of the canyon floor. Often mistaken for mere rocks, they surprise travelers by burrowing beneath the sand and popping up to knock them off balance."
+Geogolem,Earth,2,"Formed from the living bedrock of the Eurotha Mountains, the Geogolem is a mindless drone of destruction. It feels no pain and knows no fear, marching relentlessly toward intruders."
+Hex-Gargoyle,Earth,6,"Perched atop the crumbling ruins of forgotten temples, the Hex-Gargoyle waits in eternal patience. Unlike normal stone statues, this beast was carved from cursed granite. When its eyes glow green, it is casting ancient hexes."
+Indus Worm,Earth,2,"A terror of the underground, the Indus Worm senses vibrations from miles away. Though small compared to the great sand leviathans, its acidic bite can melt through steel boots in seconds."
+Isxöhe,Earth,10,"The ancient forest guardian, born from the heart of the oldest and most sacred groves. Embodying the spirit of nature's fury, Isxöhe's body is covered in moss and vines, blending seamlessly with the forest."
+King Gaom,Earth,3,"In the sun-baked deserts, King Gaom reigns supreme over a kingdom of miniature soldiers. Despite his youthful appearance, this level 3 Earth Creature commands his toy army with unwavering authority."
+Laviathron,Earth,10,"The colossal beast of molten fury, emerging from the heart of the Infernal Pits of Crom. Forged in the fiery depths, Laviathron's body is a fearsome blend of solid rock and flowing lava."
+Lizardfolk Whelp,Earth,4,"A young and curious adventurer with a thirst for exploring the unknown. With its tough scales and nimble limbs, it navigates the rugged terrains of Eurotha with ease, always eager to discover hidden paths."
+Mafistu,Earth,5,"Deep within the towering mountain ranges of Eurotha, Mafistu reigns as a formidable presence. This level 5 Earth Creature is known for its immense strength and indomitable will, making it a guardian of the ancient lands."
+Ophiotaurus,Earth,8,"A legendary beast, part bull and part serpent. It dwells in the deepest chasms of the earth, guarding the roots of the mountains. Its scales are harder than diamond, and its charge can shatter fortress walls."
+Or'granutan,Earth,7,"Hailing from the ancient stone forests of Granalith, Or'granutan's presence commands respect. Its deep, rumbling growls echo through the canyons as it watches over its domain with a vigilant eye."
+Orkarena,Earth,9,"Beneath the dunes, where the sand stretches endlessly, Orkarena reigns as a leviathan of the shifting sands. With a maw filled with teeth like jagged rocks, it is a Creature of immense power and terrifying grace."
+Pebblephant,Earth,8,"Within the pulsating rhythm of mystical forces, the Pebblephant emerges as an Earth-shaking entity. Initially adorned in a facade of innocent fluff, it harbors a brooding darkness that hungers for release."
+Sand Bear,Earth,1,"A rugged survivor of the dunes, the Sand Bear's fur is coarse like sandpaper, allowing it to blend perfectly with the desert floor. If its slumber is disturbed, it strikes with the force of a collapsing dune."
+Selkie,Earth,3,"From the shifting dunes of Myrithil’s sun-scorched deserts, Selkie rises with the might of the land. Wrapped in a coat of enchanted sand, this Creature is a master of survival, using the terrain to ambush foes."
+Serpopard,Earth,10,"A fearsome hybrid of serpent and leopard, dwelling in the forgotten ruins of Zygaroth. It guards lost treasures and sacred sites with ruthless ferocity. Its eyes gleam with an eerie intelligence."
+"Sphinx, the Noble",Earth,7,"Guardian of the sacred libraries of the Earth Kingdom, the Noble Sphinx possesses wisdom beyond measure. It enjoys testing travelers with riddles, rewarding intelligence with safe passage and punishing ignorance."
+The Behemoth,Earth,9,"A true force of nature. This towering, troll-like behemoth roams the rugged landscapes with a fearsome presence. Yet, what truly sets him apart is his unexpected bond with a mysterious girl in a bunny suit."
+Toaxic,Earth,4,"A swamp-dwelling toad infused with the poisonous essence of the marshlands. Toaxic's skin secretes a deadly slime that can paralyze attackers on contact. It hunts by sitting perfectly still until prey wanders close."
+Ushi-oni,Earth,5,"A demon of Japanese folklore, the Ushi-oni has the body of a giant spider and the head of a bull. It dwells near coastlines and mountains, spinning webs of steel-strong silk to ensnare victims."
+Wandering Traveler,Earth,6,"This enigmatic cactus humanoid, with its weathered skin and resilient spirit, roams the barren landscapes in search of hidden oases and ancient wisdom. Legends speak of its ability to draw sustenance from the arid earth."
+Zunreus,Earth,3,"A young minotaur warrior proving his worth in the labyrinths of the Earth Kingdom. Zunreus is fueled by a hot-blooded rage, charging headfirst into battle with his horns lowered."
+Ashenklaw,Fire,5,"A seething mass of charred wood and twisted embers. Born from the heart of an ancient forest fire, its every step crackles with heat. Ashenklaw’s hollow eyes reflect only the inferno within."
+Billhelm,Fire,9,"In the blazing heart of a war-torn Myrithil stands Billhelm, a formidable Creature whose presence ignites the battlefield. Clad in impenetrable armor and wielding an unyielding spirit, Billhelm is the incarnation of war’s passion."
+Cacus,Fire,9,"Behold Cacus, the malevolent force that ignites terror! Flames dance in a sinister embrace around his monstrous figure, and his eyes blaze with the sadistic thirst for destruction. Cacus is the epitome of brutal power."
+Cerberus,Fire,8,"The malevolent inferno guardian, emerging from the depths of Hell. This level 8 Fire Creature exudes an aura of ruthless domination, its three heads adorned with snarling maws, each dripping with fiery drool."
+"Cyra, the Emblazoned",Fire,5,"A pyromancer of unparalleled skill, specializing in the dark art of Hell-Fire Magik. Her mastery over flames is a sight to behold, as she weaves intricate spells with a mere flick of her fingers."
+Emberling,Fire,2,"A small spirit of the hearth, the Emberling usually dwells in campfires. However, when angered, this tiny flame can grow into a raging inferno. It is often the first sign of a coming wildfire."
+FireFly,Fire,1,"In the darkened skies of Myrithil, FireFly flutters as a beacon of hope. Though small, it is never alone, always accompanied by its fiery siblings. Wherever FireFly travels, a trail of sparkling embers follows."
+Flarepup,Fire,2,"A searing embodiment of primal flame and unyielding ferocity. Born from the infernal lineage of the legendary Cerberus, this level 2 Fire type Creature blazes with the untamed spirit of the underworld."
+Grimburn,Fire,4,"A floating skull engulfed in eternal flames, Grimburn is the remnant of a fire mage who consumed himself in his own spell. It now exists only to spread the inferno, drifting aimlessly until it finds something flammable."
+"Hikaru, Thunderflame",Fire,10,"A legendary fusion of lightning and fire, Hikaru is a deity of the storm-ravaged volcanoes. His sword is forged from a lightning bolt struck into magma. When he takes the field, the sky turns red and the ground crackles."
+Ignimia,Fire,10,"The Elemental Lord of Combustion. Ignimia is a being of pure plasma, existing at temperatures that vaporize steel. It resides in the core of the planet, only surfacing to purge the world with cleansing fire."
+Infernasaur,Fire,7,"A prehistoric titan reawakened by volcanic activity. The Infernasaur's blood is liquid magma, and its roar sends plumes of ash into the sky. It does not hunt for food, but rather to burn the world around it."
+Infernocerus,Fire,5,"With a horn made of superheated obsidian, the Infernocerus charges with the force of an erupting geyser. It dwells in the lava tubes of Westu'ra, its hooves leaving molten footprints in the stone."
+Kuroen,Fire,10,"The Black Flame Fox, Kuroen, is a myth among pyromancers. Its fire does not give off light, but rather absorbs it, burning with a cold, dark intensity. It is said that Kuroen appears only when a great civilization is about to fall."
+Kütralpun,Fire,8,"A majestic and formidable being born from the icy depths of Frozmier. This enigmatic penguin harnesses the power of arctic flames, wielding plumes of cerulean fire that dance and flicker around its body."
+Longma,Fire,7,"Born from the fury of a dying star and the unyielding spirit of a fallen warrior, the Longma embodies the untamed essence of fire and battle. Its mere presence scorches the earth, its eyes blazing with intensity."
+Moltem,Fire,6,"A living construct of lava and iron, Moltem is the smith of the underworld. It hammers its own body to shape weapons for the demon armies. Its touch melts armor instantly, and its punch hits with the weight of a mountain."
+"Phoenix, the Rising",Fire,10,"The Eternal Flame. The Phoenix is the cycle of life and death made manifest. It burns with the heat of the sun, and when it falls, it is only to be reborn from its ashes stronger than before."
+Pyrocanthodes,Fire,3,"A rare, fiery flora that gained sentience. The Pyrocanthodes shoots seeds that explode on impact, spreading wildfires to clear space for its growth. It is beautiful to look at, but deadly to touch."
+Pyronix,Fire,1,"From the heart of a flickering ember, Pyronix emerges as a fledgling embodiment of warmth. This adorable baby firebird, with downy feathers that shimmer like molten gold, is a creature of pure potential."
+"Smol, the Titan",Fire,3,"Do not let the name fool you. Though small in stature, Smol possesses the spirit and density of a collapsing star. This tiny titan wields a hammer twice his size, channeling the core heat of the planet."
+The Pyroclasm Crew,Fire,4,"A force forged in fire and bound by an unbreakable will. This elite band of warriors channels the primal energy of flames, igniting the battlefield with their synchronized fury. Together, they form an inferno."
+Vaska,Fire,6,"In the heart of Myrithil, dwells Vaska, a level 6 Fire type Creature. Born amidst the inferno, this small yet ferocious Creature is a harbinger of fiery chaos. Legends speak of Vaska's appearance being heralded by burning embers."
+Chamilla,Forest,3,"From the mystical groves of the Forests of Nura, Chamilla emerges as a protector of nature’s secrets. This level 3 Forest Creature is a descendant of an ancient lineage, her connection to the forest deep and unwavering."
+Dracoleón,Forest,10,"A hybrid terror, the King of the Jungle and the Sky. Dracoleón possesses the body of a lion and the wings and scales of a dragon. It rules the canopy and the forest floor alike."
+Eamonn,Forest,10,"The Eldest Tree, Eamonn, has stood since the first seed was sown in Myrithil. He is the forest's memory, his roots connecting every plant in the realm. When Eamonn moves, the forest moves with him."
+Forest Elf,Forest,6,"Delve into the heart of ancient woodlands to discover this ethereal being, whose beauty rivals the very essence of the lush forests she calls home. Always accompanied by a spirit guide, she weaves through the trees with grace."
+Howlwing,Forest,8,"From the shadowed boughs of ancient forests, Howlwing watches with eyes that pierce the gloom. Legends whisper of a silent predator, with feathers that blend seamlessly with the bark of ancient trees."
+Kaia,Forest,10,"The Spirit of the Overgrowth, Kaia, is the verdant wrath of nature. She commands the vines and roots to reclaim the stone cities of men. Where she walks, flowers bloom instantly."
+"Lilith, Forest Pixie",Forest,10,"Queen of the Fae, Lilith rules the deepest, most magical glades. Her small form belies a terrifying power; with a wave of her hand, she can turn an army into trees or summon a hurricane of razor-sharp petals."
+Manticore,Forest,6,"In the heart of a dense forests surrounding Nura, the Manticore lies in wait. With a mane bristling like thorns and its sharp claws curled over ancient treasure, it remains vigilant, guarding its spoils from intruders."
+Mira,Forest,1,"A tiny forest sprite that glows with the light of the morning sun. Mira is the first sign of spring, bringing warmth and growth to the frozen earth. Though not a fighter, her magic accelerates the healing of nature."
+Moss Golem,Forest,3,"A silent sentinel constructed of boulders and ancient moss. The Moss Golem waits perfectly still for decades, indistinguishable from the landscape, until a threat approaches."
+Nemean Lion,Forest,7,"The Nemean Lion stalks the majestic forests as a predator of unmatched savagery. Its jet-black fur, impervious to mortal weapons, is stained with the blood of countless victims."
+Nixor,Forest,5,"A battle-hardened survivor from the untamed depths of Myrithil's ancient jungles. Armed to the teeth and built for war, this ruthless hunter combines primal fury with lethal precision."
+Owlbear,Forest,7,"A fully grown predator that combines the silent flight of an owl with the brute strength of a bear. The Owlbear hunts at night, its screech paralyzing prey with fear before it strikes."
+Owlbear Cub,Forest,3,"A curious and playful creature despite its intimidating appearance. With the fluffy body of an owl and the sharp claws of a bear, this cub is always getting into mischief."
+Plantling,Forest,4,"A humanoid root creature that thrives in the swampy borders of the forest. Plantlings are masters of camouflage, their bodies shifting to match the foliage. They use long, whip-like vines to snare prey."
+Sapling,Forest,1,"The first stage of a forest guardian's life. While weak, the Sapling is protected by the entire forest. Harming one is the quickest way to incur the wrath of the greater titans."
+Tenebris,Forest,9,"The ominous wraith of the Rehm forest's darkest depths. Tenebris exudes an aura of enigmatic malevolence as it prowls through the dense and shadowed core of the forbidden forest."
+Thwomp,Forest,4,"A heavy, wood-shelled creature that drops from the canopy to crush intruders. Thwomps are the traps of the forest, simple but effective. Their bark is nearly impenetrable."
+Titan of Nura,Forest,9,"Deep within the mystikal and enchanted forests of Nura, the Titan of Nura stands as an arboreal behemoth. This towering entity, resembling a gnarled and twisted tree, is the guardian of Nura."
+Tsiatko,Forest,2,"Known as the 'Night People' of the forest. Tsiatko are elusive giants that move silently through the trees despite their size. They communicate through whistles that mimic birds, coordinating ambushes."
+Tyrax,Forest,8,"The ultimate soldier of the jungles throughout Myrithil. With its razor-sharp claws and unmatched agility, Tyrax strikes fear into the hearts of its enemies. This elite warrior is equipped with combat gear."
+Viarose,Forest,5,"Beneath the verdant canopies lurks Viarose. These goblin-esque beings, born of ancient flora and mischievous sprites, are masters of deception. Their vibrant petals and sweet aroma mask a cunning intellect."
+Zyra,Forest,2,"A sentient bloom that spits toxic pollen. Zyra guards the entrances to sacred groves, acting as a living alarm system. Her pollen causes hallucinations and sleep, ensuring intruders are dealt with."
+Amaterasu,Light,9,"The radiant embodiment of light, graces the mystical realm as a Level 9 Light-type Creature. With fur as pure and gleaming as freshly fallen snow, Amaterasu's presence brings an aura of tranquility and purity."
+Asti-ni,Light,4,"The luminous sentinel whose very presence radiates the ethereal beauty of an aurora. Asti-ni exudes a serene yet powerful aura, illuminating the battlefield with celestial brilliance."
+Astraea,Light,10,"The Star Maiden, Astraea, descends from the constellations to judge the earth. Her scales weigh the souls of the living, and her sword executes those found wanting. She is the embodiment of cosmic justice."
+"Aurora, the Paladin",Light,10,"Champion of the Dawn. Aurora is a warrior whose armor is forged from the first light of morning. She leads the armies of the light against the encroaching void. Her presence inspires courage in allies."
+Bonewraith,Light,3,"A spectral abomination of twisted flesh and bone. Once a noble elf, its body was ravaged by a dark curse. Now, it stalks the world as a skeletal wraith, its skin hanging loose like tattered rags."
+"Corbin, the Wise",Light,6,"An ancient scholar who ascended beyond mortality through pure enlightenment. Corbin floats in a lotus position, surrounded by scrolls of light. He does not fight with fists, but with words of power."
+Divinatria,Light,9,"Revered as a beacon of hope and righteousness. This divine entity embodies the purest form of light, radiating an aura of serenity and wisdom that touches all corners of existence."
+Djinn,Light,7,"From the darkest corners of Myrithil, the elusive Djinn emerges. This Creature is shrouded in shadow, its form barely distinguishable from the swirling void that surrounds it."
+Eclipse,Light,8,"Unveiling herself from the cloak of obscurity, Eclipse stands as a testament to the fallen splendor of the Knights of Divine Light. Imbued with the essence of both vengeance and grace, she roams as a cursed knight."
+Foton,Light,2,"Foton may look innocent with its cheerful exterior, but beneath its adorable appearance lies a powerful core. Armed with its trusty Photon Cannon, Foton can unleash devastating bursts of energy."
+Glitter Pixie,Light,2,"A vision of ethereal beauty with delicate wings that shimmer like iridescent jewels. This enchanting pixie flits through floral landscapes, leaving a trail of sparkling dust in her wake."
+Infinity Apprentice,Light,8,"A luminescent enigma and a paragon of mystical prowess. He is an apprentice in the arcane arts of Infinity Magik, casting spells with a sinister twist that mirrors the ruthless brilliance of his abilities."
+Infinity Mage,Light,10,"The Master of Time and Space. Infinity Mage has ascended beyond the need for a physical form, existing as pure magical energy held together by will. He manipulates the fabric of reality."
+Luminite,Light,3,"A crystalline entity that refracts light into solid beams. Luminites are found in the deepest crystal caves, lighting the darkness. In battle, they focus light into searing lasers."
+Luminous Wisp,Light,1,"A fleeting spark of pure energy. Luminous Wisps are the souls of the pure, drifting through the ether. They are harmless on their own, but when gathered, their collective light can blind entire armies."
+Majestic Unicorn,Light,5,"A creature of legend, rarely seen by mortal eyes. The Majestic Unicorn's horn can purify corrupt water and heal the sick. In battle, however, it is a fearsome charger, its hooves striking with force."
+"Malum, the Damned",Light,10,"A fallen angel who sought to overthrow the gods. Though cast down, Malum retains a twisted, darkened light that burns colder than the void. He seeks to extinguish all other lights in the universe."
+Penguilite,Light,1,"An adorable creature from the frozen peaks of Nura. The crystal on its chest absorbs sunlight during the day and releases it as a blinding flash to escape predators."
+Redeemer,Light,6,"An armored angel sent to purge the wicked. The Redeemer wields a hammer of solidified light. It does not seek to kill, but to judge. Those found wanting are stripped of their power."
+Soldier of Jimbora,Light,4,"A holy warrior from the floating city of Jimbora. Trained in the art of light-weaving, these soldiers create shields and weapons from thin air. Their loyalty is absolute, their discipline unbreakable."
+Sunstrike,Light,3,"A sentient sun flare given form. Sunstrike moves at blinding speeds, leaving afterimages that confuse enemies. It strikes before the enemy even sees it move, burning with the heat of high noon."
+Time Weaver,Light,5,"A mysterious mage who exists between seconds. The Time Weaver can slow down time to dodge attacks or speed it up to age his enemies into dust. He walks the fine line between the present and the future."
+Yami no Hikari,Light,7,"The 'Light in the Darkness'. This warrior creates a balance between shadow and radiance. By accepting the darkness, his light shines brighter. He hunts demons in the void, a lone beacon against the encroaching night."
+Zhànhóu,Light,7,"From the disciplined ranks of the Eternal Legion, emerges Zhànhóu. His tactical expertise and disciplined training make him a fearsome adversary. His presence in any conflict is a beacon of strength."
+Chimera Cub,Thunder,2,"A young monstrosity, a mishmash of lion, goat, and snake. Though small, the Chimera Cub is erratic and dangerous, unable to fully control the sparking energy that crackles from its mismatching fur."
+"Harpy, Storm Bringer",Thunder,7,"Where the sky churns with dark clouds and lightning ignites the heavens, Harpy descends as a herald of chaos. With each beat of her powerful wings, lightning crackles and thunder booms."
+Iškugriff,Thunder,10,"The Lightning Griffin. Iškugriff is a beast of pure energy, its feathers made of static electricity. It flies faster than sound, creating sonic booms that shatter the earth."
+Lighzard,Thunder,5,"A reptile that has adapted to the high-voltage plains of the Thunderlands. The Lighzard runs on two legs, building up static charge with every step until it unleashes a devastating kick of pure electricity."
+"Ligora, the Chimera",Thunder,9,"In the crackling shadows of tempest-laden skies, Ligora reigns supreme as the storm's wrath incarnate. With scales shimmering like forged lightning, this Creature commands the very essence of storms."
+Plazmuh,Thunder,6,"Known for its command over electrical energy. It resides within a dynamic cosmic storm, drawing power from the swirling plasma around it. This sleek, agile Creature moves with the grace and speed of a lightning bolt."
+Qilin,Thunder,9,"Forged in the crucible of ancient nightmares, the Qilin emerges from the abyss. This sadistic beast transcends mortal comprehension, embodying a malevolence that blots out the sun with disastrous storms."
+Raiden,Thunder,5,"A gifted mage from the highlands of Thundra Peaks. With a natural affinity for controlling storms, Raiden harnesses the power of lightning to stun and immobilize his foes."
+Raijū,Thunder,4,"Amidst the crackling energy of Myrithil's most violent storms, Raiju emerges as a living tempest. This level 4 Thunder Creature is known for its electrifying presence, with fur crackling with energy."
+Resaix,Thunder,6,"A storm elemental bound into a suit of conductive armor. Resaix is a living battery, absorbing electrical attacks to fuel its own. It acts as a lightning rod for its allies."
+Shock Bug,Thunder,3,"A giant insect that feeds on power lines and lightning strikes. Its buzz is a low-frequency hum that causes headaches and dizziness. When threatened, it releases a pulse that fries nearby electronics."
+Shokimono,Thunder,1,"Embodies the raw power of a thunderstorm distilled into a deceptively adorable form. This bioluminescent bunny, pulsating with electric energy, navigates the mushroom forests with unsettling grace."
+Sparxle,Thunder,1,"An agile and enigmatic creature that combines both speed and precision. Small but mighty, Sparxle is known for its ability to harness electric energy to surprise its opponents."
+Stormchaser,Thunder,4,"A bird of prey that nests in thunderclouds. The Stormchaser dives at the speed of sound, trailing lightning behind it. It is said that wherever a Stormchaser flies, a hurricane is sure to follow."
+Stormie,Thunder,4,"The electromancer of Mystik Creatures. She's a burgeoning lightning master, honing her abilities to perfection. Stormie's legendary talent lies in her awe-inspiring power to conjure tempestuous storms."
+Stormtail,Thunder,2,"A squirrel-like creature with a tail that acts as a lightning rod. It scampers through the treetops during storms, collecting energy. It is cute, but touching it will deliver a shock strong enough to stop a heart."
+Tempestas,Thunder,10,"The Incarnation of the Storm. Tempestas is a being of pure weather, a towering giant of clouds and lightning. It does not speak, it only thunders. Its arrival changes the climate of entire continents."
+Thunder Tusk,Thunder,3,"A boar with tusks made of conductive crystal. It charges blindly, goring enemies and electrocuting them simultaneously. It is stubborn, aggressive, and nearly impossible to stop once it starts running."
+Tigris,Thunder,7,"Where ancient magik collides with the echoes of forgotten technologies, Tigris stalks the battlefield. This awe-inspiring mecha tiger, with sleek metal plating and eyes that crackle with lightning, embodies power."
+Voltara,Thunder,8,"The Queen of High Voltage. Voltara is a sorceress who has replaced her blood with liquid lightning. She floats above the ground, hair crackling with static, directing bolts of electricity."
+Wilderfang,Thunder,10,"An apex predator from a timeline where storms never end. Wilderfang is a wolf the size of a castle, its howl summoning lightning from clear skies. It hunts not for food, but for the thrill of the chase."
+Wolfdrake,Thunder,10,"A dragon with the head of a wolf and wings of lightning. The Wolfdrake is a hybrid terror, possessing the cunning of a pack hunter and the raw power of a dragon."
+Zamus,Thunder,8,"A demonic knight of immense power, his very presence crackling with untamed energy. Clad in obsidian armor etched with crackling lightning, he rules over the domain of thunder."
+Aqua Imp,Water,3,"A mischievous trickster that lurks in the rivers and streams of the Mystik world. With its shimmering blue skin and webbed hands, it blends seamlessly with its watery surroundings."
+Aspidochelone,Water,8,"In the vast oceans of Mystik Creatures, the mighty Aspidochelone emerges as the epitome of aquatic grandeur. This colossal entity dons the guise of a colossal sea turtle, its sprawling shell the foundation for an entire town."
+Avani,Water,10,"The Earth-Shaker of the Deep. Avani is a colossal crab-like entity that dwells in the deepest trenches. When it moves, it creates tsunamis. Its shell is made of the hardest ocean bedrock."
+Baby Yeti,Water,6,"A mysterious and powerful Creature, roaming the frozen tundras with an imposing presence. Standing as a living embodiment of winter's wrath, Baby Yeti is not just a solitary beast; it commands the bitter cold."
+Charybdis,Water,8,"Emerging from the darkest depths of the turbulent sea, Charybdis commands the tempestuous currents. Its colossal form, a swirling vortex of aquatic power, conceals the true nature of this mythical being."
+Chillburr,Water,3,"A small, icy bear that drifts on icebergs. Though it looks cuddly, its fur is made of sharp icicles. It throws snowballs packed with rocks and ice at anyone who intrudes on its fishing grounds."
+Cryofrost,Water,4,"Deep within the Crystal Caverns, Cryofrost reigns supreme as a guardian of the frigid expanse. This enigmatic Creature, born from the first frost, embodies the very essence of winter's fury."
+Hippocampus,Water,5,"Beneath the serene waves, the gentle Hippocampus glides with grace and power. This Water Creature is a guardian of the coral reefs, using its immense strength to protect the delicate underwater ecosystems."
+Hydra,Water,10,"The Serpent of the Deep. Hydra is a multi-headed terror that regenerates faster than it can be harmed. Cut off one head, and two more take its place. It guards the sunken temples of the old gods."
+Marimira,Water,6,"In the tranquil depths of the ocean, where sunlight dances through crystalline waters, resides Marimira. She is the embodiment of aquatic elegance, her presence bringing an otherworldly beauty to the underwater realms."
+Mernatee,Water,7,"Dive into the depths with Mernatee, the serene sovereign of the ocean's heart. This Creature glides gracefully through the underwater realms, adorned with an aura of ancient wisdom and tranquility."
+Neptide,Water,2,"A small crustacean with a big attitude. Neptide uses its large claws to snap at anything that comes too close to its tide pool. It can shoot jets of pressurized water to knock down flying insects."
+Neptunova,Water,7,"From the depths where sunlight fades into a watery abyss, Neptunova arises, a siren of beguiling beauty and lethal intent. Legends whisper of her hauntingly beautiful song, capable of luring sailors to their doom."
+Nereia,Water,5,"A sea nymph who commands the currents. Nereia protects the coral reefs with a gentle but firm hand. She can turn the tide of battle literally, pushing enemies away with walls of rushing water."
+Nereus,Water,7,"The Old Man of the Sea. Nereus wields a trident forged from the heart of a dead star, cooled in the ocean's depths. He commands the sea monsters and can summon whirlpools to drag ships to the locker."
+Nerion,Water,1,"A small water sprite, the messenger of the ocean. Nerion darts through the waves faster than the eye can see. It brings news of storms and tides to the creatures of the deep."
+Raitei,Water,10,"The Storm of the Sea. Raitei is a leviathan that swims through the air as easily as water. It brings the rain and the flood, washing away civilizations that have displeased the ocean gods."
+"Rann, the Wretched",Water,10,"A cursed king of a sunken city. Rann is bound to the ocean floor by chains of gold. His rage boils the water around him, and he commands an army of the drowned."
+Scylla,Water,9,"A name whispered with dread among sailors and coastal dwellers alike, Scylla embodies the untamed fury of the ocean's wrath. Legends tell of countless vessels lured to their doom by an irresistible call."
+Seaphira,Water,2,"A jellyfish-like fairy that glows in the dark depths. Seaphira's sting is not painful, but it induces a deep, magical sleep. It floats peacefully, unaware of the danger it poses to divers."
+Skwid,Water,4,"A clever cephalopod with a tool for every occasion. Skwid uses its ink to blind foes and its many arms to disarm them. It is a master of escape, able to squeeze through the tiniest cracks."
+Water Leaper,Water,1,"A frog-like creature with bat wings and a scorpion tail. The Water Leaper is a pest of the swamps, jumping from water to air to sting prey. It is more annoying than deadly."
+Yacuruna,Water,9,"In the shadowy depths where nightmares dance, the malevolent Yacurana reigns. Cloaked in the murky depths, Yacurana takes the form of a sinister male, riding atop the back of a colossal black crocodile."
+Baby Wyvern,Wind,6,"A small dragon-like creature that has not yet grown its front legs. It relies on its powerful wings to stay aloft. It is fiercely territorial and will spit acid at anything that approaches its nest."
+Cloudpiercer,Wind,10,"A legendary whale soaring through the skies above Myrithil, said to be born from the dreams of ancient mariners. This ethereal being embodies the union of the ocean's depths and the lofty skies. Legends tell of Cloudpiercer emerging from the misty clouds, descending upon the world below to aid those who honor the spirits of the wind and sea. Its massive form, both graceful and imposing, is often described as piercing through the heavens, bringing forth both storms and tranquility." 
+Cyclone Drake,Wind,8,"Born from the heart of an unrelenting storm, Cyclone Drake is the embodiment of sky-shattering fury. Its wings rip the air apart with the force of a thousand tempests, and its serpentine body twists through the clouds."
+"Divine Beast, Panterus",Wind,10,"The Wind God's Avatar. Panterus is a leopard made of clouds and gales. It moves silently, invisible until it strikes. It is the guardian of the winds, ensuring the air remains free and flowing."
+Dragon Tamer,Wind,9,"From the hidden groves of the Whispering Forest emerges the Dragon Tamer. Her bond with these majestic beings is unparalleled, and she commands them with grace and authority."
+Dragotort,Wind,9,"When the skies darken and the very air grows heavy with foreboding, Dragotort emerges from its slumber. This colossal beast, with scales that shimmer like storm clouds, commands the power of the heavens."
+Ekek,Wind,6,"Known for its menacing presence and dark aura. With piercing red eyes and a sharp beak, Ekek soars through the night skies of Aeloria, preying on the unsuspecting with swift agility."
+"Griffin, the Majestic",Wind,9,"Amidst the mysterious skies of Mystik Creatures, Griffin, the Majestic, unfurls its elegant wings. This mythical griffin eclipses the mundane, its colossal wings and tail adorned with the resplendent hues of a cosmic rainbow."
+Hatchling,Wind,1,"Fresh from the nest, its downy feathers still damp from the shell. Though clumsy wings and unsteady legs mark its first forays into the world, a spark of untamed power shines within its bright eyes."
+Humbird,Wind,4,"In the vibrant meadows of the Forest of Rehm, Humbird flutters gracefully among the blossoms. This Wind Creature is as swift as it is delicate, weaving intricate patterns through the air with elegance."
+Mountain Harpy,Wind,7,"A majestic guardian of the towering peaks, this native harpy soars among the untamed winds. Her ethereal presence dominates the skies, casting an enigmatic shadow over all who dare enter her domain."
+Pegasus,Wind,3,"A winged horse of pure white. Pegasus is a symbol of freedom and inspiration. It flies faster than the wind, carrying heroes to their destiny. Its kick can shatter stone, but its heart is gentle."
+Penelope,Wind,2,"A small, bird-like creature with colorful plumage. Penelope mimics the sounds of larger predators to scare away threats. It loves shiny objects and often steals trinkets to decorate its nest."
+Peryton,Wind,2,"A stag with the wings of a bird. The Peryton casts the shadow of a man, confusing hunters. It is a creature of bad omens, appearing before great storms or tragedies."
+Phoenic,Wind,8,"A bird of living flame and wind. Phoenic is a cousin to the great Phoenix, but its fire burns with a cool, blue light. It nests in the craters of dormant volcanoes, feeding on ash and wind."
+Skwall,Wind,5,"A living tornado with eyes. Skwall is a chaotic elemental that loves to tear roofs off houses and scatter sheep. It is hard to hit, as weapons pass right through its windy body."
+Strix Arenaueus,Wind,10,"The Owl of the Apocalypse. Strix is a silent hunter of the night skies. Its feathers are razor sharp, and its gaze sees through all illusions. It is the judge of the skies, culling the weak from the flock."
+Sylph,Wind,1,"A tiny wind spirit, playful and elusive. Sylphs ride the updrafts, giggling as they mess up travelers' hair. They are the spies of the wind lords, whispering secrets they hear on the breeze."
+Tanuki,Wind,4,"A raccoon-dog spirit that uses leaves to shape-shift. The Tanuki rides the wind on a giant leaf, using wind magic to play pranks on the serious-minded. Its belly drum summons gusts of wind."
+Win'doku,Wind,3,"A wizened old man who embodies the very essence of the wind. With every breath, he channels the power of the air currents, manipulating them with the grace and precision of a master."
+"Winged Beast Ra'zu",Wind,7,"The Storm's Eye. Ra'zu is a winged predator that hunts within the wildest tornadoes. Its scream is a sonic boom that shatters glass and disorients prey, leaving them vulnerable to its lightning-fast dive."
+"Winged Beast U'ru",Wind,3,"The scout of the Winged Beast clan. U'ru is small and agile, capable of flying through the densest forests without touching a leaf. It marks targets with a unique pheromone, guiding the larger beasts to the kill."
+"Winged Beast Wai'ku",Wind,5,"Emerges as a savage force within the Winged Beast Clan. With golden fur and colossal wings that cast shadows of impending dread, Wai'ku stands as a sadistic paragon of the clan's brutal prowess."
+Zombified Dragon,Wind,10,"A dragon raised from the dead by foul wind magic. Its wings are tattered, yet it flies with unnatural speed. It breathes a necrotic gas that withers crops and rots flesh instantly."`;
+
+    // 2. CSV PARSER
+    function parseCSV(str) {
+        const arr = [];
+        let quote = false;  
+        let col = 0, c = 0, row = 0;
+        arr[row] = []; arr[row][col] = "";
+
+        for (; c < str.length; c++) {
+            let cc = str[c], nc = str[c+1];
+            if (cc == '"') { if (quote && nc == '"') { arr[row][col] += '"'; ++c; } else { quote = !quote; } }
+            else if (cc == ',' && !quote) { ++col; arr[row][col] = ""; }
+            else if (cc == '\r' && !quote && nc == '\n') { ++row; col = 0; arr[row] = []; arr[row][col] = ""; ++c; }
+            else if (cc == '\n' && !quote) { ++row; col = 0; arr[row] = []; arr[row][col] = ""; }
+            else if (cc == '\r' && !quote) { ++row; col = 0; arr[row] = []; arr[row][col] = ""; }
+            else { arr[row][col] += cc; }
+        }
+        return arr;
+    }
+
+    const rows = parseCSV(rawCSV);
+    const loreMap = {};
+    for(let i=1; i<rows.length; i++) {
+        const r = rows[i];
+        if(r.length >= 4) {
+            let name = r[0].trim();
+            let lore = r[3];
+            loreMap[name] = lore;
+        }
+    }
+
+    // 3. IMAGE & MODAL LOGIC
+    const IMAGE_EXT = '.png';
+    function getCardImageUrl(card) {
+      if (!card.images || !card.images.small) return null;
+      const path = card.images.small;
+      return (path.endsWith('.png') || path.endsWith('.jpg')) ? path : path + IMAGE_EXT;
+    }
+
+    function getLevelClass(level) {
+      if (!level || isNaN(level)) return '';
+      const lvl = parseInt(level);
+      if (lvl >= 1 && lvl <= 3) return 'level-common';
+      if (lvl >= 4 && lvl <= 6) return 'level-uncommon';
+      if (lvl >= 7 && lvl <= 9) return 'level-rare';
+      if (lvl >= 10) return 'level-ultra';
+      return ''; // Fallback
+    }
+
+    function enlargeImage(url, name) {
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('modal-image');
+      modalImg.src = url;
+      modalImg.alt = name;
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('image-modal').classList.remove('active');
+    }
+
+    // 4. PAGINATION CONFIG
+    const ITEMS_PER_PAGE = 15; // Set to 15 items per page for all devices
+    
+    let currentPage = 1;
+    let currentFilteredData = []; // Store current dataset for pagination logic
+
+    // Helper: Reset page and render (used by Search/Filter inputs)
+    function resetAndRender() {
+        currentPage = 1;
+        renderTable();
+    }
+
+    // Helper: Change Page (Used by buttons)
+    function changePage(direction) {
+        const totalPages = Math.ceil(currentFilteredData.length / ITEMS_PER_PAGE);
+        const newPage = currentPage + direction;
+        
+        if (newPage > 0 && newPage <= totalPages) {
+            currentPage = newPage;
+            renderTable();
+            // Scroll back to top of table on page change
+            document.querySelector('.filters-bar').scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    // 5. MAIN RENDER LOGIC
+    function renderTable() {
+      const searchVal = document.getElementById('search-input').value.toLowerCase();
+      const typeVal = document.getElementById('type-select').value;
+      const tbody = document.getElementById('codex-body');
+      
+      // Clear current table
+      tbody.innerHTML = '';
+
+      // 1. FILTER & SORT
+      const uniqueNames = new Set();
+      let filtered = [];
+
+      if (typeof CARDS !== 'undefined') {
+          const sourceData = CARDS.filter(c => c.supertype === 'Creature');
+          
+          sourceData.forEach(c => {
+             if (searchVal && !c.name.toLowerCase().includes(searchVal)) return;
+             if (typeVal && (!c.types || !c.types.includes(typeVal))) return;
+             
+             if (!uniqueNames.has(c.name)) {
+                 uniqueNames.add(c.name);
+                 filtered.push(c);
+             }
+          });
+      }
+
+      filtered.sort((a,b) => a.name.localeCompare(b.name));
+      currentFilteredData = filtered; // Update global state
+
+      // 2. APPLY PAGINATION LOGIC
+      const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+      
+      // Safety check
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+      const endIndex = startIndex + ITEMS_PER_PAGE;
+      const displayData = filtered.slice(startIndex, endIndex);
+
+      // 3. GENERATE HTML
+      displayData.forEach(c => {
+        const lore = loreMap[c.name] || "Log entry pending..."; 
+        const imgUrl = getCardImageUrl(c);
+        const rarityClass = c.rarity ? `thumb-${c.rarity.replace(/\s+/g, '')}` : '';
+        
+        const imgHTML = imgUrl 
+          ? `<img src="${imgUrl}" class="card-thumbnail ${rarityClass}" onclick="enlargeImage('${imgUrl}', '${c.name.replace(/'/g, "\\'")}')" alt="${c.name}" title="Click to enlarge">` 
+          : `<div style="width:60px; height:80px; background:#222; display:flex; align-items:center; justify-content:center; color:#555; font-size:10px;">No Image</div>`;
+
+        const typeHTML = (c.types || []).map(t => `<span class="pill pill-${t}">${t}</span>`).join(' ');
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td style="vertical-align:top;">
+             <div style="font-weight:bold; color:var(--accent); font-size:1rem; margin-bottom:4px;">${c.name}</div>
+             ${imgHTML}
+          </td>
+          <!-- NOTE: Inline vertical-align removed here so CSS media queries control it -->
+          <td>${typeHTML}</td>
+          <td><span class="${getLevelClass(c.level)}">${c.level}</span></td>
+          <td class="codex-text">${lore}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // 4. UPDATE PAGINATION CONTROLS
+      const paginationContainer = document.getElementById('pagination');
+      const countDisplay = document.getElementById('count-display');
+
+      // Update Text
+      countDisplay.innerText = `Showing ${displayData.length} of ${filtered.length} entries (Page ${currentPage} of ${totalPages})`;
+      
+      // Update Buttons
+      document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+      document.getElementById('btn-prev').disabled = (currentPage === 1);
+      document.getElementById('btn-next').disabled = (currentPage === totalPages);
+    }
+
+    window.addEventListener('load', renderTable);
+  </script>
+  <script src="footer.js"></script>
+</body>
+</html>
