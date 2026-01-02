@@ -29,6 +29,58 @@
       min-height: 100vh;
       display: flex;
     }
+
+    /* --- INTRO SPLASH SCREEN STYLES --- */
+    #intro-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      /* Start fully black */
+      background-color: rgba(5, 7, 11, 1); 
+      z-index: 999999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      
+      /* SLOW FADE for the background color only */
+      transition: background-color 3s cubic-bezier(0.4, 0, 0.2, 1);
+      /* Allow clicks to pass through once we start fading */
+      pointer-events: auto; 
+    }
+
+    #intro-logo {
+      /* Initial Splash Size */
+      width: 40vw; 
+      max-width: 600px;
+      height: auto;
+      
+      /* Start slightly larger for effect */
+      transform: scale(1.2);
+      transform-origin: center center;
+      
+      /* SLOW MOVEMENT for the logo position/scale */
+      /* Easing tweaked to start slow, speed up, then slow down gently */
+      transition: transform 3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease;
+      
+      /* Ensure it sits above the fading background */
+      z-index: 1000000;
+      position: relative; 
+      will-change: transform; /* Hint to browser for smoother rendering */
+    }
+
+    /* Helper class to fade the black background to transparent */
+    .intro-bg-transparent {
+      background-color: rgba(5, 7, 11, 0) !important;
+      pointer-events: none !important;
+    }
+    
+    .intro-logo-hidden {
+        opacity: 0;
+    }
+    /* ---------------------------------- */
+
     .sidebar {
       width: 270px;
       background: linear-gradient(180deg, #05070c, #05070b);
@@ -130,7 +182,7 @@
     /* Sidebar Image Styles */
     .sidebar-powers {
       text-align: center;
-      margin: 0.5rem 0 1.5rem 0; /* Spacing around the powers image */
+      margin: 0.5rem 0 1.5rem 0;
       padding: 0 0.5rem;
     }
     .sidebar-powers img {
@@ -142,22 +194,36 @@
 
     .sidebar-logo-bottom {
       text-align: center;
-      margin-top: 1rem; /* Pushes it down from the links */
+      margin-top: 1rem;
       margin-bottom: 1rem;
       padding: 0 0.5rem;
     }
     .sidebar-logo-bottom img {
-      max-width: 100%; /* Adjusts the logo size so it's not too huge */
+      max-width: 100%;
       height: auto;
       display: block;
       margin: 0 auto;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); /* Optional: adds a nice shadow to the logo */
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+    }
+    
+    /* Destination Logo Styling */
+    #dest-logo {
+      max-width: 300px; 
+      height: auto; 
+      opacity: 0; /* Hidden initially so we don't see double */
+      /* Slow fade in to ensure it's ready when the animation lands */
+      transition: opacity 0.5s ease-in; 
     }
   </style>
 
 </head>
 <body>
   
+  <!-- INTRO SPLASH SCREEN -->
+  <div id="intro-overlay">
+    <img id="intro-logo" src="MystikLogo-PNG.png" alt="Loading Mystik Creatures...">
+  </div>
+
   <aside class="sidebar">
     <h1>Mystik Creatures™</h1>
     <div class="sidebar-powers">
@@ -196,11 +262,87 @@
         </p>
 
         <div style="text-align: center; margin-top: 3rem; margin-bottom: 1rem;">
-            <img src="MystikLogo-PNG.png" alt="Mystik Creatures Logo" style="max-width: 300px; height: auto; opacity: 0.9;">
+            <!-- ID ADDED HERE FOR TARGETING -->
+            <img id="dest-logo" src="MystikLogo-PNG.png" alt="Mystik Creatures Logo">
         </div>
       </section>
     </div>
   </main>
+
   <script src="footer.js"></script>
+  
+  <!-- Intro Logic -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const overlay = document.getElementById('intro-overlay');
+      const splashLogo = document.getElementById('intro-logo');
+      const destLogo = document.getElementById('dest-logo');
+
+      // Check Session Storage
+      if (!sessionStorage.getItem('hasSeenIntro')) {
+        sessionStorage.setItem('hasSeenIntro', 'true');
+
+        // 1. Initial Delay (Let the user see the big logo)
+        setTimeout(() => {
+            
+            // 2. MATH: Calculate Exact Coordinates and Scale
+            const startRect = splashLogo.getBoundingClientRect();
+            const endRect = destLogo.getBoundingClientRect();
+
+            // CRITICAL FIX: The startRect includes the CSS transform scale(1.2).
+            // We need to calculate the scale relative to the *untransformed* size to avoid double-shrinking.
+            const initialScale = 1.2;
+            const unscaledStartWidth = startRect.width / initialScale;
+            
+            // Calculate the perfect scale to match the destination
+            const finalScale = endRect.width / unscaledStartWidth;
+
+            // Calculate Center-to-Center distance
+            const startCenterX = startRect.left + (startRect.width / 2);
+            const startCenterY = startRect.top + (startRect.height / 2);
+            
+            const endCenterX = endRect.left + (endRect.width / 2);
+            const endCenterY = endRect.top + (endRect.height / 2);
+
+            const deltaX = endCenterX - startCenterX;
+            const deltaY = endCenterY - startCenterY;
+
+            // 3. APPLY ANIMATIONS
+            
+            // Fade out the black background
+            overlay.classList.add('intro-bg-transparent');
+
+            // Move and Scale the Logo
+            // We use translate then scale.
+            splashLogo.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${finalScale})`;
+            
+            // 4. THE OVERLAP TRICK
+            // Wait until the logo is *almost* at its destination (2.5s mark of a 3s animation)
+            setTimeout(() => {
+                // Reveal the destination logo BEHIND the splash logo
+                destLogo.style.opacity = '1';
+            }, 2500);
+
+            // 5. CLEANUP
+            // Wait for the animation to fully complete (3000ms + buffer)
+            setTimeout(() => {
+                // Fade out the splash logo (it is now sitting perfectly on top of the identical dest logo)
+                splashLogo.classList.add('intro-logo-hidden');
+                
+                // Finally remove the overlay layer from flow
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 500); // Wait for the opacity transition of the splash logo
+            }, 3000);
+
+        }, 1200); // 1.2 second initial pause
+
+      } else {
+        // Already seen: Hide overlay immediately, show destination immediately
+        overlay.style.display = 'none';
+        destLogo.style.opacity = '1';
+      }
+    });
+  </script>
 </body>
 </html>
