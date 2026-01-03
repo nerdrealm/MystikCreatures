@@ -1,136 +1,149 @@
 document.addEventListener("DOMContentLoaded", function() {
 
-  // --- 1. MAKE POWERS IMAGE CLICKABLE ---
-  const powersImg = document.querySelector('.sidebar-powers img');
-  if (powersImg) {
-    // Change cursor to indicate it's clickable
-    powersImg.style.cursor = 'pointer';
-    // Add click event to redirect to Overview
-    powersImg.addEventListener('click', function() {
+  // --- 1. TARGET THE SPECIFIC "SECOND" IMAGE ---
+  const sidebarImages = document.querySelectorAll('.sidebar img');
+  
+  // Target the SECOND image (Index 1). Fallback to Index 0 if only 1 exists.
+  const targetImage = sidebarImages.length > 1 ? sidebarImages[1] : sidebarImages[0];
+
+  if (targetImage) {
+    // A. MAKE IT CLICKABLE
+    targetImage.style.cursor = 'pointer';
+    targetImage.addEventListener('click', function() {
       window.location.href = 'index.html';
     });
+
+    // --- B. REMOVE GAP FROM IMAGE ---
+    targetImage.style.marginBottom = "0px"; 
+
+    // C. INJECT TAGLINE
+    
+    // 1. Load "Cinzel" Font
+    const fontLink = document.createElement('link');
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap'; 
+    fontLink.rel = 'stylesheet';
+    document.head.appendChild(fontLink);
+
+    // 2. Create Tagline
+    const tagline = document.createElement('div');
+    tagline.innerText = "A New Realm Awaits";
+    
+    // 3. Style Tagline
+    Object.assign(tagline.style, {
+      fontFamily: "'Cinzel', serif", 
+      fontSize: "0.8rem",        
+      fontWeight: "400",         
+      color: "#e2e8f0",          
+      textAlign: "center",
+      textTransform: "uppercase", 
+      letterSpacing: "2px",       
+      
+      // MOVED UP TIGHT
+      marginTop: "-40px",          
+      
+      marginBottom: "20px",
+      textShadow: "0 0 8px rgba(255, 255, 255, 0.4)", 
+      width: "100%", 
+      opacity: "0.9"             
+    });
+
+    // 4. INSERT AFTER THE TARGET IMAGE
+    targetImage.insertAdjacentElement('afterend', tagline);
   }
 
   // --- 2. INJECT THE HAMBURGER BUTTON ---
   const menuBtn = document.createElement("button");
   menuBtn.id = "mobile-menu-btn";
-  menuBtn.innerHTML = "&#9776;"; // The Unicode Hamburger Symbol
+  menuBtn.innerHTML = "&#9776;"; 
   document.body.prepend(menuBtn);
 
-  // --- 3. INJECT CSS STYLES (MOBILE MENU + IMAGE PROTECTION) ---
+  // --- 3. INJECT CSS STYLES ---
   const style = document.createElement('style');
   style.innerHTML = `
-    /* --- IMAGE PROTECTION (DESKTOP & MOBILE) --- */
+    /* --- IMAGE PROTECTION --- */
     img {
-      /* Disables the "Long Press" menu on iOS/Android */
       -webkit-touch-callout: none !important;
-      /* Disables highlighting the image */
       -webkit-user-select: none !important;
-      -khtml-user-select: none !important;
-      -moz-user-select: none !important;
-      -ms-user-select: none !important;
       user-select: none !important;
-      /* Ensure clicks still work for your modals/links */
       pointer-events: auto; 
     }
 
-    /* --- DESKTOP (Default) --- */
-    #mobile-menu-btn {
-      display: none;
+    /* --- BRANDING FONT UPDATE (Title Match) --- */
+    .sidebar h1 {
+      font-family: 'Cinzel', serif !important;
+      font-weight: 700; /* Bold for the main title */
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
+
+    /* --- DESKTOP (Default) --- */
+    #mobile-menu-btn { display: none; }
 
     /* --- MOBILE (Max Width 800px) --- */
     @media (max-width: 800px) {
-
-    /* --- CUSTOM MOBILE SIZES --- */
       
-      /* 1. "Mystik Creatures" Title Size */
       .sidebar h1 {
         font-size: 1.5rem !important; 
         text-align: center;
-        margin-top: 10px; /* Space for the close button */
-      }
-
-      /* 2. "Powers.png" Image Size */
-      .sidebar-powers img {
-        max-width: 50% !important; 
-        margin-bottom: 20px !important;
+        margin-top: 10px; 
+        /* Ensure font carries over to mobile */
+        font-family: 'Cinzel', serif !important;
       }
       
-      /* MAIN LAYOUT ADJUSTMENT */
-      body {
-        position: relative;
-        overflow-x: hidden;
+      /* Mobile Image Sizing - Keep margin 0 */
+      .sidebar img:nth-of-type(2) {
+        max-width: 60% !important; 
+        margin-bottom: 0px !important; 
       }
+      
+      body { position: relative; overflow-x: hidden; }
+      .main { padding-top: 60px !important; }
 
-      /* PUSH MAIN CONTENT DOWN SLIGHTLY */
-      .main {
-        padding-top: 60px !important; 
-      }
-
-      /* THE BUTTON (Icon Only) */
+      /* HAMBURGER BUTTON */
       #mobile-menu-btn {
         display: flex;
         align-items: center;
         justify-content: center;
         position: fixed;
-        
-        /* START ON THE LEFT */
-        top: 15px;
-        left: 15px; 
-        
+        top: 15px; left: 15px; 
         z-index: 10000;
-        
-        /* SMALLER SIZE */
-        width: 36px;  
-        height: 36px;
+        width: 36px; height: 36px;
         font-size: 20px; 
-        
-        background-color: #4fd1c5; /* Accent Color */
+        background-color: #4fd1c5; 
         color: #05070b;
         border: none;
         border-radius: 6px;
         box-shadow: 0 4px 8px rgba(0,0,0,0.5);
         cursor: pointer;
-        
-        /* SMOOTH ANIMATION FOR MOVING RIGHT */
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      /* BUTTON POSITION WHEN OPEN (Move to Right side of Sidebar) */
       #mobile-menu-btn.btn-open {
-        left: 230px; /* Moves button to the right edge of the 280px sidebar */
-        background-color: #f56565 !important; /* Red */
+        left: 230px; 
+        background-color: #f56565 !important; 
         color: white !important;
       }
 
-      /* HIDE SIDEBAR BY DEFAULT */
+      /* SIDEBAR DRAWER */
       .sidebar {
         position: fixed !important;
-        top: 0;
-        left: 0;
+        top: 0; left: 0;
         height: 100vh !important;
         width: 280px !important;
         z-index: 9999;
-        transform: translateX(-100%); /* Push off-screen left */
+        transform: translateX(-100%); 
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 5px 0 15px rgba(0,0,0,0.7);
         border-right: 1px solid #2d3748;
       }
 
-      /* OPEN STATE */
-      .sidebar.mobile-open {
-        transform: translateX(0);
-      }
+      .sidebar.mobile-open { transform: translateX(0); }
 
-      /* DIM BACKGROUND */
       .sidebar.mobile-open::before {
         content: '';
         position: fixed;
-        top: 0;
-        left: 280px;
-        width: 100vw;
-        height: 100vh;
+        top: 0; left: 280px;
+        width: 100vw; height: 100vh;
         background: rgba(0,0,0,0.6);
         z-index: 9998;
       }
@@ -138,31 +151,26 @@ document.addEventListener("DOMContentLoaded", function() {
   `;
   document.head.appendChild(style);
 
-  // --- 4. ADD CLICK EVENT LISTENER FOR MENU ---
+  // --- 4. MENU LOGIC ---
   menuBtn.addEventListener('click', function(e) {
     e.stopPropagation();
     const sidebar = document.querySelector('.sidebar');
-    
-    // Toggle classes on Sidebar AND Button
     sidebar.classList.toggle('mobile-open');
     menuBtn.classList.toggle('btn-open');
     
-    // Toggle Icon
     if (sidebar.classList.contains('mobile-open')) {
-      menuBtn.innerHTML = "&#10005;"; // The 'X' symbol
+      menuBtn.innerHTML = "&#10005;"; 
     } else {
-      menuBtn.innerHTML = "&#9776;"; // The Hamburger symbol
+      menuBtn.innerHTML = "&#9776;"; 
     }
   });
 
-  // Close sidebar if clicking outside
   document.addEventListener('click', function(e) {
     const sidebar = document.querySelector('.sidebar');
     const btn = document.getElementById('mobile-menu-btn');
-    
     if (sidebar.classList.contains('mobile-open') && !sidebar.contains(e.target) && e.target !== btn) {
       sidebar.classList.remove('mobile-open');
-      btn.classList.remove('btn-open'); // Move button back to left
+      btn.classList.remove('btn-open'); 
       btn.innerHTML = "&#9776;";
     }
   });
@@ -209,17 +217,13 @@ document.addEventListener("DOMContentLoaded", function() {
     target.insertAdjacentHTML('beforeend', footerContent);
   }
 
-  // --- 6. DISABLE RIGHT-CLICK, DRAGGING & LONG-PRESS ON IMAGES ---
-  
-  // Disable Right Click (Desktop Context Menu)
+  // --- 6. DISABLE RIGHT-CLICK ON IMAGES ---
   document.addEventListener('contextmenu', function(e) {
     if (e.target.tagName === 'IMG') {
       e.preventDefault();
       return false;
     }
   });
-
-  // Disable Dragging (Desktop)
   document.addEventListener('dragstart', function(e) {
     if (e.target.tagName === 'IMG') {
       e.preventDefault();
