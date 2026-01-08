@@ -161,52 +161,81 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // --- 6. ENLARGED IMAGE WATERMARK HANDLER ---
   function applyEnlargedWatermark() {
-    const enlargedImg = document.querySelector('.lightbox img, .enlarged-image, .modal img, [class*="enlarge"] img, [class*="zoom"] img');
-    if (enlargedImg) {
-      // Remove any existing watermark overlays first
-      const existingOverlays = document.querySelectorAll('.enlarged-watermark-overlay');
-      existingOverlays.forEach(overlay => overlay.remove());
+    const allImages = document.querySelectorAll('img');
+    
+    allImages.forEach(img => {
+      // Skip sidebar
+      if (img.closest('.sidebar')) return;
       
-      // Ensure parent container is positioned
-      const parent = enlargedImg.parentElement;
-      if (parent && getComputedStyle(parent).position === 'static') {
+      // Only process larger images (likely enlarged ones)
+      const rect = img.getBoundingClientRect();
+      if (rect.width < 200 || rect.height < 200) return;
+      
+      const parent = img.parentElement;
+      if (!parent) return;
+      
+      // Check if overlay already exists
+      if (parent.querySelector('.enlarged-watermark-overlay')) return;
+      
+      // Make sure parent can hold absolute positioning
+      if (getComputedStyle(parent).position === 'static') {
         parent.style.position = 'relative';
       }
       
-      // Apply watermark overlay to enlarged image
+      // Get the actual displayed image dimensions
+      const imgWidth = img.offsetWidth;
+      const imgHeight = img.offsetHeight;
+      
+      // Create watermark overlay
       const overlay = document.createElement('div');
       overlay.className = 'enlarged-watermark-overlay';
-      overlay.style.position = 'absolute';
-      overlay.style.top = '0';
-      overlay.style.left = '0';
-      overlay.style.width = '100%';
-      overlay.style.height = '100%';
-      overlay.style.backgroundImage = `url('${WATERMARK_URL}')`;
-      overlay.style.backgroundSize = 'contain';
-      overlay.style.backgroundPosition = 'center';
-      overlay.style.backgroundRepeat = 'no-repeat';
-      overlay.style.mixBlendMode = 'multiply';
-      overlay.style.pointerEvents = 'none';
-      overlay.style.opacity = WATERMARK_OPACITY;
-      overlay.style.zIndex = '10000';
+      Object.assign(overlay.style, {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: `${imgWidth}px`,
+        height: `${imgHeight}px`,
+        backgroundImage: `url('${WATERMARK_URL}')`,
+        backgroundSize: 'contain',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        mixBlendMode: 'multiply',
+        pointerEvents: 'none',
+        opacity: WATERMARK_OPACITY,
+        zIndex: '999999'
+      });
       
-      if (parent) {
-        parent.appendChild(overlay);
-      }
-    }
+      parent.appendChild(overlay);
+    });
   }
 
-  // Watch for ANY image enlargements
-  document.addEventListener('click', function(e) {
-    setTimeout(() => applyEnlargedWatermark(), 50);
-    setTimeout(() => applyEnlargedWatermark(), 200);
-  });
+  // Apply on clicks with delays
+  document.addEventListener('click', () => {
+    // First remove ALL old overlays
+    document.querySelectorAll('.enlarged-watermark-overlay').forEach(o => o.remove());
+    
+    setTimeout(applyEnlargedWatermark, 100);
+    setTimeout(applyEnlargedWatermark, 300);
+  }, true);
 
-  // Also watch for DOM changes to catch enlarged images
-  const enlargedObserver = new MutationObserver(() => {
-    applyEnlargedWatermark();
+  // Watch for new images being added
+  const obsv = new MutationObserver((mutations) => {
+    let hasNewImages = false;
+    mutations.forEach(mutation => {
+      mutation.addedNodes.forEach(node => {
+        if (node.tagName === 'IMG' || (node.querySelectorAll && node.querySelectorAll('img').length > 0)) {
+          hasNewImages = true;
+        }
+      });
+    });
+    
+    if (hasNewImages) {
+      document.querySelectorAll('.enlarged-watermark-overlay').forEach(o => o.remove());
+      setTimeout(applyEnlargedWatermark, 100);
+    }
   });
-  enlargedObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+  obsv.observe(document.body, { childList: true, subtree: true });
 
   // --- 7. SIDEBAR & UI LOGIC ---
   const sidebarImages = document.querySelectorAll('.sidebar img');
