@@ -1,50 +1,51 @@
 document.addEventListener("DOMContentLoaded", function() {
 
   // --- CONFIGURATION ---
-  // Ensure "SAMPLE.png" is in the same folder.
-  // This method combines the watermark with your images mathematically.
   const WATERMARK_URL = 'SAMPLE.png'; 
-  const WATERMARK_OPACITY = 0.5; // 0.1 to 1.0
+  const WATERMARK_OPACITY = 0.5;
 
-  // --- 1. SETUP: PRELOAD WATERMARK ---
+  // --- 1. HIDE IMAGES IMMEDIATELY (Before watermarking) ---
+  const hideStyle = document.createElement('style');
+  hideStyle.id = 'watermark-hide';
+  hideStyle.innerHTML = `
+    body:not(.watermark-ready) img:not(.sidebar img) {
+      visibility: hidden !important;
+    }
+  `;
+  document.head.appendChild(hideStyle);
+
+  // --- 2. PRELOAD WATERMARK ---
   const watermarkImg = new Image();
   watermarkImg.src = WATERMARK_URL;
-  watermarkImg.crossOrigin = "Anonymous"; // Try to prevent security errors
+  watermarkImg.crossOrigin = "Anonymous";
 
-  // --- 2. THE BAKING FUNCTION ---
-  // This function takes an image, draws it onto a canvas, adds the watermark, 
-  // and replaces the original image source with the new combined version.
+  // --- 3. BAKING FUNCTION (Optimized) ---
   function bakeWatermark(targetImg) {
-    // NEW: Skip if on index.html page
+    // Skip index page
     if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
       return;
     }
     
-    // Safety Checks
-    if (targetImg.dataset.watermarked) return; // Already done
-    if (targetImg.closest('.sidebar')) return; // Don't touch sidebar
-    if (targetImg.width < 50 || targetImg.height < 50) return; // Skip tiny icons
+    // Safety checks
+    if (targetImg.dataset.watermarked) return;
+    if (targetImg.closest('.sidebar')) return;
+    if (targetImg.width < 50 || targetImg.height < 50) return;
     
-    // Mark as processing so we don't loop forever
     targetImg.dataset.watermarked = "true";
 
     try {
-      // 1. Create a Canvas matching the image size
       const canvas = document.createElement('canvas');
       canvas.width = targetImg.naturalWidth;
       canvas.height = targetImg.naturalHeight;
       const ctx = canvas.getContext('2d');
 
-      // 2. Draw the Original Card
+      // Draw original
       ctx.drawImage(targetImg, 0, 0);
 
-      // 3. Configure Watermark Style
-      // "multiply" makes the white background of your SAMPLE.png transparent
+      // Apply watermark
       ctx.globalCompositeOperation = 'multiply'; 
       ctx.globalAlpha = WATERMARK_OPACITY;
 
-      // 4. Calculate Watermark Scaling (Fit to card)
-      // We want the watermark to fill the card but maintain aspect ratio
       const scale = Math.min(
         canvas.width / watermarkImg.width,
         canvas.height / watermarkImg.height
@@ -55,26 +56,19 @@ document.addEventListener("DOMContentLoaded", function() {
       const x = (canvas.width - w) / 2;
       const y = (canvas.height - h) / 2;
 
-      // 5. Draw Watermark
       ctx.drawImage(watermarkImg, x, y, w, h);
 
-      // 6. Replace the Image Source
-      // This updates the visible image on the page
+      // Replace source
       targetImg.src = canvas.toDataURL();
       
-      console.log("✓ Watermark baked:", targetImg.src.substring(0, 50)); // DEBUG
-      
     } catch (e) {
-      console.error("Watermark failed:", e); // BETTER ERROR
-      // Fallback: If canvas fails (e.g. running locally without a server), 
-      // we apply a basic CSS overlay so you still have protection.
+      console.error("Watermark failed:", e);
       applyFallbackOverlay(targetImg);
     }
   }
 
-  // --- 3. FALLBACK METHOD (If Canvas Fails) ---
+  // --- 4. FALLBACK OVERLAY ---
   function applyFallbackOverlay(img) {
-    // Only used if browser security blocks the pixel-baking method
     const parent = img.parentElement;
     if (getComputedStyle(parent).position === 'static') {
       parent.style.position = 'relative';
@@ -93,39 +87,66 @@ document.addEventListener("DOMContentLoaded", function() {
     parent.appendChild(overlay);
   }
 
-  // --- 4. EXECUTION LOOP ---
-  
-  // Wait for the watermark image to load first
+  // --- 5. EXECUTION (All at once, then reveal) ---
   watermarkImg.onload = function() {
-    console.log("✓ Watermark image loaded!"); // DEBUG
+    console.log("✓ Watermark loaded");
     
-    // Skip entire process on index.html
+    // Skip on index
     if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
-      console.log("Index page detected - watermarking disabled");
+      document.body.classList.add('watermark-ready');
       return;
     }
     
-    // A. Process existing images
-    document.querySelectorAll('img').forEach(img => {
-      if (img.complete && img.naturalWidth > 0) bakeWatermark(img);
-      else img.onload = () => bakeWatermark(img);
+    // Process all images at once
+    const images = Array.from(document.querySelectorAll('img'));
+    let processed = 0;
+    const total = images.length;
+
+    images.forEach(img => {
+      const processImage = () => {
+        bakeWatermark(img);
+        processed++;
+        
+        // When all done, reveal everything at once
+        if (processed === total) {
+          document.body.classList.add('watermark-ready');
+          console.log(`✓ ${total} images watermarked and revealed`);
+        }
+      };
+
+      if (img.complete && img.naturalWidth > 0) {
+        processImage();
+      } else {
+        img.onload = processImage;
+      }
     });
 
-    // B. Watch for New/Enlarged Images (Mutation Observer)
+    // Fallback: reveal after 2 seconds even if some images fail
+    setTimeout(() => {
+      if (!document.body.classList.contains('watermark-ready')) {
+        document.body.classList.add('watermark-ready');
+        console.log('⚠ Timeout: revealing images');
+      }
+    }, 2000);
+
+    // Watch for new images
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === 1) { 
-            if (node.tagName === 'IMG') {
-               // Wait for load
-               if(node.complete) bakeWatermark(node);
-               else node.onload = () => bakeWatermark(node);
-            } else {
-              node.querySelectorAll('img').forEach(img => {
-                if(img.complete) bakeWatermark(img);
-                else img.onload = () => bakeWatermark(img);
-              });
-            }
+            const newImages = node.tagName === 'IMG' ? [node] : node.querySelectorAll('img');
+            newImages.forEach(img => {
+              // Hide new image initially
+              img.style.visibility = 'hidden';
+              
+              const processNew = () => {
+                bakeWatermark(img);
+                img.style.visibility = 'visible';
+              };
+
+              if (img.complete) processNew();
+              else img.onload = processNew;
+            });
           }
         });
       });
@@ -133,12 +154,12 @@ document.addEventListener("DOMContentLoaded", function() {
     observer.observe(document.body, { childList: true, subtree: true });
   };
 
-  // Add error handler
   watermarkImg.onerror = function() {
-    console.error("❌ Failed to load watermark: " + WATERMARK_URL);
+    console.error("✗ Failed to load watermark");
+    document.body.classList.add('watermark-ready'); // Show images anyway
   };
 
-  // --- 5. SIDEBAR & UI LOGIC (Kept from your original) ---
+  // --- 6. SIDEBAR & UI LOGIC ---
   const sidebarImages = document.querySelectorAll('.sidebar img');
   const targetImage = sidebarImages.length > 1 ? sidebarImages[1] : sidebarImages[0];
 
@@ -147,7 +168,6 @@ document.addEventListener("DOMContentLoaded", function() {
     targetImage.addEventListener('click', () => window.location.href = 'index.html');
     targetImage.style.marginBottom = "0px"; 
 
-    // Inject Tagline
     const fontLink = document.createElement('link');
     fontLink.href = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap'; 
     fontLink.rel = 'stylesheet';
