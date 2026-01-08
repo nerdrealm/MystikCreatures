@@ -1,225 +1,45 @@
 document.addEventListener("DOMContentLoaded", function() {
 
-  // ======================================================
-  // CONFIGURATION
-  // ======================================================
-  const WATERMARK_URL = 'SAMPLE.png'; // Must be in same folder as HTML
-  const WATERMARK_OPACITY = 0.5;      // 0.1 to 1.0
+  // --- CONFIGURATION ---
+  // Ensure "SAMPLE.png" is in the same folder.
+  // This method combines the watermark with your images mathematically.
+  const WATERMARK_URL = 'SAMPLE.png'; 
+  const WATERMARK_OPACITY = 0.5; // 0.1 to 1.0
 
-  // ======================================================
-  // 1. SIDEBAR & TAGLINE LOGIC
-  // ======================================================
-  const sidebarImages = document.querySelectorAll('.sidebar img');
-  
-  // Target the SECOND image (Index 1). Fallback to Index 0 if only 1 exists.
-  const targetImage = sidebarImages.length > 1 ? sidebarImages[1] : sidebarImages[0];
-
-  if (targetImage) {
-    // A. MAKE IT CLICKABLE
-    targetImage.style.cursor = 'pointer';
-    targetImage.addEventListener('click', function() {
-      window.location.href = 'index.html';
-    });
-
-    // B. REMOVE GAP FROM IMAGE
-    targetImage.style.marginBottom = "0px"; 
-
-    // C. INJECT TAGLINE
-    
-    // 1. Load "Cinzel" Font
-    const fontLink = document.createElement('link');
-    fontLink.href = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap'; 
-    fontLink.rel = 'stylesheet';
-    document.head.appendChild(fontLink);
-
-    // 2. Create Tagline
-    const tagline = document.createElement('div');
-    tagline.innerText = "A New Realm Awaits";
-    
-    // 3. Style Tagline
-    Object.assign(tagline.style, {
-      fontFamily: "'Cinzel', serif", 
-      fontSize: "0.8rem",        
-      fontWeight: "400",         
-      color: "#e2e8f0",          
-      textAlign: "center",
-      textTransform: "uppercase", 
-      letterSpacing: "2px",       
-      marginTop: "-40px",          
-      marginBottom: "20px",
-      textShadow: "0 0 8px rgba(255, 255, 255, 0.4)", 
-      width: "100%", 
-      opacity: "0.9"             
-    });
-
-    // 4. INSERT AFTER THE TARGET IMAGE
-    targetImage.insertAdjacentElement('afterend', tagline);
-  }
-
-  // ======================================================
-  // 2. MOBILE HAMBURGER BUTTON
-  // ======================================================
-  const menuBtn = document.createElement("button");
-  menuBtn.id = "mobile-menu-btn";
-  menuBtn.innerHTML = "&#9776;"; 
-  document.body.prepend(menuBtn);
-
-  // ======================================================
-  // 3. CSS STYLES
-  // ======================================================
-  const style = document.createElement('style');
-  style.innerHTML = `
-    /* --- IMAGE PROTECTION --- */
-    img {
-      -webkit-touch-callout: none !important;
-      -webkit-user-select: none !important;
-      user-select: none !important;
-      pointer-events: auto; 
-    }
-
-    /* --- BRANDING FONT UPDATE --- */
-    .sidebar h1 {
-      font-family: 'Cinzel', serif !important;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    /* --- DESKTOP (Default) --- */
-    #mobile-menu-btn { display: none; }
-
-    /* --- MOBILE (Max Width 800px) --- */
-    @media (max-width: 800px) {
-      
-      .sidebar h1 {
-        font-size: 1.5rem !important; 
-        text-align: center;
-        margin-top: 10px; 
-        font-family: 'Cinzel', serif !important;
-      }
-      
-      .sidebar img:nth-of-type(2) {
-        max-width: 60% !important; 
-        margin-bottom: 0px !important; 
-      }
-      
-      body { position: relative; overflow-x: hidden; }
-      .main { padding-top: 60px !important; }
-
-      /* HAMBURGER BUTTON */
-      #mobile-menu-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: fixed;
-        top: 15px; left: 15px; 
-        z-index: 10000;
-        width: 36px; height: 36px;
-        font-size: 20px; 
-        background-color: #4fd1c5; 
-        color: #05070b;
-        border: none;
-        border-radius: 6px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      #mobile-menu-btn.btn-open {
-        left: 230px; 
-        background-color: #f56565 !important; 
-        color: white !important;
-      }
-
-      /* SIDEBAR DRAWER */
-      .sidebar {
-        position: fixed !important;
-        top: 0; left: 0;
-        height: 100vh !important;
-        width: 280px !important;
-        z-index: 9999;
-        transform: translateX(-100%); 
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 5px 0 15px rgba(0,0,0,0.7);
-        border-right: 1px solid #2d3748;
-        background-color: #05070b; /* Ensure solid bg */
-      }
-
-      .sidebar.mobile-open { transform: translateX(0); }
-
-      .sidebar.mobile-open::before {
-        content: '';
-        position: fixed;
-        top: 0; left: 280px;
-        width: 100vw; height: 100vh;
-        background: rgba(0,0,0,0.6);
-        z-index: 9998;
-      }
-    }
-  `;
-  document.head.appendChild(style);
-
-  // ======================================================
-  // 4. MENU INTERACTION LOGIC
-  // ======================================================
-  menuBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('mobile-open');
-    menuBtn.classList.toggle('btn-open');
-    
-    if (sidebar.classList.contains('mobile-open')) {
-      menuBtn.innerHTML = "&#10005;"; 
-    } else {
-      menuBtn.innerHTML = "&#9776;"; 
-    }
-  });
-
-  document.addEventListener('click', function(e) {
-    const sidebar = document.querySelector('.sidebar');
-    const btn = document.getElementById('mobile-menu-btn');
-    if (sidebar.classList.contains('mobile-open') && !sidebar.contains(e.target) && e.target !== btn) {
-      sidebar.classList.remove('mobile-open');
-      btn.classList.remove('btn-open'); 
-      btn.innerHTML = "&#9776;";
-    }
-  });
-
-  // ======================================================
-  // 5. WATERMARK LOGIC (THE BAKING METHOD)
-  // ======================================================
-  // This physically combines the watermark with the image pixels.
-  // This solves the animation/scroll issues.
-
+  // --- 1. SETUP: PRELOAD WATERMARK ---
   const watermarkImg = new Image();
   watermarkImg.src = WATERMARK_URL;
-  watermarkImg.crossOrigin = "Anonymous";
+  watermarkImg.crossOrigin = "Anonymous"; // Try to prevent security errors
 
-  // A. The Baking Function
+  // --- 2. THE BAKING FUNCTION ---
+  // This function takes an image, draws it onto a canvas, adds the watermark, 
+  // and replaces the original image source with the new combined version.
   function bakeWatermark(targetImg) {
     // Safety Checks
-    if (targetImg.dataset.watermarked) return; 
-    if (targetImg.closest('.sidebar')) return; 
+    if (targetImg.dataset.watermarked) return; // Already done
+    if (targetImg.closest('.sidebar')) return; // Don't touch sidebar
     if (targetImg.width < 50 || targetImg.height < 50) return; // Skip tiny icons
     
-    // Mark processed
+    // Mark as processing so we don't loop forever
     targetImg.dataset.watermarked = "true";
 
     try {
-      // 1. Create Canvas
+      // 1. Create a Canvas matching the image size
       const canvas = document.createElement('canvas');
       canvas.width = targetImg.naturalWidth;
       canvas.height = targetImg.naturalHeight;
       const ctx = canvas.getContext('2d');
 
-      // 2. Draw Original
+      // 2. Draw the Original Card
       ctx.drawImage(targetImg, 0, 0);
 
-      // 3. Configure Blend Mode (Removes White BG from Watermark)
+      // 3. Configure Watermark Style
+      // "multiply" makes the white background of your SAMPLE.png transparent
       ctx.globalCompositeOperation = 'multiply'; 
       ctx.globalAlpha = WATERMARK_OPACITY;
 
-      // 4. Calculate Scale (Fit watermark to card)
+      // 4. Calculate Watermark Scaling (Fit to card)
+      // We want the watermark to fill the card but maintain aspect ratio
       const scale = Math.min(
         canvas.width / watermarkImg.width,
         canvas.height / watermarkImg.height
@@ -230,19 +50,24 @@ document.addEventListener("DOMContentLoaded", function() {
       const x = (canvas.width - w) / 2;
       const y = (canvas.height - h) / 2;
 
-      // 5. Draw Watermark & Replace Image
+      // 5. Draw Watermark
       ctx.drawImage(watermarkImg, x, y, w, h);
+
+      // 6. Replace the Image Source
+      // This updates the visible image on the page
       targetImg.src = canvas.toDataURL();
       
     } catch (e) {
-      // Security Fallback (if browser blocks canvas access)
-      console.warn("Watermark skipped (Security):", targetImg.src);
+      console.warn("Watermark skipped (CORS/Security restriction):", targetImg.src);
+      // Fallback: If canvas fails (e.g. running locally without a server), 
+      // we apply a basic CSS overlay so you still have protection.
       applyFallbackOverlay(targetImg);
     }
   }
 
-  // B. Fallback Function (Overlay method)
+  // --- 3. FALLBACK METHOD (If Canvas Fails) ---
   function applyFallbackOverlay(img) {
+    // Only used if browser security blocks the pixel-baking method
     const parent = img.parentElement;
     if (getComputedStyle(parent).position === 'static') {
       parent.style.position = 'relative';
@@ -261,20 +86,24 @@ document.addEventListener("DOMContentLoaded", function() {
     parent.appendChild(overlay);
   }
 
-  // C. Execution Loop
+  // --- 4. EXECUTION LOOP ---
+  
+  // Wait for the watermark image to load first
   watermarkImg.onload = function() {
-    // 1. Process existing images
+    
+    // A. Process existing images
     document.querySelectorAll('img').forEach(img => {
       if (img.complete && img.naturalWidth > 0) bakeWatermark(img);
       else img.onload = () => bakeWatermark(img);
     });
 
-    // 2. Watch for NEW images (Popups/Enlarged)
+    // B. Watch for New/Enlarged Images (Mutation Observer)
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === 1) { 
             if (node.tagName === 'IMG') {
+               // Wait for load
                if(node.complete) bakeWatermark(node);
                else node.onload = () => bakeWatermark(node);
             } else {
@@ -290,10 +119,84 @@ document.addEventListener("DOMContentLoaded", function() {
     observer.observe(document.body, { childList: true, subtree: true });
   };
 
+  // --- 5. SIDEBAR & UI LOGIC (Kept from your original) ---
+  const sidebarImages = document.querySelectorAll('.sidebar img');
+  const targetImage = sidebarImages.length > 1 ? sidebarImages[1] : sidebarImages[0];
 
-  // ======================================================
-  // 6. LEGAL FOOTER
-  // ======================================================
+  if (targetImage) {
+    targetImage.style.cursor = 'pointer';
+    targetImage.addEventListener('click', () => window.location.href = 'index.html');
+    targetImage.style.marginBottom = "0px"; 
+
+    // Inject Tagline
+    const fontLink = document.createElement('link');
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap'; 
+    fontLink.rel = 'stylesheet';
+    document.head.appendChild(fontLink);
+
+    const tagline = document.createElement('div');
+    tagline.innerText = "A New Realm Awaits";
+    Object.assign(tagline.style, {
+      fontFamily: "'Cinzel', serif", fontSize: "0.8rem", fontWeight: "400", 
+      color: "#e2e8f0", textAlign: "center", textTransform: "uppercase", 
+      letterSpacing: "2px", marginTop: "-40px", marginBottom: "20px",
+      textShadow: "0 0 8px rgba(255, 255, 255, 0.4)", width: "100%", opacity: "0.9"             
+    });
+    targetImage.insertAdjacentElement('afterend', tagline);
+  }
+
+  // Mobile Menu
+  const menuBtn = document.createElement("button");
+  menuBtn.id = "mobile-menu-btn";
+  menuBtn.innerHTML = "&#9776;"; 
+  document.body.prepend(menuBtn);
+
+  // CSS Styles
+  const style = document.createElement('style');
+  style.innerHTML = `
+    img { -webkit-touch-callout: none; user-select: none; }
+    .sidebar h1 { font-family: 'Cinzel', serif !important; font-weight: 700; text-transform: uppercase; text-align: center; }
+    #mobile-menu-btn { display: none; }
+    @media (max-width: 800px) {
+      .sidebar h1 { font-size: 1.5rem; text-align: center; }
+      .sidebar img:nth-of-type(2) { max-width: 60%; margin-bottom: 0; }
+      body { position: relative; overflow-x: hidden; }
+      .main { padding-top: 60px; }
+      #mobile-menu-btn {
+        display: flex; align-items: center; justify-content: center;
+        position: fixed; top: 15px; left: 15px; z-index: 10000;
+        width: 36px; height: 36px; font-size: 20px; 
+        background-color: #4fd1c5; color: #05070b; border: none; border-radius: 6px;
+      }
+      #mobile-menu-btn.btn-open { left: 230px; background-color: #f56565 !important; color: white !important; }
+      .sidebar {
+        position: fixed; top: 0; left: 0; height: 100vh; width: 280px;
+        z-index: 9999; transform: translateX(-100%); transition: 0.3s;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.7); background: #05070b;
+      }
+      .sidebar.mobile-open { transform: translateX(0); }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Menu Logic
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('mobile-open');
+    menuBtn.classList.toggle('btn-open');
+    menuBtn.innerHTML = sidebar.classList.contains('mobile-open') ? "&#10005;" : "&#9776;";
+  });
+  document.addEventListener('click', (e) => {
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar.classList.contains('mobile-open') && !sidebar.contains(e.target) && e.target !== menuBtn) {
+      sidebar.classList.remove('mobile-open');
+      menuBtn.classList.remove('btn-open');
+      menuBtn.innerHTML = "&#9776;";
+    }
+  });
+
+  // Footer & No Right Click
   const footerContent = `
     <style>
       .legal-footer {
@@ -330,24 +233,10 @@ document.addEventListener("DOMContentLoaded", function() {
     </footer>
   `;
 
-  const target = document.querySelector('.main-inner') || document.querySelector('.main');
-  if (target) {
-    target.insertAdjacentHTML('beforeend', footerContent);
-  }
+  const main = document.querySelector('.main-inner') || document.querySelector('.main');
+  if (main) main.insertAdjacentHTML('beforeend', footerContent);
 
-  // ======================================================
-  // 7. DISABLE RIGHT-CLICK
-  // ======================================================
-  document.addEventListener('contextmenu', function(e) {
-    if (e.target.tagName === 'IMG') {
-      e.preventDefault();
-      return false;
-    }
-  });
-  document.addEventListener('dragstart', function(e) {
-    if (e.target.tagName === 'IMG') {
-      e.preventDefault();
-      return false;
-    }
+  document.addEventListener('contextmenu', e => {
+    if (e.target.tagName === 'IMG') e.preventDefault();
   });
 });
