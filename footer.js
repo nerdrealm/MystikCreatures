@@ -161,6 +161,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // --- 6. ENLARGED IMAGE WATERMARK HANDLER ---
   function applyEnlargedWatermark() {
+    // Skip index page completely
+    if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+      return;
+    }
+    
     const allImages = document.querySelectorAll('img');
     
     allImages.forEach(img => {
@@ -212,6 +217,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Apply on clicks with delays
   document.addEventListener('click', () => {
+    // Skip index page
+    if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+      return;
+    }
+    
     // First remove ALL old overlays
     document.querySelectorAll('.enlarged-watermark-overlay').forEach(o => o.remove());
     
@@ -221,6 +231,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Watch for new images being added
   const obsv = new MutationObserver((mutations) => {
+    // Skip index page
+    if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+      return;
+    }
+    
     let hasNewImages = false;
     mutations.forEach(mutation => {
       mutation.addedNodes.forEach(node => {
