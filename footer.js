@@ -15,6 +15,11 @@ document.addEventListener("DOMContentLoaded", function() {
   // This function takes an image, draws it onto a canvas, adds the watermark, 
   // and replaces the original image source with the new combined version.
   function bakeWatermark(targetImg) {
+    // NEW: Skip if on index.html page
+    if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+      return;
+    }
+    
     // Safety Checks
     if (targetImg.dataset.watermarked) return; // Already done
     if (targetImg.closest('.sidebar')) return; // Don't touch sidebar
@@ -57,8 +62,10 @@ document.addEventListener("DOMContentLoaded", function() {
       // This updates the visible image on the page
       targetImg.src = canvas.toDataURL();
       
+      console.log("✓ Watermark baked:", targetImg.src.substring(0, 50)); // DEBUG
+      
     } catch (e) {
-      console.warn("Watermark skipped (CORS/Security restriction):", targetImg.src);
+      console.error("Watermark failed:", e); // BETTER ERROR
       // Fallback: If canvas fails (e.g. running locally without a server), 
       // we apply a basic CSS overlay so you still have protection.
       applyFallbackOverlay(targetImg);
@@ -90,6 +97,13 @@ document.addEventListener("DOMContentLoaded", function() {
   
   // Wait for the watermark image to load first
   watermarkImg.onload = function() {
+    console.log("✓ Watermark image loaded!"); // DEBUG
+    
+    // Skip entire process on index.html
+    if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+      console.log("Index page detected - watermarking disabled");
+      return;
+    }
     
     // A. Process existing images
     document.querySelectorAll('img').forEach(img => {
@@ -117,6 +131,11 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     });
     observer.observe(document.body, { childList: true, subtree: true });
+  };
+
+  // Add error handler
+  watermarkImg.onerror = function() {
+    console.error("❌ Failed to load watermark: " + WATERMARK_URL);
   };
 
   // --- 5. SIDEBAR & UI LOGIC (Kept from your original) ---
@@ -156,7 +175,8 @@ document.addEventListener("DOMContentLoaded", function() {
   style.innerHTML = `
     img { -webkit-touch-callout: none; user-select: none; }
     .sidebar h1 { font-family: 'Cinzel', serif !important; font-weight: 700; text-transform: uppercase; text-align: center; }
-    .sidebar img { margin-top: -01.5rem; }
+    .sidebar { padding-top: 1rem; }
+    .sidebar img { margin-top: 0.5rem; }
     #mobile-menu-btn { display: none; }
     @media (max-width: 800px) {
       .sidebar h1 { font-size: 1.5rem; text-align: center; }
