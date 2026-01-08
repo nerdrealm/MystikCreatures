@@ -156,6 +156,7 @@ document.addEventListener("DOMContentLoaded", function() {
   style.innerHTML = `
     img { -webkit-touch-callout: none; user-select: none; }
     .sidebar h1 { font-family: 'Cinzel', serif !important; font-weight: 700; text-transform: uppercase; text-align: center; }
+    .sidebar img { margin-top: -01.5rem; }
     #mobile-menu-btn { display: none; }
     @media (max-width: 800px) {
       .sidebar h1 { font-size: 1.5rem; text-align: center; }
