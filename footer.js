@@ -1,82 +1,64 @@
 document.addEventListener("DOMContentLoaded", function() {
 
   // --- CONFIGURATION ---
-  const WATERMARK_URL = 'SAMPLE.png'; 
-  const WATERMARK_OPACITY = 0.5;
-
-  // --- 1. HIDE IMAGES IMMEDIATELY (Before watermarking) ---
-  const hideStyle = document.createElement('style');
-  hideStyle.id = 'watermark-hide';
-  hideStyle.innerHTML = `
-    body:not(.watermark-ready) img:not(.sidebar img) {
-      visibility: hidden !important;
-    }
-  `;
-  document.head.appendChild(hideStyle);
-
-  // --- 2. PRELOAD WATERMARK ---
+  const WATERMARK_URL = 'SAMPLE.png';
+  const WATERMARK_OPACITY = 0.5; // 0.1 to 1.0
+  
+  // --- 1. SETUP: PRELOAD WATERMARK ---
   const watermarkImg = new Image();
   watermarkImg.src = WATERMARK_URL;
   watermarkImg.crossOrigin = "Anonymous";
-
-  // --- 3. BAKING FUNCTION (Optimized) ---
+  
+  // --- 2. THE BAKING FUNCTION ---
   function bakeWatermark(targetImg) {
-    // Skip index page
-    if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
-      return;
-    }
-    
-    // Safety checks
-    if (targetImg.dataset.watermarked) return;
-    if (targetImg.closest('.sidebar')) return;
-    if (targetImg.width < 50 || targetImg.height < 50) return;
+    // Safety Checks
+    if (targetImg.dataset.watermarked) return; // Already done
+    if (targetImg.closest('.sidebar')) return; // Don't touch sidebar
+    if (targetImg.width < 50 || targetImg.height < 50) return; // Skip tiny icons
     
     targetImg.dataset.watermarked = "true";
-
+    
     try {
       const canvas = document.createElement('canvas');
       canvas.width = targetImg.naturalWidth;
       canvas.height = targetImg.naturalHeight;
       const ctx = canvas.getContext('2d');
-
-      // Draw original
+      
       ctx.drawImage(targetImg, 0, 0);
-
-      // Apply watermark
-      ctx.globalCompositeOperation = 'multiply'; 
+      
+      ctx.globalCompositeOperation = 'multiply';
       ctx.globalAlpha = WATERMARK_OPACITY;
-
+      
       const scale = Math.min(
         canvas.width / watermarkImg.width,
         canvas.height / watermarkImg.height
       );
-      
       const w = watermarkImg.width * scale;
       const h = watermarkImg.height * scale;
       const x = (canvas.width - w) / 2;
       const y = (canvas.height - h) / 2;
-
-      ctx.drawImage(watermarkImg, x, y, w, h);
-
-      // Replace source
-      targetImg.src = canvas.toDataURL();
       
+      ctx.drawImage(watermarkImg, x, y, w, h);
+      targetImg.src = canvas.toDataURL();
     } catch (e) {
-      console.error("Watermark failed:", e);
+      console.warn("Watermark skipped (CORS/Security restriction):", targetImg.src);
       applyFallbackOverlay(targetImg);
     }
   }
-
-  // --- 4. FALLBACK OVERLAY ---
+  
+  // --- 3. FALLBACK METHOD (If Canvas Fails) ---
   function applyFallbackOverlay(img) {
     const parent = img.parentElement;
     if (getComputedStyle(parent).position === 'static') {
       parent.style.position = 'relative';
     }
+    
     const overlay = document.createElement('div');
     overlay.style.position = 'absolute';
-    overlay.style.top = '0'; overlay.style.left = '0';
-    overlay.style.width = '100%'; overlay.style.height = '100%';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
     overlay.style.backgroundImage = `url('${WATERMARK_URL}')`;
     overlay.style.backgroundSize = 'contain';
     overlay.style.backgroundPosition = 'center';
@@ -86,67 +68,29 @@ document.addEventListener("DOMContentLoaded", function() {
     overlay.style.opacity = WATERMARK_OPACITY;
     parent.appendChild(overlay);
   }
-
-  // --- 5. EXECUTION (All at once, then reveal) ---
+  
+  // --- 4. EXECUTION LOOP ---
   watermarkImg.onload = function() {
-    console.log("✓ Watermark loaded");
-    
-    // Skip on index
-    if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
-      document.body.classList.add('watermark-ready');
-      return;
-    }
-    
-    // Process all images at once
-    const images = Array.from(document.querySelectorAll('img'));
-    let processed = 0;
-    const total = images.length;
-
-    images.forEach(img => {
-      const processImage = () => {
-        bakeWatermark(img);
-        processed++;
-        
-        // When all done, reveal everything at once
-        if (processed === total) {
-          document.body.classList.add('watermark-ready');
-          console.log(`✓ ${total} images watermarked and revealed`);
-        }
-      };
-
-      if (img.complete && img.naturalWidth > 0) {
-        processImage();
-      } else {
-        img.onload = processImage;
-      }
+    // A. Process existing images
+    document.querySelectorAll('img').forEach(img => {
+      if (img.complete && img.naturalWidth > 0) bakeWatermark(img);
+      else img.onload = () => bakeWatermark(img);
     });
-
-    // Fallback: reveal after 2 seconds even if some images fail
-    setTimeout(() => {
-      if (!document.body.classList.contains('watermark-ready')) {
-        document.body.classList.add('watermark-ready');
-        console.log('⚠ Timeout: revealing images');
-      }
-    }, 2000);
-
-    // Watch for new images
+    
+    // B. Watch for New/Enlarged Images
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === 1) { 
-            const newImages = node.tagName === 'IMG' ? [node] : node.querySelectorAll('img');
-            newImages.forEach(img => {
-              // Hide new image initially
-              img.style.visibility = 'hidden';
-              
-              const processNew = () => {
-                bakeWatermark(img);
-                img.style.visibility = 'visible';
-              };
-
-              if (img.complete) processNew();
-              else img.onload = processNew;
-            });
+          if (node.nodeType === 1) {
+            if (node.tagName === 'IMG') {
+              if(node.complete) bakeWatermark(node);
+              else node.onload = () => bakeWatermark(node);
+            } else {
+              node.querySelectorAll('img').forEach(img => {
+                if(img.complete) bakeWatermark(img);
+                else img.onload = () => bakeWatermark(img);
+              });
+            }
           }
         });
       });
@@ -154,12 +98,7 @@ document.addEventListener("DOMContentLoaded", function() {
     observer.observe(document.body, { childList: true, subtree: true });
   };
 
-  watermarkImg.onerror = function() {
-    console.error("✗ Failed to load watermark");
-    document.body.classList.add('watermark-ready'); // Show images anyway
-  };
-
-  // --- 6. SIDEBAR & UI LOGIC ---
+  // --- SIDEBAR & UI LOGIC ---
   const sidebarImages = document.querySelectorAll('.sidebar img');
   const targetImage = sidebarImages.length > 1 ? sidebarImages[1] : sidebarImages[0];
 
@@ -197,6 +136,7 @@ document.addEventListener("DOMContentLoaded", function() {
     .sidebar h1 { font-family: 'Cinzel', serif !important; font-weight: 700; text-transform: uppercase; text-align: center; }
     .sidebar { padding-top: 1rem; }
     .sidebar img { margin-top: -2rem; }
+    .sidebar img[src*="Powers.png"] { margin-top: 0 !important; }
     #mobile-menu-btn { display: none; }
     @media (max-width: 800px) {
       .sidebar h1 { font-size: 1.5rem; text-align: center; }
