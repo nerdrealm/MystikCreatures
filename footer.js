@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const bottomImage = document.querySelector('.sidebar-logo-bottom img');
   if (bottomImage) {
     bottomImage.src = "Mystik.png"; // <--- REPLACES THE IMAGE
-    bottomImage.style.marginTop = "40px";
+    bottomImage.style.marginTop = "10px";
     bottomImage.style.marginBottom = "0px"; 
 
     // Add Font
