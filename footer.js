@@ -28,6 +28,8 @@ document.addEventListener("DOMContentLoaded", function() {
   // C. Bottom Image (MystikLogo) -> KEEPS THE TAGLINE
   const bottomImage = document.querySelector('.sidebar-logo-bottom img');
   if (bottomImage) {
+    bottomImage.src = "Mystik.png"; // <--- REPLACES THE IMAGE
+    bottomImage.style.marginTop = "40px";
     bottomImage.style.marginBottom = "0px"; 
 
     // Add Font
@@ -45,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function() {
       fontFamily: "'Cinzel', serif", fontSize: "0.8rem", fontWeight: "400", 
       color: "#e2e8f0", textAlign: "center", textTransform: "uppercase", 
       letterSpacing: "2px", 
-      marginTop: "-40px", 
+      marginTop: "-20px", 
       marginBottom: "20px",
       textShadow: "0 0 8px rgba(255, 255, 255, 0.4)", width: "100%", opacity: "0.9"             
     });
@@ -53,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Insert Tagline AFTER the Bottom Logo
     bottomImage.insertAdjacentElement('afterend', tagline);
   }
-  
+
   // --- 2. MOBILE MENU LOGIC ---
   const menuBtn = document.getElementById("mobile-menu-btn");
   const sidebar = document.querySelector('.sidebar');
