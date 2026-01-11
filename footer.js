@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function() {
     mobileLogoAdjust.innerHTML = `
       @media (max-width: 800px) {
         .sidebar-logo-bottom img {
-           margin-top: -20px; 
+           margin-top: -15px; 
         }
       }
     `;
