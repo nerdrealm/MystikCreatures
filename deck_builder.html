@@ -1,0 +1,2236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mystik Creatures™ — Deck Builder</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Social Media Preview Tags -->
+    <meta property="og:title" content="Mystik Creatures™ TCG" />
+    <meta property="og:description" content="A New Realm Awaits" />
+    <meta property="og:image" content="https://nerdrealm.github.io/MystikCreatures/MystikLogo-PNG.png" />
+    <meta property="og:url" content="https://nerdrealm.github.io/MystikCreatures/index.html" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+        
+        /* --- MAIN LAYOUT --- */
+        .main {
+            flex: 1;
+            padding: 1.5rem 1.5rem 2.5rem;
+            max-width: calc(100% - 260px);
+        }
+        .main-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        section {
+            background: rgba(7, 10, 18, 0.95);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(45, 55, 72, 0.9);
+            box-shadow: var(--shadow-soft);
+            padding: 1.4rem 1.5rem 1.3rem;
+        }
+        h2 {
+            margin: 0 0 0.6rem;
+            font-size: 1.05rem;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* --- Random Deck Generator STYLES --- */
+
+        #status {
+            text-align: center;
+            padding: 10px;
+            background-color: var(--bg-panel-soft);
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: var(--accent);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group { 
+            display: flex; 
+            flex-direction: column; 
+            grid-column: 1 / -1; 
+            background: var(--bg-panel-soft);
+            padding: 15px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+        }
+        
+        .control-group label { 
+            margin-bottom: 10px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .theme-hint { 
+            font-size: 0.8em; 
+            color: var(--text-muted); 
+            margin-top: 10px; 
+            margin-bottom: 0; 
+            font-style: italic; 
+            line-height: 1.4;
+        }
+
+        /* --- TYPE BUBBLES --- */
+        .type-selector-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        
+        .type-bubble, .boss-bubble {
+            padding: 6px 14px; 
+            border-radius: 999px; 
+            cursor: pointer; 
+            border: 1px solid var(--border-subtle);
+            background-color: #1a202c; 
+            color: #fff; 
+            font-size: 0.8rem;
+            font-weight: 600; 
+            user-select: none;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy transition */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Base Type Colors */
+        .type-bubble-Dark { border-color: #8e44ad; color: #8e44ad; }
+        .type-bubble-Earth { border-color: #d2b48c; color: #d2b48c; }
+        .type-bubble-Fire { border-color: #e67e22; color: #e67e22; }
+        .type-bubble-Forest { border-color: #27ae60; color: #27ae60; }
+        .type-bubble-Light { border-color: #f1f2f6; color: #f1f2f6; }
+        .type-bubble-Thunder { border-color: var(--color-yellow-status); color: var(--color-yellow-status); }
+        .type-bubble-Water { border-color: #3498db; color: #3498db; }
+        .type-bubble-Wind { border-color: #87CEEB; color: #87CEEB; }
+        .type-bubble-Blank { border-color: #718096; color: #a0aec0; }
+
+        /* NOTE: Hover effects moved to @media query below to fix mobile sticky tap */
+        .type-bubble-Dark.selected { background-color: #8e44ad; color: #fff; box-shadow: 0 0 15px #8e44ad; border-color: #8e44ad; }
+        .type-bubble-Earth.selected { background-color: #d2b48c; color: #000; box-shadow: 0 0 15px #d2b48c; border-color: #d2b48c; }
+        .type-bubble-Fire.selected { background-color: #e67e22; color: #fff; box-shadow: 0 0 15px #e67e22; border-color: #e67e22; }
+        .type-bubble-Forest.selected { background-color: #27ae60; color: #fff; box-shadow: 0 0 15px #27ae60; border-color: #27ae60; }
+        .type-bubble-Light.selected { background-color: #f1f2f6; color: #000; box-shadow: 0 0 15px #f1f2f6; border-color: #f1f2f6; }
+        .type-bubble-Thunder.selected { background-color: var(--color-yellow-status); color: #000; box-shadow: 0 0 15px var(--color-yellow-status); border-color: var(--color-yellow-status); }
+        .type-bubble-Water.selected { background-color: #3498db; color: #fff; box-shadow: 0 0 15px #3498db; border-color: #3498db; }
+        .type-bubble-Wind.selected { background-color: #87CEEB; color: #000; box-shadow: 0 0 15px #87CEEB; border-color: #87CEEB; }
+        .type-bubble-Blank.selected { background-color: #4a5568; color: #fff; box-shadow: 0 0 15px #4a5568; border-color: #718096; }
+        
+        /* Boss Selection */
+        .boss-bubble { display: flex; align-items: center; gap: 8px; background-color: var(--bg-panel); border-color: var(--accent); color: var(--accent); }
+        .boss-bubble.selected { background-color: var(--accent); color: #000; box-shadow: 0 0 12px var(--accent); }
+        .disabled-section { opacity: 0.4; pointer-events: none; }
+
+        /* --- ARCHETYPE BUTTONS --- */
+        .archetype-options { display: flex; flex-wrap: wrap; gap: 12px; }
+        .archetype-options input[type="radio"] { display: none; }
+        .archetype-options label { 
+            cursor: pointer; 
+            padding: 10px 20px; 
+            background-color: var(--bg); 
+            border: 2px solid var(--border-subtle); 
+            border-radius: 999px; 
+            transition: all 0.2s ease-in-out;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* 1. Balanced (Green) */
+        input[value="Balanced"] + label:hover,
+        input[value="Balanced"]:checked + label {
+            background-color: var(--color-green-status);
+            color: #000;
+            border-color: var(--color-green-status);
+            box-shadow: 0 0 20px var(--color-green-status);
+            transform: translateY(-2px);
+        }
+
+        /* 2. Aggro (Red) */
+        input[value="Aggro"] + label:hover,
+        input[value="Aggro"]:checked + label {
+            background-color: var(--color-red-status);
+            color: #fff;
+            border-color: var(--color-red-status);
+            box-shadow: 0 0 20px var(--color-red-status);
+            transform: translateY(-2px);
+        }
+
+        /* 3. Control (Yellow) */
+        input[value="Control"] + label:hover,
+        input[value="Control"]:checked + label {
+            background-color: var(--color-yellow-status);
+            color: #000;
+            border-color: var(--color-yellow-status);
+            box-shadow: 0 0 20px var(--color-yellow-status);
+            transform: translateY(-2px);
+        }
+
+        /* 4. Energy (Blue) */
+        input[value="Energy"] + label:hover,
+        input[value="Energy"]:checked + label {
+            background-color: var(--color-blue-status);
+            color: #fff;
+            border-color: var(--color-blue-status);
+            box-shadow: 0 0 20px var(--color-blue-status);
+            transform: translateY(-2px);
+        }
+
+        /* Main Buttons */
+        .action-button {
+            grid-column: 1 / -1; 
+            padding: 12px; 
+            font-size: 0.95rem; 
+            font-weight: bold; 
+            color: #05070b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background-color: var(--accent); 
+            border: none; 
+            border-radius: var(--radius-sm); 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+        /* Only apply hover effects if the device supports hovering (Mouse) */
+        @media (hover: hover) {
+            /* Action Buttons */
+            .action-button:hover { 
+                background-color: #81e6d9; 
+                transform: translateY(-1px); 
+                box-shadow: 0 0 15px var(--accent) !important; 
+            }
+
+            /* Type Bubbles */
+            .type-bubble-Dark:hover { background-color: #8e44ad; color: #fff; box-shadow: 0 0 15px #8e44ad; border-color: #8e44ad; }
+            .type-bubble-Earth:hover { background-color: #d2b48c; color: #000; box-shadow: 0 0 15px #d2b48c; border-color: #d2b48c; }
+            .type-bubble-Fire:hover { background-color: #e67e22; color: #fff; box-shadow: 0 0 15px #e67e22; border-color: #e67e22; }
+            .type-bubble-Forest:hover { background-color: #27ae60; color: #fff; box-shadow: 0 0 15px #27ae60; border-color: #27ae60; }
+            .type-bubble-Light:hover { background-color: #f1f2f6; color: #000; box-shadow: 0 0 15px #f1f2f6; border-color: #f1f2f6; }
+            .type-bubble-Thunder:hover { background-color: var(--color-yellow-status); color: #000; box-shadow: 0 0 15px var(--color-yellow-status); border-color: var(--color-yellow-status); }
+            .type-bubble-Water:hover { background-color: #3498db; color: #fff; box-shadow: 0 0 15px #3498db; border-color: #3498db; }
+            .type-bubble-Wind:hover { background-color: #87CEEB; color: #000; box-shadow: 0 0 15px #87CEEB; border-color: #87CEEB; }
+            .type-bubble-Blank:hover { background-color: #4a5568; color: #fff; box-shadow: 0 0 15px #4a5568; border-color: #718096; }
+
+            /* Boss Bubbles */
+            .boss-bubble:hover { background-color: var(--accent); color: #000; box-shadow: 0 0 12px var(--accent); }
+        }
+
+        .action-button:disabled { background-color: #2d3748; color: #718096; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* --- DISCLAIMER BOX --- */
+        .disclaimer-box {
+            background: rgba(241, 196, 15, 0.05); /* Slightly lower opacity for footer feel */
+            border: 1px solid rgba(241, 196, 15, 0.2);
+            border-left: 3px solid var(--color-yellow-status); /* Stylish left accent */
+            color: #c7a926; 
+            padding: 15px;
+            border-radius: var(--radius-sm);
+    
+            /* PUSH TO BOTTOM STYLES */
+            margin-top: 40px; 
+            margin-bottom: 0;
+    
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.8rem; /* Slightly smaller text */
+            line-height: 1.5;
+        }
+
+        .disclaimer-box i {
+            margin-top: 2px;
+            font-size: 1.2em;
+        }
+        .disclaimer-box p {
+            margin: 0;
+        }
+        .disclaimer-box strong {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-yellow-status);
+        }
+
+        /* Output Area */
+        #output { display: none; padding-top: 20px; border-top: 1px solid var(--border-subtle); margin-top: 20px; }
+        
+        #Deck-summary { 
+            padding: 20px; 
+            background-color: var(--bg-panel-soft); 
+            border-radius: var(--radius-sm); 
+            margin-bottom: 20px; 
+            text-align: center; 
+            border: 1px solid var(--border-subtle);
+        }
+        #Deck-title-container { margin-bottom: 5px; font-size: 1.4em; font-weight: bold; color: var(--text-main); }
+        #Deck-stats { color: var(--text-muted); font-size: 0.9em; margin-top: 0; }
+        
+        #Deck-list-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        
+        .card-list { background-color: var(--bg-panel-soft); padding: 15px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); }
+        .card-list h3 { 
+            border-bottom: 1px solid var(--border-subtle); 
+            color: var(--accent); 
+            padding-bottom: 10px; 
+            margin-top: 0; 
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-list ul { list-style: none; padding: 0; margin: 0; }
+        .card-list li { 
+            padding: 8px 10px; 
+            border-bottom: 1px solid #1a202c; 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 0.85em; 
+            color: var(--text-main);
+            transition: background 0.2s;
+            align-items: center;
+            cursor: pointer;
+        }
+        .card-list li:hover { background-color: var(--accent-soft); }
+
+        /* --- Swap Buttons & Sort Controls --- */
+        .swap-btn {
+            background: none; border: none; color: var(--accent);
+            cursor: pointer; font-size: 1.1em; margin-left: 8px;
+            opacity: 0.6; transition: all 0.2s; padding: 2px 5px; line-height: 1;
+        }
+        .swap-btn:hover { opacity: 1; transform: scale(1.1) rotate(15deg); }
+
+        .sort-controls { display: inline-flex; gap: 8px; vertical-align: middle; }
+        .sort-btn {
+            background-color: var(--bg); color: var(--text-muted);
+            border: 1px solid var(--border-subtle); padding: 2px 8px;
+            border-radius: 4px; font-size: 0.7em; cursor: pointer; text-transform: uppercase;
+        }
+        .sort-btn:hover { background-color: var(--border-subtle); color: var(--text-main); }
+        
+        /* --- Image Enlargement Modal (Matches Search Page) --- */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10002;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            backdrop-filter: blur(2px);
+        }
+        .image-modal.active {
+            display: flex;
+        }
+        .image-modal img {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(79, 209, 197, 0.3);
+            transition: transform 0.2s;
+        }
+        .image-modal img:hover {
+            transform: scale(1.02);
+        }
+        .image-modal-text {
+            position: absolute;
+            bottom: 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Sidebar Image Styles */
+        .sidebar-powers {
+            text-align: center;
+            margin: -0.25rem 0 1.5rem 0; /* Spacing around the powers image */
+            padding: 0 0.5rem;
+        }
+        .sidebar-powers img {
+            max-width: 60%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .sidebar-logo-bottom {
+            text-align: center;
+            margin-top: -1rem; /* Pushes it down from the links */
+            margin-bottom: 1rem;
+            padding: 0 0.5rem;
+        }
+        .sidebar-logo-bottom img {
+            max-width: 100%; /* Adjusts the logo size so it's not too huge */
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); /* Optional: adds a nice shadow to the logo */
+        } 
+        /* --- MOBILE OPTIMIZATION --- */
+    
+    /* 1. Mobile Label (Hidden on Desktop) */
+    .mobile-label { display: none; }
+    
+    /* MOBILE TABS FOR EDITOR (Hidden on Desktop) */
+    .mobile-editor-tabs { display: none; }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #1a202c; }
+      .main { max-width: 100%; padding: 1rem 1rem 2rem; }
+
+      /* Force table elements to behave like blocks */
+      .table-wrapper { max-height: none; border: none; overflow: visible; }
+      table, thead, tbody, th, td, tr { display: block; }
+      
+      /* Hide Table Headers */
+      thead tr { position: absolute; top: -9999px; left: -9999px; }
+      
+      /* Style the Row as a "Card" */
+      tbody tr { 
+        background: var(--bg-panel-soft);
+        margin-bottom: 1.5rem; 
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        padding: 1.25rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      }
+
+      /* Style the Cells */
+      td { 
+        border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.05); 
+        padding: 0.5rem 0;
+        text-align: left !important;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; 
+      }
+      td:last-child { border-bottom: none; }
+
+      /* Reveal Labels */
+      .mobile-label {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        margin-right: 10px;
+        min-width: 80px; 
+      }
+
+      /* Name & Image (First Cell) */
+      td:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center !important;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+      }
+      td:first-child .mobile-label { display: none; } /* Hide label for name */
+      
+      td:first-child div { font-size: 1.3rem !important; margin-bottom: 10px; }
+      .card-thumbnail { max-height: 200px; width: auto; }
+
+      /* Details Block */
+      td:nth-child(5) { 
+          display: block; 
+          margin-top: 0.5rem;
+          background: rgba(0,0,0,0.2);
+          padding: 10px;
+          border-radius: 8px;
+      }
+      td:nth-child(5) .mobile-label {
+          display: block;
+          margin-bottom: 5px;
+          border-bottom: 1px solid #333;
+          padding-bottom: 2px;
+          width: 100%;
+      }
+      
+      .detail-text { text-align: left; }
+      
+      .controls { grid-template-columns: 1fr; }
+    }
+    
+    /* --- DECK EDITOR MODAL STYLES --- */
+    .editor-modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(4px);
+    }
+
+    .editor-modal.active { display: flex; }
+
+    .editor-content {
+        background: var(--bg-panel);
+        width: 95%; max-width: 900px;
+        height: 85vh;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        display: flex; flex-direction: column;
+        box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    }
+
+    .editor-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex; justify-content: space-between; align-items: center;
+        background: var(--bg-panel-soft);
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    .editor-header h3 { margin: 0; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.1em; }
+    .close-editor { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+
+    #editor-status-bar {
+        padding: 10px 20px;
+        background: #1a202c;
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex; justify-content: space-between; align-items: center;
+        font-size: 0.9rem; font-weight: bold;
+    }
+    .status-valid { color: var(--color-green-status); }
+    .status-invalid { color: var(--color-red-status); }
+
+    .editor-body {
+        flex: 1;
+        display: flex;
+        overflow: hidden; /* Contains the scrollbars */
+    }
+
+    .editor-column {
+        flex: 1;
+        padding: 15px;
+        display: flex; flex-direction: column;
+        border-right: 1px solid var(--border-subtle);
+    }
+    .editor-column:last-child { border-right: none; }
+
+    .editor-list-container {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+
+    #card-search {
+        width: 100%; padding: 10px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-subtle);
+        background: var(--bg);
+        color: var(--text-main);
+        margin-bottom: 10px;
+    }
+
+    /* Editor List Items */
+    .editor-item {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 8px;
+        background: rgba(255,255,255,0.03);
+        margin-bottom: 5px;
+        border-radius: 4px;
+        border: 1px solid transparent;
+    }
+    .editor-item:hover { border-color: var(--border-subtle); }
+    .editor-controls { display: flex; gap: 5px; align-items: center; }
+    .qty-btn {
+        width: 24px; height: 24px;
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-panel);
+        color: var(--text-main);
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex; justify-content: center; align-items: center;
+    }
+    .qty-btn:hover { background: var(--accent); color: #000; }
+
+    .editor-footer {
+        padding: 15px;
+        border-top: 1px solid var(--border-subtle);
+        text-align: right;
+        background: var(--bg-panel-soft);
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    @media (max-width: 768px) {
+        /* Original desktop fallback, mostly overridden by the specific Mobile Editor logic below */
+    }   
+
+    /* --- MOBILE EDITOR SPECIFIC STYLES (Tabs & Visibility) --- */
+    @media (max-width: 800px) {
+        .editor-modal {
+            /* Full screen override */
+            padding: 0;
+            background: #05070b;
+        }
+        .editor-content {
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            border-radius: 0;
+            border: none;
+            display: flex;
+            flex-direction: column;
+        }
+        .editor-header {
+            border-radius: 0;
+            padding: 15px;
+        }
+        
+        /* Mobile Tabs */
+        .mobile-editor-tabs {
+            display: flex;
+            width: 100%;
+            border-bottom: 1px solid var(--border-subtle);
+            background: var(--bg-panel-soft);
+        }
+        .mobile-tab-btn {
+            flex: 1;
+            padding: 15px 0;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.9rem;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+        }
+        .mobile-tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            background: rgba(79, 209, 197, 0.05);
+        }
+        
+        /* Body Layout */
+        .editor-body {
+            flex-direction: column;
+        }
+        
+        .editor-column {
+            border-right: none;
+            padding: 15px;
+            /* Hidden by default on mobile, toggled via JS utility classes */
+            display: none; 
+            height: 100%;
+        }
+        
+        /* Utility class to show column */
+        .editor-column.mobile-visible {
+            display: flex;
+        }
+        
+        /* Force 2-column grid for Browser on Mobile */
+        .browser-grid {
+            grid-template-columns: repeat(2, 1fr) !important; 
+            gap: 15px !important;
+        }
+        .browser-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .browser-card img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 0.71; /* Card ratio approximation */
+            object-fit: cover;
+        }
+        
+        /* Increase touch targets */
+        .qty-btn {
+            width: 32px; height: 32px; font-size: 1.2rem;
+        }
+    }
+
+    /* --- LANDING PAGE STYLES --- */
+    #landing-section {
+        text-align: center;
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .mode-cards {
+        display: flex;
+        gap: 30px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .mode-card {
+        background: var(--bg-panel-soft);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+        padding: 30px;
+        width: 300px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .mode-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent);
+        box-shadow: 0 10px 30px rgba(79, 209, 197, 0.15);
+    }
+
+    .mode-icon {
+        font-size: 3rem;
+        color: var(--accent);
+        margin-bottom: 20px;
+    }
+
+    .mode-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: var(--text-main);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .mode-desc {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    /* FORCE REMOVAL OF FOCUS OUTLINES */
+    button:focus, 
+    .action-button:focus, 
+    .type-bubble:focus,
+    input:focus + label {
+        outline: none !important;
+        box-shadow: none !important; 
+    }
+
+    /* Restore hover effects only when actually hovering */
+    .action-button:hover { 
+        background-color: #81e6d9; 
+        transform: translateY(-1px); 
+        box-shadow: 0 0 15px var(--accent) !important; /* Force shadow on hover */
+    }
+
+    /* --- BROWSER GRID STYLES (New Feature) --- */
+    .browser-filters {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .filter-btn {
+        background: var(--bg);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-muted);
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+    }
+
+    .filter-btn.active {
+        background: var(--accent);
+        color: #000;
+        border-color: var(--accent);
+    }
+
+    .browser-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+    }
+
+    .browser-card {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid transparent;
+        border-radius: 6px;
+        padding: 10px;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .browser-card:hover {
+        background: rgba(79, 209, 197, 0.1);
+        border-color: var(--accent);
+    }
+
+    .browser-card-name { font-size: 0.85rem; font-weight: bold; margin-bottom: 4px; display:block; }
+    .browser-card-meta { font-size: 0.7rem; color: var(--text-muted); }
+
+    /* Hide sections initially */
+    #builder-ui { display: none; }
+    </style>
+</head>
+<body>
+    <button id="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
+    <aside class="sidebar"></aside>
+
+       <main class="main">
+        <div class="main-inner">
+            <section>
+                <!-- 1. LANDING PAGE -->
+                <div id="landing-section">
+                    <h2 style="border:none; font-size: 1.8rem; text-align: center;">Create Your Deck</h2>
+                    <div class="mode-cards">
+                        <div class="mode-card" onclick="selectMode('random')">
+                            <i class="fa-solid fa-dice-d20 mode-icon"></i>
+                            <div class="mode-title">Random Generator</div>
+                            <div class="mode-desc">
+                                Let fate decide. Select a Deck Type and Archetype, and the system will generate a balanced deck for you.
+                            </div>
+                        </div>
+                        
+                        <div class="mode-card" onclick="selectMode('custom')">
+                            <i class="fa-solid fa-screwdriver-wrench mode-icon"></i>
+                            <div class="mode-title">Custom Builder</div>
+                            <div class="mode-desc">
+                                Full control. Select your Deck Type and build your deck from scratch using the entire card library.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- 2. BUILDER UI (Hidden initially) -->
+                <div id="builder-ui">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h2 id="builder-title" style="margin:0; border:none;">Deck Builder</h2>
+                        <button class="action-button" style="width:auto; padding: 5px 15px; background:transparent; border:1px solid var(--text-muted); color:var(--text-muted);" onclick="location.reload()">
+                            <i class="fa-solid fa-arrow-left"></i> Back
+                        </button>
+                    </div>
+    
+                    <div id="status">System Ready.</div>
+    
+                    <div class="controls">
+                        <!-- Type Selector (Shared) -->
+                        <div class="control-group" id="Deck-type-group">
+                            <label>Deck Type Theme</label>
+                            <div id="Deck-type-selector" class="type-selector-container"></div>
+                            <p class="theme-hint">
+                                Choose up to 3 themes. 'Blank' is exclusive.
+                            </p>
+                        </div>
+    
+                        <!-- Archetype Selector (Random Only) -->
+                        <div class="control-group" id="archetype-group">
+                            <label>Deck Archetype</label>
+                            <div id="archetype-options" class="archetype-options"></div>
+                        </div>
+    
+                        <!-- Boss Selector (Random Only) -->
+                        <div class="control-group" id="boss-group">
+                            <label>Add <em>Level 10</em> Creatures (Optional)</label>
+                            <div id="boss-Creature-selector" class="type-selector-container disabled-section"></div>
+                        </div>
+    
+                        <!-- Action Buttons -->
+                        <button id="generate-btn" class="action-button" disabled>Generate Random Deck</button>
+                        <button id="start-custom-btn" class="action-button" style="display:none;" disabled>Open Deck Builder</button>
+                    </div>
+    
+                    <!-- Output Area (Generated Deck) -->
+                    <div id="output">
+                        <div id="Deck-summary">
+                            <div id="Deck-title-container"></div>
+                            <p id="Deck-stats"></p>
+                            <div style="display:flex; justify-content:center; gap:10px; margin-top:10px;">
+                                <button id="reroll-btn" class="action-button" style="width:auto; padding:8px 20px; font-size:0.8em; margin-top:0;">Re-Roll</button>
+                                <button id="edit-btn" class="action-button" style="width:auto; padding:8px 20px; font-size:0.8em; margin-top:0; background-color: #3498db; color: white;">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit Deck
+                                </button>
+                                <button id="copy-btn" class="action-button" style="width:auto; padding:8px 20px; font-size:0.8em; margin-top:0;" title="Copy Deck List"><i class="fa-regular fa-copy"></i> Copy</button>
+                            </div>
+                        </div>
+    
+                        <div class="disclaimer-box">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <p>
+                                <strong>Automated Builder Disclaimer:</strong> 
+                                This tool generates decks using a mathematical algorithm. Results may vary.
+                            </p>
+                        </div>
+    
+                        <p style="text-align:center; font-style:italic; color:var(--text-muted); font-size:0.75em; margin-top:15px; margin-bottom:15px; text-transform:uppercase; letter-spacing:0.05em;">Click card names to view images</p>
+    
+                        <div id="Deck-list-container">
+                            <div class="card-list">
+                                <h3 id="Creatures-title">Creatures</h3>
+                                <ul id="Creatures-list"></ul>
+                            </div>
+                            <div class="card-list">
+                                <h3 id="secrets-title">Secrets</h3>
+                                <ul id="secrets-list"></ul>
+                            </div>
+                            <div class="card-list">
+                                <h3 id="power-title">Power</h3>
+                                <ul id="power-list"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Image enlargement modal (Matching Search Page) -->
+    <div class="image-modal" id="image-modal" onclick="closeModal()">
+        <img id="modal-image" src="" alt="">
+        <div class="image-modal-text">Click anywhere to close</div>
+    </div>
+    
+    <!-- UPDATED DECK EDITOR MODAL -->
+    <div id="editor-modal" class="editor-modal">
+        <div class="editor-content">
+            <div class="editor-header">
+                <h3>Deck Editor</h3>
+                <button class="close-editor" onclick="closeEditor()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div id="editor-status-bar">
+                <span id="editor-count">0/60 Cards</span>
+                <span id="editor-warnings"></span>
+            </div>
+            
+            <!-- Mobile Tabs (Visible only on mobile) -->
+            <div class="mobile-editor-tabs">
+                <button class="mobile-tab-btn active" onclick="toggleMobileEditorTab('deck')">My Deck</button>
+                <button class="mobile-tab-btn" onclick="toggleMobileEditorTab('library')">Card Library</button>
+            </div>
+
+            <div class="editor-body">
+                <!-- LEFT: Current Deck -->
+                <div id="editor-col-deck" class="editor-column">
+                    <h4 style="color:var(--accent);">Current Deck</h4>
+                    <div id="editor-list" class="editor-list-container"></div>
+                </div>
+
+                <!-- RIGHT: Library -->
+                <div id="editor-col-library" class="editor-column">
+                    <h4 style="color:var(--text-muted);">Card Library</h4>
+                    
+                    <!-- Toggle between Search and Browse -->
+                    <div style="display:flex; gap:10px; margin-bottom:10px;">
+                        <button class="filter-btn active" id="tab-search" onclick="switchLibraryTab('search')">Search</button>
+                        <button class="filter-btn" id="tab-browse" onclick="switchLibraryTab('browse')">Browse All</button>
+                    </div>
+
+                    <!-- VIEW 1: SEARCH -->
+                    <div id="view-search">
+                        <input type="text" id="card-search" placeholder="Type card name..." autocomplete="off">
+                        <div id="search-results" class="editor-list-container" style="max-height: 400px;"></div>
+                    </div>
+
+                    <!-- VIEW 2: BROWSER (New) -->
+                    <div id="view-browse" style="display:none; flex:1; overflow:hidden; flex-direction:column;">
+                        
+                        <!-- Main Row: Left Aligned -->
+                        <div class="browser-filters" id="main-filters">
+                            <button class="filter-btn active" id="btn-creature" onclick="filterBrowser('Creature', this)">Creatures</button>
+                            <button class="filter-btn" id="btn-secret" onclick="filterBrowser('Secret', this)">Secrets</button>
+                            <button class="filter-btn" id="btn-power" onclick="filterBrowser('Power', this)">Power</button>
+                        </div>
+
+                        <!-- Sub Row: Adjusted margin-left to 45px to center the group under 'Secrets' -->
+                        <div class="browser-filters" id="secret-sub-filters" style="display:none; border-top:none; margin-top:-15px; padding-top:0; margin-left: 47.5px; gap: 5px;">
+                            <button class="filter-btn active" onclick="filterBrowser('Magik', this)">Magik</button>
+                            <button class="filter-btn" onclick="filterBrowser('Spell', this)">Spells</button>
+                            <button class="filter-btn" onclick="filterBrowser('Terrain', this)">Terrain</button>
+                        </div>
+
+                        <div id="browser-results" class="editor-list-container browser-grid"></div>
+                    </div>
+
+            <div class="editor-footer">
+                <button class="action-button" onclick="saveEditorChanges()">Save & Update</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="cards_data.js"></script>
+    <script>
+        // --- DATA & CONFIG ---
+        let all_cards = [];
+        let companion_map = {}; 
+        let currentMode = 'random'; // 'random' or 'custom'
+        let editingDeck = null;
+        let currentDeck = null;
+        let selectedTypes = new Set();
+        let selectedBosses = new Set();
+        let currentCreatureSort = 'desc';
+        
+        // Strict Boss -> Secret Dependency Map
+        const BOSS_SECRET_MAP = {
+            "Werelephant": "Moonlight Awakening",
+            "Isxöhe": "Spirit Guide",
+            "Ignimia": "Flames of Bah'tu",
+            "Dracoleón": "Sacrificial Lamb",
+            "Lilith, Forest Pixie": "Lilith's Garden",
+            "Malum, the Damned": "Ritual of the Damned",
+            "Iškugriff": "Storm of Reckoning",
+            "Rann, the Wretched": "Abandoned Ship",
+            "Divine Beast Panterus": "Heavenly Hunt"
+        };
+        
+        const SECRET_BOSS_MAP = {};
+        Object.entries(BOSS_SECRET_MAP).forEach(([boss, secret]) => {
+            SECRET_BOSS_MAP[secret] = boss;
+        });
+
+        // Boss -> Creatures (Manual Mapping)
+        const BOSS_COMPANION_MAP = {
+            "Arcana Temptress": ["Arcana Apprentice"], "Dracoleón": ["Nemean Lion"], "Hydra": ["Nereus"],
+            "Infinity Mage": ["Infinity Apprentice"], "Phoenix, the Rising": ["Phoenic"], "Serpopard": ["Anuket"],
+            "Werelephant": ["Pebblephant"], "Zombified Dragon": ["Dragon Tamer"],
+            "Divine Beast Panterus": ["Winged Beast U'ru", "Winged Beast Wai'ku", "Winged Beast Ra'zu"]
+        };
+        
+        const CREATURE_COMPANION_TO_BOSS = {};
+        Object.entries(BOSS_COMPANION_MAP).forEach(([boss, companions]) => {
+            companions.forEach(comp => CREATURE_COMPANION_TO_BOSS[comp] = boss);
+        });
+
+        const DECK_ARCHETYPES = {
+            "Balanced": { "creatures": { "base": 0.40, "flex": 0.04 }, "secrets": { "base": 0.35, "flex": 0.04 } },
+            "Aggro":    { "creatures": { "base": 0.50, "flex": 0.05 }, "secrets": { "base": 0.25, "flex": 0.03 } },
+            "Control":  { "creatures": { "base": 0.30, "flex": 0.03 }, "secrets": { "base": 0.45, "flex": 0.05 } },
+            "Energy":   { "creatures": { "base": 0.35, "flex": 0.03 }, "secrets": { "base": 0.30, "flex": 0.04 } }
+        };
+        const DECK_RULES = {
+            "deck_size": 60,
+            "creature_card_limits": { "Common": 4, "Uncommon": 3, "Rare": 2, "UltraRare": 2, "HiddenRare": 1, "Borderless": 1 },
+            "secret_card_limits": { "Common": 3, "Uncommon": 2, "Rare": 1, "HiddenRare": 1, "Borderless": 1 },
+            "power_card_limits": { "powerValue_1": Infinity, "powerValue_2": 5 }
+        };
+
+        const TERRAIN_TYPE_COMPATIBILITY = {
+            "Ancient Forests of Rehm": ["Forest"], "Aquatic Paradise": ["Water", "Forest"], "Dark Shadows": ["Dark"],
+            "Huricanes off Jimbora": ["Thunder"], "Infernal Pits of Crom": ["Fire"], "Lights of Nura": ["Light"],
+            "Mountains of Eurotha": ["Earth"], "Oceans of Nimbitu": ["Water"], "Pixie Forest": ["Forest"],
+            "Poisonous Swamp": ["Earth", "Dark"], "Rough Seas": ["Water"], "Sacred Grounds": ["Thunder", "Light"],
+            "Sandstorm": ["Earth"], "Scorched Fields": ["Wind", "Fire"], "Shadow Plains": ["Dark"],
+            "Southern Winds of Us'ah": ["Wind"], "Star of Septeptus": ["Light"], "Stomy Skies": ["Thunder"],
+            "Torn Wastelands": ["All"], "Volcanoes of Westu'ra": ["Fire"], "Winds off the Coast": ["Wind"]
+        };
+
+        const BANNED_SECRET_CARDS = [
+            "Aquatic Conversion", "Celestial Storm", "Corrupt Evolution", "Divine Transformation",
+            "Elemental Infusion", "Infernal Transmutation", "Mystik Forestry", "Primeval Mutation",
+            "Windy Metamorphosis", "Elemental Break"
+        ];
+        
+        const defaultdict = (defaultFactory) => new Proxy({}, {
+            get: (t, n) => n in t ? t[n] : (t[n] = defaultFactory())
+        });
+
+        const shuffle = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            if (typeof CARDS !== 'undefined') all_cards = CARDS;
+            else if (typeof CARD_PROFILES !== 'undefined') all_cards = CARD_PROFILES;
+            else {
+                try {
+                    const response = await fetch('https://raw.githubusercontent.com/nerdrealm/mystik_builder/main/cardProfiles.json');
+                    all_cards = await response.json();
+                } catch(e) { console.error("Data load failed", e); }
+            }
+            all_cards.forEach(c => { if(!c.script_uuid) c.script_uuid = crypto.randomUUID(); });
+            
+            initUI();
+            
+            // Search Listener
+            document.getElementById('card-search').addEventListener('input', (e) => renderSearchResults(e.target.value));
+        });
+
+        function initUI() {
+            // Type Bubbles
+            const types = ["Fire", "Water", "Thunder", "Earth", "Forest", "Dark", "Wind", "Light", "Blank"];
+            const typeContainer = document.getElementById('Deck-type-selector');
+            types.forEach(t => {
+                const b = document.createElement('div');
+                b.className = `type-bubble type-bubble-${t}`;
+                b.textContent = t;
+                b.onclick = () => toggleType(b, t);
+                typeContainer.appendChild(b);
+            });
+
+            // Archetype Radio
+            const archContainer = document.getElementById('archetype-options');
+            Object.keys(DECK_ARCHETYPES).forEach(a => {
+                const id = `arch-${a}`;
+                const radio = document.createElement('input');
+                radio.type = 'radio'; radio.name = 'archetype'; radio.value = a; radio.id = id;
+                const label = document.createElement('label');
+                label.htmlFor = id; label.textContent = a;
+                archContainer.appendChild(radio);
+                archContainer.appendChild(label);
+                radio.addEventListener('change', checkButtons);
+            });
+
+            document.getElementById('generate-btn').onclick = runGeneration;
+            document.getElementById('start-custom-btn').onclick = startCustomBuilder;
+            document.getElementById('reroll-btn').onclick = runGeneration;
+            document.getElementById('edit-btn').onclick = openDeckEditor;
+            document.getElementById('copy-btn').onclick = copyDeckToClipboard;
+            
+            document.addEventListener('mouseup', (e) => {
+                const target = e.target.closest('button') || e.target.closest('input[type="radio"]') || e.target.closest('.type-bubble');
+                if (target) {
+                    // Slight delay ensures the click event registers before we remove focus
+                    setTimeout(() => target.blur(), 100); 
+                }
+            });
+        
+        }
+
+        // --- MODE SELECTION ---
+        function selectMode(mode) {
+            currentMode = mode;
+            document.getElementById('landing-section').style.display = 'none';
+            document.getElementById('builder-ui').style.display = 'block';
+
+            const archGroup = document.getElementById('archetype-group');
+            const bossGroup = document.getElementById('boss-group');
+            const genBtn = document.getElementById('generate-btn');
+            const custBtn = document.getElementById('start-custom-btn');
+            const title = document.getElementById('builder-title');
+
+            if (mode === 'custom') {
+                title.textContent = "Custom Deck Builder";
+                archGroup.style.display = 'none';
+                bossGroup.style.display = 'none';
+                genBtn.style.display = 'none';
+                custBtn.style.display = 'block';
+                document.getElementById('status').textContent = "Select Deck Theme to begin.";
+            } else {
+                title.textContent = "Random Generator";
+                archGroup.style.display = 'flex';
+                bossGroup.style.display = 'flex';
+                genBtn.style.display = 'block';
+                custBtn.style.display = 'none';
+                document.getElementById('status').textContent = "Select Theme & Archetype.";
+            }
+            
+            // Clear any previous selections
+            selectedTypes.clear();
+            document.querySelectorAll('.type-bubble').forEach(b => b.classList.remove('selected', 'disabled'));
+            document.querySelectorAll('input[name="archetype"]').forEach(r => r.checked = false);
+            checkButtons();
+        }
+
+        function checkButtons() {
+            if (currentMode === 'custom') {
+                document.getElementById('start-custom-btn').disabled = (selectedTypes.size === 0);
+            } else {
+                const arch = document.querySelector('input[name="archetype"]:checked');
+                document.getElementById('generate-btn').disabled = !(selectedTypes.size > 0 && arch);
+            }
+        }
+
+        function toggleType(el, type) {
+            if (type === 'Blank') {
+                if (!selectedTypes.has('Blank')) {
+                    selectedTypes.clear();
+                    document.querySelectorAll('.type-bubble').forEach(b => b.classList.remove('selected', 'disabled'));
+                    selectedTypes.add('Blank');
+                } else {
+                    selectedTypes.delete('Blank');
+                }
+            } else {
+                if (selectedTypes.has('Blank')) { alert("Deselect Blank first."); return; }
+                if (selectedTypes.has(type)) {
+                    selectedTypes.delete(type);
+                } else {
+                    if (selectedTypes.size >= 3) { alert("Max 3 themes."); return; }
+                    if (selectedTypes.size === 2 && !confirm("Recommended: 2 types. Continue?")) return;
+                    selectedTypes.add(type);
+                }
+            }
+            el.classList.toggle('selected');
+            
+            // Manage Bubbles State
+            const bubbles = document.querySelectorAll('.type-bubble');
+            if(selectedTypes.has('Blank')) {
+                bubbles.forEach(b => { if(!b.classList.contains('type-bubble-Blank')) b.classList.add('disabled'); });
+            } else if (selectedTypes.size > 0) {
+                document.querySelector('.type-bubble-Blank').classList.add('disabled');
+            } else {
+                bubbles.forEach(b => b.classList.remove('disabled'));
+            }
+            
+            if(currentMode === 'random') updateBosses();
+            checkButtons();
+        }
+
+        function updateBosses() {
+            const container = document.getElementById('boss-Creature-selector');
+            container.innerHTML = '';
+            selectedBosses.clear();
+            if (selectedTypes.size === 0) { container.classList.add('disabled-section'); return; }
+            container.classList.remove('disabled-section');
+
+            const bosses = all_cards.filter(c => c.supertype === 'Creature' && c.level === 10 && 
+                (selectedTypes.has('Blank') || (c.types || []).some(t => selectedTypes.has(t)))
+            );
+            const unique = [...new Map(bosses.map(item => [item.name, item])).values()].sort((a,b) => a.name.localeCompare(b.name));
+
+            unique.forEach(boss => {
+                const b = document.createElement('div');
+                b.className = 'boss-bubble';
+                b.textContent = boss.name;
+                b.onclick = () => {
+                    if(!selectedBosses.has(boss.script_uuid) && selectedBosses.size >= 3) { alert("Max 3 bosses."); return; }
+                    b.classList.toggle('selected');
+                    selectedBosses.has(boss.script_uuid) ? selectedBosses.delete(boss.script_uuid) : selectedBosses.add(boss.script_uuid);
+                };
+                container.appendChild(b);
+            });
+        }
+
+        function analyzePowerRequirements(creatures) {
+            const powerNeeds = defaultdict(() => 0);
+            for (const creature of creatures) {
+                for (const attack of creature.attacks || []) {
+                    for (const cost of attack.cost || []) {
+                        powerNeeds[cost.PowerType] += cost.count;
+                    }
+                }
+            }
+            return powerNeeds;
+        }
+
+        function scoreCreatureSynergy(card, deckTheme) {
+            let score = Math.random() * 50;
+            const cardTypes = card.types || [];
+            const themeTypes = deckTheme.split('/');
+            
+            if (!themeTypes.some(t => cardTypes.includes(t)) && deckTheme !== 'Blank') return -1;
+            
+            score += 50;
+            if (themeTypes.length > 1 && themeTypes.every(t => cardTypes.includes(t))) score += 40;
+            if (card.rarity === 'Rare') score += 15;
+            if (card.rarity === 'UltraRare') score += 25;
+            if ((card.level || 0) >= 7) score += 10;
+            return score;
+        }
+
+        function selectFromTieredPool(pool) {
+            if (!pool || pool.length === 0) return null;
+            const tier1_end = Math.floor(pool.length * 0.15);
+            const tier2_end = Math.floor(pool.length * 0.40);
+            const rand = Math.random();
+            let selectedTier;
+            if (rand < 0.50) selectedTier = pool.slice(0, tier1_end);
+            else if (rand < 0.80) selectedTier = pool.slice(tier1_end, tier2_end);
+            else selectedTier = pool.slice(tier2_end);
+            if (selectedTier.length === 0) selectedTier = pool;
+            return selectedTier[Math.floor(Math.random() * selectedTier.length)];
+        }
+
+        function rebuildPowerSection(deck, targetPowerCount, themeTypes) {
+            const newPowerList = [];
+            const isBlankTheme = (themeTypes.length === 1 && themeTypes[0] === 'Blank');
+
+            let powerNeeds = analyzePowerRequirements(deck.Creatures); 
+
+            if (isBlankTheme) {
+                let totalNeeded = 0;
+                Object.values(powerNeeds).forEach(count => totalNeeded += count);
+                powerNeeds = { 'Blank': totalNeeded }; 
+            }
+
+            let powerTasks = [];
+            for (const type in powerNeeds) {
+                for (let i = 0; i < powerNeeds[type]; i++) powerTasks.push(type);
+            }
+
+            if (isBlankTheme) {
+                for(let i=0; i<25; i++) powerTasks.push('Blank');
+            } else {
+                [...new Set(deck.Creatures.flatMap(c => c.types || []))].forEach(type => {
+                    if (!powerNeeds[type]) { powerTasks.push(type); powerTasks.push(type); }
+                });
+            }
+            
+            shuffle(powerTasks);
+
+            const powerCardsByType = defaultdict(() => []);
+            all_cards.filter(c => c.supertype === 'Power').forEach(c => powerCardsByType[c.powerType].push(c));
+
+            let doublePowerCount = 0;
+            
+            while (newPowerList.length < targetPowerCount) {
+                if (powerTasks.length === 0) {
+                    let fillType = isBlankTheme ? 'Blank' : (themeTypes[0] || 'Blank');
+                    const card = powerCardsByType[fillType].find(c => (c.powerValue || 1) === 1) || powerCardsByType['Blank'][0];
+                    if (card) newPowerList.push(card); else break;
+                    continue;
+                }
+
+                const nextType = powerTasks.shift();
+                const useDouble = (doublePowerCount < DECK_RULES.power_card_limits.powerValue_2 && 
+                                   powerTasks.includes(nextType) && 
+                                   powerCardsByType[nextType] &&
+                                   powerCardsByType[nextType].some(c => (c.powerValue||1) === 2));
+                
+                if (useDouble) {
+                    const card = powerCardsByType[nextType].find(c => (c.powerValue||1) === 2);
+                    if(card) {
+                        newPowerList.push(card);
+                        doublePowerCount++;
+                        const idx = powerTasks.indexOf(nextType);
+                        if(idx > -1) powerTasks.splice(idx, 1);
+                    }
+                } else {
+                    const card = (powerCardsByType[nextType] && powerCardsByType[nextType].find(c => (c.powerValue||1) === 1)) 
+                                 || powerCardsByType['Blank'].find(c=>(c.powerValue||1)===1);
+                    if(card) newPowerList.push(card);
+                }
+            }
+            return newPowerList;
+        }
+
+        function sanitizeDeck(deck) {
+            const currentBossNames = new Set(deck.Creatures.map(c => c.name));
+            const secretCountBefore = deck.Secrets.length;
+
+            deck.Secrets = deck.Secrets.filter(secret => {
+                const requiredBoss = SECRET_BOSS_MAP[secret.name];
+                if (requiredBoss) {
+                    return currentBossNames.has(requiredBoss); 
+                }
+                return true;
+            });
+            
+            deck.Creatures.forEach(c => {
+                if (BOSS_SECRET_MAP[c.name]) {
+                    const secretName = BOSS_SECRET_MAP[c.name];
+                    const hasSecret = deck.Secrets.some(s => s.name === secretName);
+                    if (!hasSecret) {
+                        const secretCard = all_cards.find(x => x.name === secretName && x.supertype === 'Secret');
+                        if (secretCard) {
+                            deck.Secrets.push(secretCard);
+                        }
+                    }
+                }
+            });
+            
+            const secretCountAfter = deck.Secrets.length;
+            const themeTypes = Array.from(selectedTypes);
+            const is_blank_deck = (themeTypes[0] === 'Blank');
+            
+            if (secretCountAfter < secretCountBefore) {
+                const needToFill = secretCountBefore - secretCountAfter;
+                let secretPool = all_cards.filter(c => c.supertype === 'Secret').filter(c => {
+                    if (c.name in SECRET_BOSS_MAP) {
+                        const requiredBoss = SECRET_BOSS_MAP[c.name];
+                        return currentBossNames.has(requiredBoss);
+                    }
+                    if (BANNED_SECRET_CARDS.includes(c.name)) return false;
+                    if ((c.subtypes || []).includes('Terrain')) {
+                        if (is_blank_deck) return false;
+                        const validTypes = TERRAIN_TYPE_COMPATIBILITY[c.name] || [];
+                        return (validTypes.includes("All") || themeTypes.some(t => validTypes.includes(t)));
+                    }
+                    return true;
+                });
+                
+                const secretCounts = {};
+                deck.Secrets.forEach(s => {
+                    secretCounts[s.name] = (secretCounts[s.name] || 0) + 1;
+                });
+                
+                for (let i = 0; i < needToFill; i++) {
+                    const validCandidates = secretPool.filter(c => {
+                        const limit = DECK_RULES.secret_card_limits[c.rarity] || 1;
+                        return (secretCounts[c.name] || 0) < limit;
+                    });
+                    
+                    if (validCandidates.length > 0) {
+                        const candidate = validCandidates[Math.floor(Math.random() * validCandidates.length)];
+                        deck.Secrets.push(candidate);
+                        secretCounts[candidate.name] = (secretCounts[candidate.name] || 0) + 1;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        function enforceDeckIntegrity(deck) {
+            deck.Creatures.forEach(c => {
+                if (BOSS_SECRET_MAP[c.name]) {
+                    const secretName = BOSS_SECRET_MAP[c.name];
+                    if (!deck.Secrets.some(s => s.name === secretName)) {
+                        const card = all_cards.find(x => x.name === secretName);
+                        if (card) {
+                            const junkIdx = deck.Secrets.findIndex(x => !SECRET_BOSS_MAP[x.name]);
+                            if (junkIdx > -1) deck.Secrets.splice(junkIdx, 1);
+                            else if(deck.Secrets.length > 0) deck.Secrets.pop(); 
+                            deck.Secrets.push(card);
+                        }
+                    }
+                }
+                if (BOSS_COMPANION_MAP[c.name]) {
+                    BOSS_COMPANION_MAP[c.name].forEach(compName => {
+                        if (!deck.Creatures.some(cr => cr.name === compName)) {
+                            const card = all_cards.find(x => x.name === compName);
+                            if (card) {
+                                const junkIdx = deck.Creatures.findIndex(x => x.level < 5 && !BOSS_SECRET_MAP[x.name] && !Object.values(BOSS_COMPANION_MAP).flat().includes(x.name));
+                                if (junkIdx > -1) deck.Creatures[junkIdx] = card;
+                                else deck.Creatures.push(card);
+                            }
+                        }
+                    });
+                }
+            });
+
+            for (let i = deck.Creatures.length - 1; i >= 0; i--) {
+                const c = deck.Creatures[i];
+                if (BOSS_COMPANION_MAP[c.name]) {
+                    const missingCompanion = BOSS_COMPANION_MAP[c.name].some(comp => !deck.Creatures.some(x => x.name === comp));
+                    if (missingCompanion) {
+                        let replacementPool = all_cards.filter(x => x.supertype === 'Creature' && x.level >= 7 && x.name !== c.name);
+                        const replacement = replacementPool[Math.floor(Math.random() * replacementPool.length)];
+                        deck.Creatures[i] = replacement;
+                        enforceDeckIntegrity(deck);
+                        return;
+                    }
+                }
+            }
+            sanitizeDeck(deck);
+        }
+
+        // --- GENERATOR LOGIC (Random) ---
+        function runGeneration() {
+            const archInput = document.querySelector('input[name="archetype"]:checked');
+            if(!archInput) { alert("Select an Archetype"); return; }
+            if(selectedTypes.size === 0) { alert("Select a Theme"); return; }
+
+            const archetype = archInput.value;
+            const themeStr = Array.from(selectedTypes).join('/');
+            const coreBosses = Array.from(selectedBosses).map(id => all_cards.find(c => c.script_uuid === id)).filter(x => x);
+
+            try {
+                const deck = buildStrategicDeck(themeStr, archetype, coreBosses);
+                currentDeck = deck;
+                enforceDeckIntegrity(deck);
+                sanitizeDeck(deck);
+                renderDeck(deck, themeStr, archetype);
+                document.getElementById('output').style.display = 'block';
+                document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (e) {
+                console.error(e);
+                alert("Generation Error: " + e.message);
+            }
+        }
+
+        function buildStrategicDeck(selectedTypes, archetype_name, coreCreatures = []) {
+            const deck = { "Creatures": [], "Power": [], "Secrets": [] };
+            const archetype = DECK_ARCHETYPES[archetype_name];
+            const is_blank_deck = (selectedTypes === 'Blank');
+            const themeTypes = selectedTypes.split('/');
+            const creatureCounts = defaultdict(() => 0);
+            const coreNames = new Set(coreCreatures.map(c => c.name));
+
+            for (const core of coreCreatures) {
+                deck.Creatures.push(core);
+                creatureCounts[core.name]++;
+            }
+
+            if (coreCreatures.length === 0) {
+                if (Math.random() < 0.70) {
+                    const potentialBosses = all_cards.filter(c => 
+                        c.supertype === 'Creature' && c.level === 10 &&
+                        (is_blank_deck || c.types.some(t => themeTypes.includes(t)))
+                    );
+                    if (potentialBosses.length > 0) {
+                        const randomBoss = potentialBosses[Math.floor(Math.random() * potentialBosses.length)];
+                        deck.Creatures.push(randomBoss);
+                        creatureCounts[randomBoss.name]++;
+                    }
+                }
+            }
+
+            const bossesInDeck = deck.Creatures.filter(c => c.level === 10);
+            bossesInDeck.forEach(boss => {
+                const companions = BOSS_COMPANION_MAP[boss.name] || [];
+                companions.forEach(compName => {
+                    const card = all_cards.find(c => c.name === compName);
+                    if (card && creatureCounts[compName] < (DECK_RULES.creature_card_limits[card.rarity] || 1)) {
+                        deck.Creatures.push(card);
+                        creatureCounts[compName]++;
+                    }
+                });
+            });
+
+            const getRandomCount = (spec) => Math.round(DECK_RULES.deck_size * (spec.base + ((Math.random()*2-1)*spec.flex)));
+            let targetCreatures = Math.max(getRandomCount(archetype.creatures), deck.Creatures.length);
+            let targetSecrets = getRandomCount(archetype.secrets);
+            
+            const creatureFilter = c => !coreNames.has(c.name) && (is_blank_deck || (c.types || []).some(t => themeTypes.includes(t)));
+            const pools = {
+                high: all_cards.filter(c => c.supertype === 'Creature' && c.level >= 7 && c.level <= 9 && creatureFilter(c)),
+                mid:  all_cards.filter(c => c.supertype === 'Creature' && c.level >= 4 && c.level <= 6 && creatureFilter(c)),
+                low:  all_cards.filter(c => c.supertype === 'Creature' && c.level >= 1 && c.level <= 3 && creatureFilter(c))
+            };
+            
+            Object.values(pools).forEach(pool => pool.forEach(c => c._score = scoreCreatureSynergy(c, selectedTypes)));
+            Object.values(pools).forEach(pool => pool.sort((a,b) => b._score - a._score));
+
+            let attempts = 0;
+            while(deck.Creatures.length < targetCreatures && attempts < 500) {
+                attempts++;
+                const rand = Math.random();
+                let pool = (rand < 0.5) ? pools.low : (rand < 0.85) ? pools.mid : pools.high;
+                if(pool.length === 0) pool = pools.low;
+                
+                const candidate = selectFromTieredPool(pool);
+                if(!candidate) continue;
+
+                const limit = DECK_RULES.creature_card_limits[candidate.rarity] || 1;
+                if(creatureCounts[candidate.name] < limit) {
+                    deck.Creatures.push(candidate);
+                    creatureCounts[candidate.name]++;
+                    while(creatureCounts[candidate.name] < limit && deck.Creatures.length < targetCreatures && Math.random() > 0.4) {
+                        deck.Creatures.push(candidate);
+                        creatureCounts[candidate.name]++;
+                    }
+                }
+            }
+
+            const secretCounts = defaultdict(() => 0);
+            
+            deck.Creatures.forEach(c => {
+                if (c.name in BOSS_SECRET_MAP) {
+                    const secretName = BOSS_SECRET_MAP[c.name];
+                    const secretCard = all_cards.find(sc => sc.name === secretName && sc.supertype === 'Secret');
+                    if (secretCard && secretCounts[secretName] === 0) {
+                        deck.Secrets.push(secretCard);
+                        secretCounts[secretName]++;
+                    }
+                }
+            });
+
+            const allBossesInDeck = new Set(deck.Creatures.map(c => c.name));
+            let secretPool = all_cards.filter(c => c.supertype === 'Secret').filter(c => {
+                if (c.name in SECRET_BOSS_MAP) {
+                    const requiredBoss = SECRET_BOSS_MAP[c.name];
+                    return allBossesInDeck.has(requiredBoss);
+                }
+                if (BANNED_SECRET_CARDS.includes(c.name)) return false;
+                if ((c.subtypes || []).includes('Terrain')) {
+                    if (selectedTypes === 'Blank') return false;
+                    const validTypes = TERRAIN_TYPE_COMPATIBILITY[c.name] || [];
+                    return (validTypes.includes("All") || themeTypes.some(t => validTypes.includes(t)));
+                }
+                return true;
+            });
+            secretPool = secretPool.map(c => ({ card: c, score: Math.random() * 10 })).sort((a,b) => b.score - a.score);
+
+            attempts = 0;
+            while(deck.Secrets.length < targetSecrets && attempts < 500 && secretPool.length > 0) {
+                attempts++;
+                const idx = Math.floor(Math.pow(Math.random(), 2) * Math.min(secretPool.length, 15));
+                const candidate = secretPool[idx].card;
+                const limit = DECK_RULES.secret_card_limits[candidate.rarity] || 1;
+                if(secretCounts[candidate.name] < limit) {
+                    deck.Secrets.push(candidate);
+                    secretCounts[candidate.name]++;
+                }
+            }
+
+            const targetPower = DECK_RULES.deck_size - deck.Creatures.length - deck.Secrets.length;
+            deck.Power = rebuildPowerSection(deck, targetPower, themeTypes);
+
+            const total = () => deck.Creatures.length + deck.Secrets.length + deck.Power.length;
+            while(total() > 60) {
+                if(deck.Power.length > 10) deck.Power.pop();
+                else if(deck.Secrets.length > 10) {
+                    const removableIdx = deck.Secrets.findIndex(s => !SECRET_BOSS_MAP[s.name]);
+                    if (removableIdx > -1) deck.Secrets.splice(removableIdx, 1);
+                    else deck.Secrets.pop();
+                } else {
+                    const nonBossIdx = deck.Creatures.findIndex(c => c.level < 10 && !BOSS_SECRET_MAP[c.name]);
+                    if (nonBossIdx > -1) deck.Creatures.splice(nonBossIdx, 1);
+                    else deck.Creatures.pop();
+                }
+            }
+            while(total() < 60) {
+                const card = all_cards.find(c => c.supertype === 'Power' && c.powerType === 'Blank' && (c.powerValue||1) === 1);
+                if(card) deck.Power.push(card); else break;
+            }
+
+            sanitizeDeck(deck);
+            sanitizeDeck(deck);
+
+            return deck;
+
+        }
+
+        // --- CUSTOM BUILDER LOGIC ---
+        function startCustomBuilder() {
+            // 1. Init Empty Deck
+            currentDeck = { "Creatures": [], "Secrets": [], "Power": [] };
+            
+            // 2. Open Editor Immediately
+            openDeckEditor();
+        }
+
+        // --- DECK EDITOR & BROWSER LOGIC ---
+
+        function openDeckEditor() {
+            // Initialize editing copy
+            if(currentMode === 'custom' && !currentDeck) currentDeck = { "Creatures": [], "Secrets": [], "Power": [] };
+            
+            editingDeck = JSON.parse(JSON.stringify(currentDeck));
+            
+            document.getElementById('editor-modal').classList.add('active');
+            renderEditorList();
+            renderSearchResults('');
+            switchLibraryTab('search'); // Default to search
+            validateEditorDeck();
+            
+            // Mobile Init: Default to library so they can add cards immediately
+            if(window.innerWidth <= 800) toggleMobileEditorTab('library');
+        }
+        
+        // --- NEW: MOBILE EDITOR TOGGLE LOGIC ---
+        function toggleMobileEditorTab(tabName) {
+            const btnDeck = document.querySelector('.mobile-editor-tabs button:first-child');
+            const btnLib = document.querySelector('.mobile-editor-tabs button:last-child');
+            
+            const colDeck = document.getElementById('editor-col-deck');
+            const colLib = document.getElementById('editor-col-library');
+            
+            if (tabName === 'deck') {
+                btnDeck.classList.add('active');
+                btnLib.classList.remove('active');
+                colDeck.classList.add('mobile-visible');
+                colLib.classList.remove('mobile-visible');
+            } else {
+                btnLib.classList.add('active');
+                btnDeck.classList.remove('active');
+                colLib.classList.add('mobile-visible');
+                colDeck.classList.remove('mobile-visible');
+            }
+        }
+
+        function closeEditor() {
+            document.getElementById('editor-modal').classList.remove('active');
+            editingDeck = null;
+        }
+
+        function switchLibraryTab(tab) {
+            document.getElementById('view-search').style.display = (tab === 'search') ? 'block' : 'none';
+            document.getElementById('view-browse').style.display = (tab === 'browse') ? 'flex' : 'none';
+            
+            document.getElementById('tab-search').className = (tab === 'search') ? 'filter-btn active' : 'filter-btn';
+            document.getElementById('tab-browse').className = (tab === 'browse') ? 'filter-btn active' : 'filter-btn';
+
+            if(tab === 'browse') filterBrowser('Creature', document.querySelector('.browser-filters button'));
+        }
+
+        function filterBrowser(category, btnEl) {
+            const subFilterContainer = document.getElementById('secret-sub-filters');
+            const mainSecretBtn = document.getElementById('btn-secret');
+
+            // --- 1. HANDLE UI LOGIC (Hiding/Showing Buttons) ---
+            
+            // Case A: Clicked Top-Level "Secret"
+            if (category === 'Secret') {
+                // Highlight 'Secret' in main row
+                document.querySelectorAll('#main-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                mainSecretBtn.classList.add('active');
+                
+                // Show sub-buttons
+                subFilterContainer.style.display = 'flex';
+                
+                // DEFAULT to Magik: Find the Magik button and click it logically
+                const magikBtn = subFilterContainer.querySelector('button:first-child');
+                filterBrowser('Magik', magikBtn); 
+                return; // Stop here, the recursive call above handles the rendering
+            }
+
+            // Case B: Clicked Creature or Power
+            if (category === 'Creature' || category === 'Power') {
+                // Highlight clicked button in main row
+                document.querySelectorAll('#main-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                if (btnEl) btnEl.classList.add('active');
+                
+                // Hide sub-buttons
+                subFilterContainer.style.display = 'none';
+            }
+
+            // Case C: Clicked a Subtype (Magik, Spell, Terrain)
+            if (['Magik', 'Spell', 'Terrain'].includes(category)) {
+                // Ensure 'Secret' stays active in main row
+                document.querySelectorAll('#main-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                mainSecretBtn.classList.add('active');
+                
+                // Highlight the specific sub-button
+                document.querySelectorAll('#secret-sub-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                if (btnEl) btnEl.classList.add('active');
+                
+                // Ensure sub-buttons are visible (in case we came from direct call)
+                subFilterContainer.style.display = 'flex';
+            }
+
+            // --- 2. RENDERING LOGIC ---
+
+            const container = document.getElementById('browser-results');
+            container.innerHTML = '';
+
+            const isBlank = selectedTypes.has('Blank');
+            let pool = [];
+
+            // Select data based on category
+            if (category === 'Creature' || category === 'Power') {
+                pool = all_cards.filter(c => c.supertype === category);
+            } else {
+                // It's a secret subtype (Magik, Spell, Terrain)
+                pool = all_cards.filter(c => c.supertype === 'Secret' && (c.subtypes || []).includes(category));
+            }
+
+            // Filter by Theme/Restrictions
+            if (!isBlank) {
+                pool = pool.filter(c => {
+                    if (c.supertype === 'Creature') return c.types.some(t => selectedTypes.has(t));
+                    if (c.supertype === 'Power') return selectedTypes.has(c.powerType) || c.powerType === 'Blank';
+                    if (c.supertype === 'Secret') return !BANNED_SECRET_CARDS.includes(c.name);
+                    return true;
+                });
+            }
+
+            // Sort & Deduplicate
+            pool.sort((a,b) => a.name.localeCompare(b.name));
+            
+            const unique = [];
+            const seen = new Set();
+            pool.forEach(c => { if(!seen.has(c.name)) { seen.add(c.name); unique.push(c); }});
+
+            // Generate HTML
+            unique.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'browser-card';
+                
+                let imgTag = '';
+                if (c.images && c.images.small) {
+                    let path = c.images.small;
+                    if (!path.endsWith('.png') && !path.endsWith('.jpg')) { path += '.png'; }
+                    imgTag = `<img src="${path}" alt="${c.name}" style="width:100%; height:auto; border-radius:4px; display:block; margin-bottom:8px;">`;
+                }
+
+                div.innerHTML = `
+                    ${imgTag}
+                    <span class="browser-card-name">${c.name}</span>
+                    <span class="browser-card-meta">${c.supertype === 'Creature' ? 'Lvl '+c.level : (c.subtypes||[]).join('/')}</span>
+                `;
+                div.onclick = () => addCardToEditor(c.name, c.rarity);
+                container.appendChild(div);
+            });
+        }
+
+        function getEditingDeckFlatList() {
+            return [...editingDeck.Creatures, ...editingDeck.Secrets, ...editingDeck.Power];
+        }
+
+        function renderEditorList() {
+            const container = document.getElementById('editor-list');
+            container.innerHTML = '';
+            const flat = getEditingDeckFlatList();
+            
+            const grouped = {};
+            flat.sort((a,b) => {
+                if(a.supertype !== b.supertype) return a.supertype.localeCompare(b.supertype); 
+                return a.name.localeCompare(b.name);
+            });
+
+            flat.forEach(c => {
+                const key = c.name + "|" + c.rarity; 
+                if(!grouped[key]) grouped[key] = { card: c, count: 0 };
+                grouped[key].count++;
+            });
+
+            Object.values(grouped).forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'editor-item';
+                const typeColor = item.card.supertype === 'Creature' ? 'var(--accent)' : item.card.supertype === 'Secret' ? '#d63031' : '#f1c40f';
+                const rarityText = item.card.rarity === 'Common' ? '' : `• <span style="color:#f1c40f">${item.card.rarity}</span>`;
+                const safeName = item.card.name.replace(/'/g, "\\'");
+                
+                div.innerHTML = `
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="font-weight:bold; font-size:0.9em; cursor:pointer; text-decoration:underline; text-decoration-color:var(--border-subtle);" 
+                            onclick="showCardImage(all_cards.find(c => c.name === '${safeName}'))">
+                            ${item.card.name}
+                        </span>
+                        <span style="font-size:0.75em; color:${typeColor}">
+                            ${item.card.supertype} ${item.card.level ? 'Lvl '+item.card.level : ''} ${rarityText}
+                        </span>
+                    </div>
+                    <div class="editor-controls">
+                        <button class="qty-btn" onclick="updateCardQty('${safeName}', '${item.card.rarity}', -1)">-</button>
+                        <span style="width:20px; text-align:center; font-weight:bold;">${item.count}</span>
+                        <button class="qty-btn" onclick="updateCardQty('${safeName}', '${item.card.rarity}', 1)">+</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderSearchResults(query) {
+            const container = document.getElementById('search-results');
+            container.innerHTML = '';
+            if(query.length < 2) { container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:10px;">Type to search...</div>'; return; }
+
+            const isBlank = selectedTypes.has('Blank');
+            
+            let matches = all_cards.filter(c => c.name.toLowerCase().includes(query.toLowerCase()));
+            
+            if (!isBlank) {
+                matches = matches.filter(c => {
+                    if (c.supertype === 'Creature') return c.types.some(t => selectedTypes.has(t));
+                    if (c.supertype === 'Power') return selectedTypes.has(c.powerType) || c.powerType === 'Blank';
+                    if (c.supertype === 'Secret') return !BANNED_SECRET_CARDS.includes(c.name);
+                    return true;
+                });
+            }
+
+            const uniqueVariants = [];
+            const seen = new Set();
+            matches.forEach(c => { const key = c.name+"|"+c.rarity; if(!seen.has(key)) { seen.add(key); uniqueVariants.push(c); }});
+
+            uniqueVariants.slice(0, 25).forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'editor-item';
+                div.style.cursor = 'pointer';
+                const safeName = c.name.replace(/'/g, "\\'");
+                div.innerHTML = `
+                    <div onclick="showCardImage(all_cards.find(x => x.name === '${safeName}' && x.rarity === '${c.rarity}'))">
+                        <span style="font-weight:bold; font-size:0.9em;">${c.name}</span> <br>
+                        <span style="font-size:0.7em; color:var(--text-muted);">${c.supertype} • ${c.rarity}</span>
+                    </div>
+                    <button class="qty-btn" style="width:auto; padding:0 10px;" onclick="addCardToEditor('${safeName}', '${c.rarity}')">Add</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateCardQty(cardName, rarity, delta) {
+            if (delta === 1) addCardToEditor(cardName, rarity);
+            else {
+                const targetList = findListForCard(cardName);
+                if(!targetList) return;
+                const idx = targetList.findIndex(c => c.name === cardName && c.rarity === rarity);
+                if(idx > -1) targetList.splice(idx, 1);
+                else { const backupIdx = targetList.findIndex(c => c.name === cardName); if(backupIdx > -1) targetList.splice(backupIdx, 1); }
+                renderEditorList();
+                validateEditorDeck();
+            }
+        }
+
+        function addCardToEditor(cardName, rarity) {
+            const card = all_cards.find(c => c.name === cardName && c.rarity === rarity);
+            if (!card) return;
+
+            let baseRarity = card.rarity;
+            if (rarity === 'HiddenRare' || rarity === 'Borderless') {
+                const baseCard = all_cards.find(c => c.name === cardName && c.rarity !== 'HiddenRare' && c.rarity !== 'Borderless');
+                if (baseCard) baseRarity = baseCard.rarity;
+            }
+
+            let limit = 4;
+            
+            if (card.supertype === 'Creature') {
+                // OVERRIDE: If it's Level 10, the limit is always 2 (regardless of rarity)
+                if (card.level === 10) {
+                    limit = 2;
+                } else {
+                    limit = DECK_RULES.creature_card_limits[baseRarity] || 4;
+                }
+            }
+            else if (card.supertype === 'Secret') {
+                limit = DECK_RULES.secret_card_limits[baseRarity] || 4;
+            }
+            else if (card.supertype === 'Power') {
+                limit = (card.powerValue === 2) ? 5 : 60;
+            }
+
+            const flat = getEditingDeckFlatList();
+            const currentCount = flat.filter(c => c.name === cardName).length;
+
+            if (currentCount >= limit) { alert(`Cannot add more "${cardName}". \nLimit for this card is ${limit}.`); return; }
+            if (flat.length >= 60) { alert("Deck is full (60/60)."); return; }
+
+            if (card.supertype === 'Creature') editingDeck.Creatures.push(card);
+            else if (card.supertype === 'Secret') editingDeck.Secrets.push(card);
+            else if (card.supertype === 'Power') editingDeck.Power.push(card);
+
+            renderEditorList();
+            validateEditorDeck();
+        }
+
+        function findListForCard(name) {
+            if(editingDeck.Creatures.some(c => c.name === name)) return editingDeck.Creatures;
+            if(editingDeck.Secrets.some(c => c.name === name)) return editingDeck.Secrets;
+            if(editingDeck.Power.some(c => c.name === name)) return editingDeck.Power;
+            return null;
+        }
+
+        function validateEditorDeck() {
+            const flat = getEditingDeckFlatList();
+            const count = flat.length;
+            const countEl = document.getElementById('editor-count');
+            const warnEl = document.getElementById('editor-warnings');
+            countEl.textContent = `${count}/60 Cards`;
+            countEl.className = (count === 60) ? 'status-valid' : 'status-invalid';
+            warnEl.innerHTML = (count < 60) ? `<span style="color:var(--color-yellow-status)">Deck incomplete.</span>` : (count === 60) ? `<span style="color:var(--color-green-status)">Ready</span>` : `<span style="color:var(--danger)">Too many cards!</span>`;
+        }
+
+        function saveEditorChanges() {
+            const flat = getEditingDeckFlatList();
+            
+            // STRICT VALIDATION: If not exactly 60, Alert and Stop.
+            if(flat.length !== 60) {
+                alert(`Cannot Save Deck.\n\nYour deck has ${flat.length} cards.\nA legal deck must have exactly 60 cards.`);
+                return; // Stop the function here
+            }
+            
+            // If we reach here, the deck is valid (60 cards)
+            currentDeck = editingDeck;
+            document.getElementById('output').style.display = 'block';
+            const themeStr = Array.from(selectedTypes).join('/');
+            
+            // Check if user came from Custom or Random to determine the "Archetype" label
+            let archLabel = "Custom";
+            if(currentMode === 'random') {
+                const archInput = document.querySelector('input[name="archetype"]:checked');
+                if(archInput) archLabel = archInput.value;
+            }
+
+            renderDeck(currentDeck, themeStr, archLabel);
+            closeEditor();
+            document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderDeck(deck, theme, arch) {
+            // Type Color Mapping
+            const typeColors = {
+                "Dark": "#8e44ad",
+                "Earth": "#d2b48c",
+                "Fire": "#e67e22",
+                "Forest": "#27ae60",
+                "Light": "#f1f2f6",
+                "Thunder": "#f1c40f",
+                "Water": "#3498db",
+                "Wind": "#87CEEB",
+                "Blank": "#a0aec0"
+            };
+
+            // Archetype Color Mapping
+            const archColors = {
+                "Balanced": "var(--color-green-status)",
+                "Aggro": "var(--color-red-status)",
+                "Control": "var(--color-yellow-status)",
+                "Energy": "var(--color-blue-status)"
+            };
+
+            // Generate colored theme HTML
+            const coloredTheme = theme.split('/').map(t => {
+                const color = typeColors[t] || '#fff';
+                return `<span style="color:${color}">${t}</span>`;
+            }).join('<span style="color:var(--text-muted)"> / </span>');
+
+            // Generate colored archetype HTML
+            const archColor = archColors[arch] || '#fff';
+            const coloredArch = `<span style="color:${archColor}">${arch}</span>`;
+
+            // Insert into DOM
+            document.getElementById('Deck-title-container').innerHTML = 
+                `${coloredTheme} <span style="color:var(--text-muted); font-size:0.8em; margin:0 8px;">//</span> ${coloredArch}`;
+
+            // Stats
+            const total = deck.Creatures.length + deck.Secrets.length + deck.Power.length;
+            document.getElementById('Deck-stats').textContent = `Total: ${total} (C:${deck.Creatures.length} S:${deck.Secrets.length} P:${deck.Power.length})`;
+
+            // Sorting Controls
+            const creatureHeader = document.getElementById('Creatures-title');
+            if(!document.getElementById('sort-controls-container')) {
+                const div = document.createElement('div');
+                div.id = 'sort-controls-container';
+                div.className = 'sort-controls';
+                div.innerHTML = `
+                    <button class="sort-btn" onclick="toggleCreatureSort('asc')">1-10</button>
+                    <button class="sort-btn" onclick="toggleCreatureSort('desc')">10-1</button>
+                `;
+                creatureHeader.appendChild(div);
+            }
+
+            renderList('Creatures', deck.Creatures);
+            renderList('secrets', deck.Secrets);
+            renderList('power', deck.Power);
+        }
+
+        function copyDeckToClipboard() {
+            if (!currentDeck) return;
+            // Use plain text for clipboard
+            let text = `Mystik Creatures Deck - ${document.getElementById('Deck-title-container').textContent}\n\n`;
+
+            const formatSection = (title, list) => {
+                if (!list || !list.length) return;
+                text += `--- ${title} (${list.length}) ---\n`;
+                const counts = {};
+                list.forEach(c => counts[c.name] = (counts[c.name] || 0) + 1);
+                // Sort by name for cleaner list
+                Object.keys(counts).sort().forEach(name => {
+                    text += `${counts[name]}x ${name}\n`;
+                });
+                text += '\n';
+            };
+
+            formatSection("Creatures", currentDeck.Creatures);
+            formatSection("Secrets", currentDeck.Secrets);
+            formatSection("Power", currentDeck.Power);
+
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copy-btn');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                btn.style.backgroundColor = 'var(--color-green-status)';
+                btn.style.color = '#000';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.style.backgroundColor = '';
+                    btn.style.color = '';
+                }, 2000);
+            }).catch(err => {
+                console.error("Copy failed", err);
+                alert("Failed to copy deck list.");
+            });
+        }
+
+        function toggleCreatureSort(order) {
+            currentCreatureSort = order;
+            const themeStr = Array.from(selectedTypes).join('/');
+            const arch = document.querySelector('input[name="archetype"]:checked').value;
+            renderDeck(currentDeck, themeStr, arch);
+        }
+
+        function renderList(id, cards) {
+            const ul = document.getElementById(`${id}-list`);
+            ul.innerHTML = '';
+            
+            const grouped = {};
+            const cardRef = {};
+            cards.forEach(c => {
+                const key = c.name;
+                grouped[key] = (grouped[key] || 0) + 1;
+                cardRef[key] = c;
+            });
+
+            const sortedKeys = Object.keys(grouped).sort((a,b) => {
+                if(id === 'Creatures') {
+                    if(currentCreatureSort === 'desc') return (cardRef[b].level || 0) - (cardRef[a].level || 0);
+                    else return (cardRef[a].level || 0) - (cardRef[b].level || 0);
+                }
+                return a.localeCompare(b);
+            });
+
+            sortedKeys.forEach(key => {
+                const c = cardRef[key];
+                const li = document.createElement('li');
+                let meta = '';
+                if(id === 'Creatures') meta = `Lvl ${c.level} • ${c.types[0]}`;
+                else if(id === 'power') meta = `${c.powerType} ${c.powerValue > 1 ? '(x2)' : ''}`;
+                
+                let swapHtml = '';
+                // Disable swap for Custom Mode, rely on Edit
+                if(currentMode === 'random' && id !== 'power') {
+                    swapHtml = `<button class="swap-btn" onclick="event.stopPropagation(); handleSwap('${key.replace(/'/g, "\\'")}', '${id}')" title="Swap"><i class="fa-solid fa-arrows-rotate"></i></button>`;
+                }
+
+                li.innerHTML = `
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="font-weight:bold;">${key}</span>
+                        <span style="font-size:0.8em; color:var(--text-muted);">${meta}</span>
+                    </div>
+                    <div style="display:flex; align-items:center;">
+                        <span style="font-weight:bold; color:var(--accent);">x${grouped[key]}</span>
+                        ${swapHtml}
+                    </div>
+                `;
+                li.onclick = () => showCardImage(c);
+                ul.appendChild(li);
+            });
+        }
+        
+        function handleSwap(cardName, listType) {
+            if(!currentDeck) return;
+            const deckList = currentDeck[listType];
+            const oldCardIndex = deckList.findIndex(c => c.name === cardName);
+            if(oldCardIndex === -1) return;
+            const oldCard = deckList[oldCardIndex];
+
+            let candidates = all_cards.filter(c => c.supertype === oldCard.supertype && c.name !== oldCard.name);
+            
+            if(listType === 'Creatures') {
+                const themeStr = Array.from(selectedTypes).join('/');
+                candidates = candidates.filter(c => 
+                    (themeStr === 'Blank' || (c.types || []).some(t => selectedTypes.has(t))) &&
+                    Math.abs((c.level || 0) - (oldCard.level || 0)) <= 2
+                );
+            } else if (listType === 'Secrets') {
+                 const allBossesInDeck = new Set(currentDeck.Creatures.map(c => c.name));
+                 candidates = candidates.filter(c => {
+                    if (c.name in SECRET_BOSS_MAP) return allBossesInDeck.has(SECRET_BOSS_MAP[c.name]);
+                    return !BANNED_SECRET_CARDS.includes(c.name);
+                 });
+            }
+
+            if(candidates.length === 0) { alert("No suitable replacement found."); return; }
+            const newCard = candidates[Math.floor(Math.random() * candidates.length)];
+            
+            for(let i=0; i<deckList.length; i++) {
+                if(deckList[i].name === cardName) deckList[i] = newCard;
+            }
+
+            rebalanceDeckPostSwap(newCard, oldCard);
+            sanitizeDeck(currentDeck);
+            enforceDeckIntegrity(currentDeck);
+            sanitizeDeck(currentDeck);
+
+            const themeStr = Array.from(selectedTypes).join('/');
+            const targetPower = DECK_RULES.deck_size - currentDeck.Creatures.length - currentDeck.Secrets.length;
+            currentDeck.Power = rebuildPowerSection(currentDeck, targetPower, themeStr.split('/'));
+
+            const arch = document.querySelector('input[name="archetype"]:checked').value;
+            renderDeck(currentDeck, themeStr, arch);
+        }
+
+        function rebalanceDeckPostSwap(newCard, oldCard) {
+            if (oldCard.name in CREATURE_COMPANION_TO_BOSS) {
+                const bossName = CREATURE_COMPANION_TO_BOSS[oldCard.name];
+                const bossIdx = currentDeck.Creatures.findIndex(c => c.name === bossName);
+                if (bossIdx > -1) {
+                    const oldBoss = currentDeck.Creatures[bossIdx];
+                    let potentialBosses = all_cards.filter(x => x.supertype === 'Creature' && x.level >= 7 && x.name !== bossName);
+                    const preferred = potentialBosses.filter(c => c.types.some(t => oldBoss.types.includes(t)));
+                    const replacementBoss = preferred.length ? preferred[Math.floor(Math.random()*preferred.length)] : potentialBosses[0];
+                    if(replacementBoss) {
+                        currentDeck.Creatures[bossIdx] = replacementBoss;
+                        rebalanceDeckPostSwap(replacementBoss, oldBoss);
+                    }
+                }
+            }
+
+            if (oldCard.name in BOSS_SECRET_MAP) {
+                const secretName = BOSS_SECRET_MAP[oldCard.name];
+                currentDeck.Secrets = currentDeck.Secrets.filter(s => s.name !== secretName);
+                while(currentDeck.Secrets.length < 15) { 
+                     const validSecret = all_cards.find(c => c.supertype === 'Secret' && !BANNED_SECRET_CARDS.includes(c.name) && !(c.name in SECRET_BOSS_MAP));
+                     if(validSecret) currentDeck.Secrets.push(validSecret); else break;
+                }
+            }
+
+            if (newCard.name in BOSS_SECRET_MAP) {
+                const secretName = BOSS_SECRET_MAP[newCard.name];
+                const secretCard = all_cards.find(c => c.name === secretName);
+                if(secretCard && !currentDeck.Secrets.some(s => s.name === secretName)) {
+                    if(currentDeck.Secrets.length > 0) currentDeck.Secrets.pop();
+                    currentDeck.Secrets.push(secretCard);
+                }
+            }
+            if (newCard.name in BOSS_COMPANION_MAP) {
+                 const compNames = BOSS_COMPANION_MAP[newCard.name];
+                 compNames.forEach(compName => {
+                     const compCard = all_cards.find(c => c.name === compName);
+                     if(compCard && !currentDeck.Creatures.some(c => c.name === compName)) {
+                         const lowIndex = currentDeck.Creatures.findIndex(c => c.level < 5 && c.name !== newCard.name);
+                         if(lowIndex > -1) currentDeck.Creatures[lowIndex] = compCard;
+                         else currentDeck.Creatures.push(compCard);
+                     }
+                 });
+            }
+        }
+
+        // --- MODAL LOGIC (MATCHING SEARCH PAGE) ---
+        function showCardImage(card) {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-image');
+    
+            if (card.images && card.images.small) {
+                let path = card.images.small;
+                if (!path.endsWith('.png') && !path.endsWith('.jpg')) {
+                    path += '.png';
+                }
+                modalImg.src = path;
+                modalImg.alt = card.name;
+                modal.classList.add('active');
+            } else {
+                alert("No image available for " + card.name);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('image-modal').classList.remove('active');
+        }
+    </script>
+    <script src="sidebar.js"></script>
+    <script src="footer.js"></script>
+</body>
+</html>

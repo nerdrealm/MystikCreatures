@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Mystik Creatures™</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Social Media Preview Tags -->
+  <meta property="og:title" content="Mystik Creatures™ TCG" />
+  <meta property="og:description" content="A New Realm Awaits" />
+
+  <!-- Directs to your logo on the live site -->
+  <meta property="og:image" content="https://nerdrealm.github.io/MystikCreatures/MystikLogo-PNG.png" />
+
+  <!-- Directs to your main page -->
+  <meta property="og:url" content="https://nerdrealm.github.io/MystikCreatures/index.html" />
+
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+    
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    
+    /* --- INTRO SPLASH SCREEN STYLES --- */
+    #intro-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      /* Start fully black */
+      background-color: rgba(5, 7, 11, 1); 
+      z-index: 999999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      
+      /* SLOW FADE for the background color only */
+      transition: background-color 3s cubic-bezier(0.4, 0, 0.2, 1);
+      /* Allow clicks to pass through once we start fading */
+      pointer-events: auto; 
+    }
+
+    #intro-logo {
+      /* Initial Splash Size */
+      width: 40vw; 
+      max-width: 600px;
+      height: auto;
+      
+      /* Start slightly larger for effect */
+      transform: scale(1.2);
+      transform-origin: center center;
+      
+      /* SLOW MOVEMENT for the logo position/scale */
+      /* Easing tweaked to start slow, speed up, then slow down gently */
+      transition: transform 3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease;
+      
+      /* Ensure it sits above the fading background */
+      z-index: 1000000;
+      position: relative; 
+      will-change: transform; /* Hint to browser for smoother rendering */
+    }
+
+    /* Helper class to fade the black background to transparent */
+    .intro-bg-transparent {
+      background-color: rgba(5, 7, 11, 0) !important;
+      pointer-events: none !important;
+    }
+    
+    .intro-logo-hidden {
+        opacity: 0;
+    }
+    
+    /* Destination Logo Styling */
+    #dest-logo {
+      max-width: 300px; 
+      height: auto; 
+      opacity: 0; /* Hidden initially so we don't see double */
+      /* Slow fade in to ensure it's ready when the animation lands */
+      transition: opacity 0.5s ease-in; 
+    }
+    /* --- MOBILE OPTIMIZATION --- */
+    h2 { 
+      color: var(--accent); 
+    }
+    /* 1. Mobile Label (Hidden on Desktop) */
+    .mobile-label { display: none; }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #1a202c; }
+      .main { max-width: 100%; padding: 1rem 1rem 2rem; }
+
+      /* Force table elements to behave like blocks */
+      .table-wrapper { max-height: none; border: none; overflow: visible; }
+      table, thead, tbody, th, td, tr { display: block; }
+      
+      /* Hide Table Headers */
+      thead tr { position: absolute; top: -9999px; left: -9999px; }
+      
+      /* Style the Row as a "Card" */
+      tbody tr { 
+        background: var(--bg-panel-soft);
+        margin-bottom: 1.5rem; 
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        padding: 1.25rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      }
+
+      /* Style the Cells */
+      td { 
+        border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.05); 
+        padding: 0.5rem 0;
+        text-align: left !important;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; 
+      }
+      td:last-child { border-bottom: none; }
+
+      /* Reveal Labels */
+      .mobile-label {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        margin-right: 10px;
+        min-width: 80px; 
+      }
+
+      /* Name & Image (First Cell) */
+      td:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center !important;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+      }
+      td:first-child .mobile-label { display: none; } /* Hide label for name */
+      
+      td:first-child div { font-size: 1.3rem !important; margin-bottom: 10px; }
+      .card-thumbnail { max-height: 200px; width: auto; }
+
+      /* Details Block */
+      td:nth-child(5) { 
+          display: block; 
+          margin-top: 0.5rem;
+          background: rgba(0,0,0,0.2);
+          padding: 10px;
+          border-radius: 8px;
+      }
+      td:nth-child(5) .mobile-label {
+          display: block;
+          margin-bottom: 5px;
+          border-bottom: 1px solid #333;
+          padding-bottom: 2px;
+          width: 100%;
+      }
+      
+      .detail-text { text-align: left; }
+    }
+    /* Social Media Icons */
+    .social-links {
+        display: flex;
+        gap: 1rem;  
+        justify-content: center;
+        align-items: center;
+    }
+
+    .social-icon {
+        color: var(--text-muted);
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .social-icon:hover {
+        color: var(--accent);
+        transform: translateY(-3px);
+    }
+
+    .social-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+
+  </style>
+</head>
+<body>
+  
+  <!-- INTRO SPLASH SCREEN -->
+  <div id="intro-overlay">
+    <img id="intro-logo" src="MystikLogo-PNG.png" alt="Loading Mystik Creatures...">
+  </div>
+  <button id="mobile-menu-btn">&#9776;</button>
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+    <div class="main-inner">
+      <section>
+        <h2>Mystik Creatures™ TCG</h2>
+        
+        <p class="section-subtitle" style="color:var(--text-main);">
+          Mystik Creatures™ is a fantasy trading card game built around powerful Creatures, elemental strategies, and deep tactical combat. Players build decks, summon Creatures, and battle using unique attacks/abilities, resource management, and clever timing. With rich lore, expanding card sets, and a growing community, Mystik Creatures™ delivers a fresh and dynamic TCG experience designed for players of all skill levels.
+        </p>
+        
+        <p class="muted">
+          This webpage serves as your complete hub for the game. You can browse the full card library, search for specific cards, compare cards side by side, and build deck ideas using the real Mystik Creatures™ rules and stats. Everything on the site is fully synced with the current Mystik Creatures™ card set.
+          <br><br>
+          <small class="disclaimer-text">
+            <em>Please note that Mystik Creatures™ is currently in active development; card images, stats, attacks/abilities, and mechanics are subject to change as we refine the game.</em>
+          </small>        
+        </p>
+
+        <div style="text-align: center; margin-top: 3rem; margin-bottom: 1rem;">
+            <!-- ID ADDED HERE FOR TARGETING -->
+            <img id="dest-logo" src="MystikLogo-PNG.png" alt="Mystik Creatures Logo">
+        </div>
+        
+        <!-- ADD THIS SOCIAL MEDIA SECTION -->
+        <div class="social-links" style="margin-top: .5rem;">
+            <a href="https://x.com/MystikTCG" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="Twitter">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+            </a>
+            <a href="https://www.instagram.com/mystikcreatures.tcg" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                </svg>
+            </a>
+            <a href="https://www.facebook.com/MystikCreatures" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="Facebook">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+            </a>
+            <a href="https://www.tiktok.com/@mystikcreatures" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="TikTok">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                </svg>
+            </a>
+             <a href="https://www.youtube.com/@MystikCreatures" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="YouTube">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+            </a>
+        </div>
+
+      </section>
+    </div>
+  </main>
+  <script src="sidebar.js"></script>
+  <script src="footer.js"></script>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const overlay = document.getElementById('intro-overlay');
+      const splashLogo = document.getElementById('intro-logo');
+      const destLogo = document.getElementById('dest-logo');
+
+      // 1. GET NAVIGATION CONTEXT
+      const navigationEntry = performance.getEntriesByType("navigation")[0];
+      const isRefresh = navigationEntry && navigationEntry.type === 'reload';
+      
+      // Check if the user came from a page on the SAME domain (Internal Link)
+      // Note: checking 'window.location.hostname' ensures we only skip if moving within your own site.
+      const referrer = document.referrer;
+      const isInternalNavigation = referrer && referrer.includes(window.location.hostname);
+
+      // 2. DECIDE: PLAY OR SKIP?
+      // Play ONLY if:
+      // A. It is a hard Refresh
+      // B. OR: It's a fresh session AND they didn't come from another internal page
+      const shouldPlay = isRefresh || (!sessionStorage.getItem('hasSeenIntro') && !isInternalNavigation);
+
+      if (shouldPlay) {
+        
+        // --- PLAY ANIMATION ---
+        sessionStorage.setItem('hasSeenIntro', 'true');
+
+        setTimeout(() => {
+            const startRect = splashLogo.getBoundingClientRect();
+            const endRect = destLogo.getBoundingClientRect();
+
+            const initialScale = 1.2;
+            const unscaledStartWidth = startRect.width / initialScale;
+            const finalScale = endRect.width / unscaledStartWidth;
+
+            const startCenterX = startRect.left + (startRect.width / 2);
+            const startCenterY = startRect.top + (startRect.height / 2);
+            const endCenterX = endRect.left + (endRect.width / 2);
+            const endCenterY = endRect.top + (endRect.height / 2);
+
+            const deltaX = endCenterX - startCenterX;
+            const deltaY = endCenterY - startCenterY;
+
+            overlay.classList.add('intro-bg-transparent');
+            splashLogo.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${finalScale})`;
+            
+            setTimeout(() => {
+                destLogo.style.opacity = '1';
+            }, 2500);
+
+            setTimeout(() => {
+                splashLogo.classList.add('intro-logo-hidden');
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 500);
+            }, 3000);
+
+        }, 1200);
+
+      } else {
+        // --- SKIP ANIMATION (INSTANT APPEARANCE) ---
+        
+        // Ensure session is marked as seen so future refreshes/navs behave correctly
+        sessionStorage.setItem('hasSeenIntro', 'true');
+
+        // 1. Hide the black overlay immediately
+        overlay.style.display = 'none';
+        
+        // 2. Kill the CSS transition so it doesn't "fade in"
+        destLogo.style.transition = 'none';
+        
+        // 3. Show the logo immediately
+        destLogo.style.opacity = '1';
+      }
+    });
+  </script>
+</body>
+</html>

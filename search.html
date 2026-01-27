@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Mystik Creatures™ – Search Any Creature Card</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Social Media Preview Tags -->
+  <meta property="og:title" content="Mystik Creatures™ TCG" />
+  <meta property="og:description" content="A New Realm Awaits" />
+
+  <!-- Directs to your logo on the live site -->
+  <meta property="og:image" content="https://nerdrealm.github.io/MystikCreatures/MystikLogo-PNG.png" />
+
+  <!-- Directs to your main page -->
+  <meta property="og:url" content="https://nerdrealm.github.io/MystikCreatures/index.html" />
+
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+    
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+   
+    /* Matching TEXT COLORS (For Numbers) */
+    .text-Dark    { color: #a569bd; font-weight: bold; }
+    .text-Earth   { color: #e0cdae; font-weight: bold; }
+    .text-Fire    { color: #f39c12; font-weight: bold; }
+    .text-Forest  { color: #2ecc71; font-weight: bold; }
+    .text-Light   { color: #ffffff; font-weight: bold; }
+    .text-Thunder { color: #f4d03f; font-weight: bold; }
+    .text-Water   { color: #5dade2; font-weight: bold; }
+    .text-Wind    { color: #87CEEB; font-weight: bold; }
+    .text-Blank   { color: #a0aec0; font-weight: bold; }
+
+    /* Damage Red Highlight */
+    .stat-damage  { color: #f56565; font-weight: bold; text-shadow: 0 0 8px rgba(245, 101, 101, 0.4); }   
+
+    /* --- PILL BOX STYLES --- */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+      white-space: nowrap;
+      margin: 0 2px;
+    }
+    
+    /* Elemental Colors */
+    .pill-Dark    { border-color: #8e44ad; color: #a569bd; background: rgba(142, 68, 173, 0.15); }
+    .pill-Earth   { border-color: #d2b48c; color: #e0cdae; background: rgba(210, 180, 140, 0.15); }
+    .pill-Fire    { border-color: #e67e22; color: #f39c12; background: rgba(230, 126, 34, 0.15); }
+    .pill-Forest  { border-color: #27ae60; color: #2ecc71; background: rgba(39, 174, 96, 0.15); }
+    .pill-Light   { border-color: #f1f2f6; color: #ffffff; background: rgba(241, 242, 246, 0.15); }
+    .pill-Thunder { border-color: #f1c40f; color: #f4d03f; background: rgba(241, 196, 15, 0.15); }
+    .pill-Water   { border-color: #3498db; color: #5dade2; background: rgba(52, 152, 219, 0.15); }
+    .pill-Wind    { border-color: #87CEEB; color: #87CEEB; background: rgba(135, 206, 235, 0.15); }
+    .pill-Blank   { border-color: #718096; color: #a0aec0; background: rgba(113, 128, 150, 0.15); }
+
+    /* TEXT GLOW STYLES */
+    .stat-glow {
+      color: #fff;
+      text-shadow: 0 0 8px #f1c40f; /* Gold Glow */
+      font-weight: bold;
+    }
+
+    /* Level Range Glows */
+    .level-common   { color: #fff; text-shadow: 0 0 8px #a0aec0; font-weight: 700; } /* Level 1-3 (Silver) */
+    .level-uncommon { color: #fff; text-shadow: 0 0 8px #2ecc71; font-weight: 700; } /* Level 4-6 (Green)  */
+    .level-rare     { color: #fff; text-shadow: 0 0 8px #3498db; font-weight: 700; } /* Level 7-9 (Blue)   */
+    .level-ultra    { color: #fff; text-shadow: 0 0 8px #9b59b6; font-weight: 700; } /* Level 10  (Purple) */
+    
+    /* Rarity Text Glows */
+    .rarity-text-Common     { color: #fff; text-shadow: 0 0 8px #a0aec0; font-weight: bold; }
+    .rarity-text-Uncommon   { color: #fff; text-shadow: 0 0 8px #2ecc71; font-weight: bold; }
+    .rarity-text-Rare       { color: #fff; text-shadow: 0 0 8px #3498db; font-weight: bold; }
+    .rarity-text-UltraRare  { color: #fff; text-shadow: 0 0 8px #9b59b6; font-weight: bold; }
+    .rarity-text-HiddenRare { color: #fff; text-shadow: 0 0 8px #f1c40f; font-weight: bold; }
+    .rarity-text-Borderless { color: #fff; text-shadow: 0 0 8px #e74c3c; font-weight: bold; }
+
+    .results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      max-height: 70vh;
+      overflow-y: auto;
+      padding-right: 0.3rem;
+    }
+    .card-result {
+      background: #05070c;
+      border-radius: var(--radius-sm);
+      border: 1px solid #1a202c;
+      padding: 0.9rem 1rem;
+    }
+    .card-result-header {
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+      margin-bottom: 0.6rem;
+    }
+    .card-image img {
+      display: block;
+      width: 140px;
+      border-radius: 10px;
+      border: 1px solid #2d3748;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .card-image img:hover {
+      transform: scale(1.05);
+    }
+    .card-title-block h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+    
+    /* --- METADATA LAYOUT --- */
+    .card-title-block .meta-line {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.8; /* Slight increase for readability */
+    }
+    
+    /* The chunks (Label: Value) */
+    .meta-chunk {
+      display: inline-block;
+      white-space: nowrap;
+    }
+    
+    /* Desktop Separator: Adds " | " AFTER the item. 
+       If the line wraps, the pipe stays with the previous item. */
+    .meta-chunk:not(:last-child)::after {
+      content: " | ";
+      margin: 0 6px;
+      color: var(--border-subtle);
+      font-weight: normal;
+    }
+
+    .detail-columns {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.7rem 1rem;
+    }
+    .detail-block h4 {
+      margin: 0 0 0.25rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    .detail-block p {
+      margin: 0 0 0.25rem;
+      font-size: 0.8rem;
+    }
+    .detail-block p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Image enlargement modal */
+    .image-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    .image-modal.active {
+      display: flex;
+    }
+    .image-modal img {
+      max-width: 90%;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(79, 209, 197, 0.3);
+    }
+    .image-modal-text {
+      position: absolute;
+      bottom: 20px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* --- MOBILE STYLES (MATCHING CODEX) --- */
+    @media (max-width: 800px) {
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        position: static;
+        max-height: none;
+        border-right: none;
+        border-bottom: 1px solid #1a202c;
+      }
+      .main {
+        max-width: 100%;
+        padding: 1rem 1rem 2rem;
+      }
+
+      /* Stack Header Elements (Image Top, Text Bottom) */
+      .card-result-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      
+      /* Center the Image */
+      .card-image {
+        margin: 0 auto 1rem auto;
+      }
+      
+      /* Center Icons */
+      .elemental-icon-row {
+        justify-content: center;
+      }
+
+      /* Stack Metadata Vertically (No Pipes) */
+      .meta-chunk {
+        display: block; /* Forces new line */
+        margin-bottom: 3px;
+      }
+      
+      /* Hide the desktop separator on mobile */
+      .meta-chunk:not(:last-child)::after {
+        content: none; 
+      }
+    }
+    
+    /* Sidebar Image Styles */
+    .sidebar-powers {
+      text-align: center;
+      margin: -0.25rem 0 1.5rem 0; /* Spacing around the powers image */
+      padding: 0 0.5rem;
+    }
+    .sidebar-powers img {
+      max-width: 60%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .sidebar-logo-bottom {
+      text-align: center;
+      margin-top: -1rem; /* Pushes it down from the links */
+      margin-bottom: 1rem;
+      padding: 0 0.5rem;
+    }
+    .sidebar-logo-bottom img {
+      max-width: 100%; /* Adjusts the logo size so it's not too huge */
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); /* Optional: adds a nice shadow to the logo */
+    }
+    
+    /* Elemental Icon Styles */
+    .elemental-icon-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-top: 15px;
+    }
+    .element-icon {
+      width: 35px;
+      height: 35px;
+      object-fit: contain;
+    }
+    
+    /* Elemental Icon Glows by Type */
+    .icon-Dark    { filter: drop-shadow(0 0 8px #8e44ad); }
+    .icon-Earth   { filter: drop-shadow(0 0 8px #d2b48c); }
+    .icon-Fire    { filter: drop-shadow(0 0 8px #e67e22); }
+    .icon-Forest  { filter: drop-shadow(0 0 8px #27ae60); }
+    .icon-Light   { filter: drop-shadow(0 0 8px #f1f2f6); }
+    .icon-Thunder { filter: drop-shadow(0 0 8px #f1c40f); }
+    .icon-Water   { filter: drop-shadow(0 0 8px #3498db); }
+    .icon-Wind    { filter: drop-shadow(0 0 8px #87CEEB); }
+    .icon-Blank   { filter: drop-shadow(0 0 8px #718096); }
+    
+    /* Rarity Borders - HIGH INTENSITY GLOWS */
+    .rarity-Common .card-image img { border: 2px solid #a0aec0; box-shadow: 0 0 15px rgba(160, 174, 192, 0.6), 0 10px 26px rgba(0, 0, 0, 0.6); }
+    .rarity-Uncommon .card-image img { border: 2px solid #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.6), 0 10px 26px rgba(0, 0, 0, 0.6); }
+    .rarity-Rare .card-image img { border: 2px solid #3498db; box-shadow: 0 0 15px rgba(52, 152, 219, 0.6), 0 10px 26px rgba(0, 0, 0, 0.6); }
+    .rarity-UltraRare .card-image img { border: 2px solid #9b59b6; box-shadow: 0 0 20px rgba(155, 89, 182, 0.7), 0 10px 26px rgba(0, 0, 0, 0.6); }
+    .rarity-HiddenRare .card-image img { border: 2px solid #f1c40f; box-shadow: 0 0 20px rgba(241, 196, 15, 0.7), 0 10px 26px rgba(0, 0, 0, 0.6); }
+    .rarity-Borderless .card-image img { border: 2px solid #e74c3c; box-shadow: 0 0 20px rgba(231, 76, 60, 0.7), 0 10px 26px rgba(0, 0, 0, 0.6); }
+  
+    .codex-entry {
+      margin-top: 1rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid var(--border-subtle);
+      font-family: Georgia, serif;
+      font-style: italic;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .codex-label {
+      font-family: system-ui, sans-serif;
+      font-style: normal;
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+    
+    /* --- MOBILE OPTIMIZATION --- */
+    h2 { 
+      color: var(--accent); 
+    }    
+    /* 1. Mobile Label (Hidden on Desktop) */
+    .mobile-label { display: none; }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #1a202c; }
+      .main { max-width: 100%; padding: 1rem 1rem 2rem; }
+
+      /* Force table elements to behave like blocks */
+      .table-wrapper { max-height: none; border: none; overflow: visible; }
+      table, thead, tbody, th, td, tr { display: block; }
+      
+      /* Hide Table Headers */
+      thead tr { position: absolute; top: -9999px; left: -9999px; }
+      
+      /* Style the Row as a "Card" */
+      tbody tr { 
+        background: var(--bg-panel-soft);
+        margin-bottom: 1.5rem; 
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        padding: 1.25rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      }
+
+      /* Style the Cells */
+      td { 
+        border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.05); 
+        padding: 0.5rem 0;
+        text-align: left !important;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; 
+      }
+      td:last-child { border-bottom: none; }
+
+      /* Reveal Labels */
+      .mobile-label {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        margin-right: 10px;
+        min-width: 80px; 
+      }
+
+      /* Name & Image (First Cell) */
+      td:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center !important;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+      }
+      td:first-child .mobile-label { display: none; } /* Hide label for name */
+      
+      td:first-child div { font-size: 1.3rem !important; margin-bottom: 10px; }
+      .card-thumbnail { max-height: 200px; width: auto; }
+
+      /* Details Block */
+      td:nth-child(5) { 
+          display: block; 
+          margin-top: 0.5rem;
+          background: rgba(0,0,0,0.2);
+          padding: 10px;
+          border-radius: 8px;
+      }
+      td:nth-child(5) .mobile-label {
+          display: block;
+          margin-bottom: 5px;
+          border-bottom: 1px solid #333;
+          padding-bottom: 2px;
+          width: 100%;
+      }
+      
+      .detail-text { text-align: left; }
+    }
+
+  </style>
+</head>
+<body>
+  <button id="mobile-menu-btn">&#9776;</button>
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+    <div class="main-inner">
+      <section>
+        <h2>Search by Creature Name</h2>
+        <p class="section-subtitle">
+          Start typing a Creature's name. Results will appear below as you type.
+        </p>
+
+        <div class="search-bar">
+          <input id="search-input" type="text" placeholder="Type a Creature name, e.g. Arcana Apprentice" />
+        </div>
+
+        <div class="results-meta">
+          <span id="results-count" class="muted"></span>
+        </div>
+
+        <div id="results" class="results-list"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Image enlargement modal -->
+  <div class="image-modal" id="image-modal" onclick="closeModal()">
+    <img id="modal-image" src="" alt="">
+    <div class="image-modal-text">Click anywhere to close</div>
+  </div>
+
+  <script src="cards_data.js"></script>
+  <script src="codex_data.js"></script>
+  <script src="promo.js"></script>
+  <script>
+    const IMAGE_EXT = '.png';
+
+    function getLevelClass(level) {
+      if (!level || isNaN(level)) return '';
+      const lvl = parseInt(level);
+      if (lvl >= 1 && lvl <= 3) return 'level-common';
+      if (lvl >= 4 && lvl <= 6) return 'level-uncommon';
+      if (lvl >= 7 && lvl <= 9) return 'level-rare';
+      if (lvl >= 10) return 'level-ultra';
+      return ''; // Fallback
+    }
+    
+    function hasExtension(path) {
+      return /\.[a-zA-Z0-9]+$/.test(path);
+    }
+
+    function getCardImageUrl(card) {
+      if (!card.images || !card.images.small) return null;
+      const path = card.images.small;
+      return hasExtension(path) ? path : path + IMAGE_EXT;
+    }
+
+function getElementIconsHTML(card) {
+      if (!card.types || card.types.length === 0) return '';
+      
+      const path = "CardImages/icons/";
+      
+      const iconMap = {
+        "Dark": "PowerDark.png",       
+        "Earth": "PowerEarth.png",     
+        "Fire": "PowerFire.png",       
+        "Forest": "PowerForest.png",   
+        "Light": "PowerLight.png",     
+        "Thunder": "PowerThunder.png", 
+        "Water": "PowerWater.png",     
+        "Wind": "PowerWind.png",       
+        "Blank": "PowerBlank.png" 
+      };
+
+      let html = '<div class="elemental-icon-row">';
+      
+      card.types.forEach(type => {
+        const filename = iconMap[type];
+        if (filename) {
+          html += `<img src="${path}${filename}" class="element-icon icon-${type}" alt="${type}" />`;
+        }
+      });
+      
+      html += '</div>';
+      return html;
+    }
+
+    // Modal logic
+    function enlargeImage(url, name) {
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('modal-image');
+  
+      modalImg.src = url;
+      modalImg.alt = name;
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('image-modal').classList.remove('active');
+    }
+
+    const input = document.getElementById('search-input');
+    const results = document.getElementById('results');
+    const resultsCount = document.getElementById('results-count');
+
+    function renderResults() {
+      const termRaw = (input.value || '').trim();
+      const term = termRaw.toLowerCase();
+
+      if (!term) {
+        results.innerHTML = '';
+        resultsCount.textContent = '0 result(s)';
+        return;
+      }
+
+      // Combine regular cards and promo cards
+      const allCards = [...CARDS, ...PROMO_CARDS];
+
+      let matches = allCards.filter(c => {
+        if (c.supertype !== 'Creature') return false; 
+        if (!c.name) return false;
+        return c.name.toLowerCase().startsWith(term);
+      });
+
+      if (matches.length === 0) {
+        matches = allCards.filter(c => {
+          if (c.supertype !== 'Creature') return false;
+          if (!c.name) return false;
+          return c.name.toLowerCase().includes(term);
+        });
+      }
+
+      results.innerHTML = '';
+      resultsCount.textContent = matches.length + ' result(s)';
+
+      matches.forEach(c => {
+        const div = document.createElement('div');
+        
+        const rarityClean = c.rarity ? c.rarity.replace(/\s+/g, '') : '';
+        const rarityClass = c.rarity ? `rarity-${rarityClean}` : '';
+        div.className = `card-result ${rarityClass}`;
+
+        const hp = c.hp ?? '—';
+        const level = c.level ?? '—';
+
+        const levelDisplay = level !== '—' ? `<span class="${getLevelClass(level)}">${level}</span>` : '—';
+        const hpDisplay = hp !== '—' ? `<span class="stat-glow">${hp}</span>` : '—';
+        const rarityDisplay = c.rarity ? `<span class="rarity-text-${rarityClean}">${c.rarity}</span>` : '—';
+        const typeDisplay = (c.types || []).map(t => `<span class="pill pill-${t}">${t}</span>`).join(' ');
+
+        // Attack 1 with pill styling
+        const atk1Name = (c.attacks && c.attacks[0]) ? c.attacks[0].name : '—';
+        const atk1Cost = (c.attacks && c.attacks[0] && c.attacks[0].cost) 
+          ? c.attacks[0].cost.map(x => {
+              const pType = x.PowerType || x.powerType || 'Blank';
+              return `<span class="text-${pType}">${x.count}</span> <span class="pill pill-${pType}">${pType}</span>`;
+            }).join(' ')
+          : '—';
+        const atk1Damage = (c.attacks && c.attacks[0]) ? c.attacks[0].damage : null;
+        const atk1Desc = (c.attacks && c.attacks[0]) ? (c.attacks[0].effectText || '') : '';
+
+        // Attack 2 with pill styling
+        const atk2Name = (c.attacks && c.attacks[1]) ? c.attacks[1].name : '—';
+        const atk2Cost = (c.attacks && c.attacks[1] && c.attacks[1].cost)
+          ? c.attacks[1].cost.map(x => {
+              const pType = x.PowerType || x.powerType || 'Blank';
+              return `<span class="text-${pType}">${x.count}</span> <span class="pill pill-${pType}">${pType}</span>`;
+            }).join(' ')
+          : '—';
+        const atk2Damage = (c.attacks && c.attacks[1]) ? c.attacks[1].damage : null;
+        const atk2Desc = (c.attacks && c.attacks[1]) ? (c.attacks[1].effectText || '') : '';
+
+        const abilityName = (c.abilities && c.abilities[0]) ? c.abilities[0].name : null;
+        const abilityText = (c.abilities && c.abilities[0]) ? c.abilities[0].effectText : null;
+        const hasAbility = abilityName && abilityText;
+
+        // Weakness with pill styling
+        let weakPart = '—';
+        if (c.weaknesses && c.weaknesses.length > 0) {
+          weakPart = c.weaknesses.map(w => 
+            `<span class="pill pill-${w.PowerType}">${w.PowerType}</span> <span class="text-${w.PowerType}">x${w.multiplier}</span>`
+          ).join(' ');
+        }
+
+        // Retreat cost with pill styling
+        let retreatPart = '—';
+        if (c.retreatCost && c.retreatCost.length > 0) {
+          retreatPart = c.retreatCost.map(rc => {
+            const pType = rc.PowerType || rc.powerType || 'Blank';
+            return `<span class="pill pill-${pType}">${pType}</span> <span class="text-${pType}">x${rc.count}</span>`;
+          }).join(' ');
+        }
+
+        const imgUrl = getCardImageUrl(c);
+        
+        const imgHtml = imgUrl
+          ? `<div class="card-image"><img src="${imgUrl}" alt="${c.name}" onclick="enlargeImage('${imgUrl}', '${c.name.replace(/'/g, "\\'")}')" /></div>`
+          : '<div class="card-image" style="background:#1a202c; height:200px; width:140px; display:flex; align-items:center; justify-content:center; border-radius:10px; color:#555; font-size:0.7rem;">No Image</div>';
+
+        const iconsHtml = getElementIconsHTML(c);
+
+        // --- THIS WAS MISSING IN YOUR CODE ---
+        let loreText = "This character is featured in our light novel, The Last Concordant.";
+        let codexLabel = "Codex";
+        let codexStyle = '';
+
+        if (c.rarity === 'Promo') {
+          codexLabel = "The Last Concordant";
+          codexStyle = ' style="color:#feebc8;"';
+        } else if (typeof loreMap !== 'undefined' && loreMap[c.name]) {
+          loreText = loreMap[c.name];
+        }
+        div.innerHTML = `
+          <div class="card-result-header">
+            ${imgHtml}
+            <div class="card-title-block">
+              <h3>${c.name}</h3>
+              <div class="meta-line">
+                <span class="meta-chunk"><strong>Type:</strong> ${typeDisplay}</span>
+                <span class="meta-chunk"><strong>Level:</strong> ${levelDisplay}</span>
+                <span class="meta-chunk"><strong>HP:</strong> ${hpDisplay}</span>
+              </div>
+              <div class="meta-line" style="margin-top: 0.3rem;">
+                <span class="meta-chunk"><strong>Rarity:</strong> ${rarityDisplay}</span>
+                <span class="meta-chunk"><strong>Set ID:</strong> ${c.collectionNumber || ''}</span>
+              </div>
+              ${iconsHtml}
+            </div>
+          </div>
+          <div class="detail-columns">
+            ${hasAbility ? `
+            <div class="detail-block">
+              <h4>Ability</h4>
+              <p><strong style="color:#feebc8;">${abilityName}</strong></p>
+              <p>${abilityText}</p>
+            </div>
+            ` : ''}
+            <div class="detail-block">
+              <h4>Attack 1</h4>
+              <p><strong>${atk1Name}</strong> ${atk1Damage ? `<span class="stat-damage">- ${atk1Damage} Dmg</span>` : ''}</p>
+              <p class="muted">Cost: ${atk1Cost}</p>
+              ${atk1Desc ? `<p>${atk1Desc}</p>` : ''}
+            </div>
+            ${atk2Name !== '—' ? `
+            <div class="detail-block">
+              <h4>Attack 2</h4>
+              <p><strong>${atk2Name}</strong> ${atk2Damage ? `<span class="stat-damage">- ${atk2Damage} Dmg</span>` : ''}</p>
+              <p class="muted">Cost: ${atk2Cost}</p>
+              ${atk2Desc ? `<p>${atk2Desc}</p>` : ''}
+            </div>
+            ` : ''}
+            <div class="detail-block">
+              <h4>Weakness &amp; Retreat</h4>
+              <p><strong>Weakness:</strong> ${weakPart}</p>
+              <p><strong>Retreat cost:</strong> ${retreatPart}</p>
+            </div>
+          </div>
+          </div>
+          <div class="codex-entry">
+            <span class="codex-label"${codexStyle}>${codexLabel}</span>
+            "${loreText}"
+          </div>
+        `;
+        results.appendChild(div);
+      });
+    }
+
+    function formatCost(costArray) {
+        if(!costArray || costArray.length === 0) return '—';
+        return costArray.map(c => `${c.count} ${c.PowerType}`).join(', ');
+    }
+
+    let debounceTimer;
+    input.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            renderResults();
+        }, 300);
+    });
+  </script>
+  <script src="sidebar.js"></script>
+  <script src="footer.js"></script>
+</body>
+</html>

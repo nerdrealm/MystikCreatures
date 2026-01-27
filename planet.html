@@ -1,0 +1,2573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Theme Colors for Mobile Browsers -->
+    <meta name="theme-color" content="#05070b">
+    <meta name="theme-color" content="#05070b" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f7fafc" media="(prefers-color-scheme: light)">
+    
+    <!-- iOS Safari Specific -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Myrithil">
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <title>Explore Myrithil</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        
+        body {
+            overflow: hidden;
+        }
+        
+        .main {
+            position: relative;
+            padding: 0 !important;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            display: block;
+            outline: none;
+        }
+
+        /* --- UI OVERLAYS --- */
+        .planet-ui {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* HEADER */
+        .planet-header { top: 2rem; left: 2rem; }
+
+        .planet-title {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 3.5rem;
+            color: var(--accent);
+            text-shadow: none;
+            margin: 0;
+            opacity: 0;
+            animation: fadeIn 2s ease-out forwards;
+            font-weight: 600;
+        }
+
+        .planet-subtitle {
+            font-family: system-ui, sans-serif;
+            color: var(--text-muted);
+            letter-spacing: 0.2em;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+            opacity: 0;
+            animation: fadeIn 2s ease-out 0.5s forwards;
+        }
+
+        /* STATS BOX */
+        
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            align-items: center;
+        }
+
+        .stat-label { 
+            color: var(--text-muted); 
+            text-transform: uppercase; 
+            font-size: 0.75rem; 
+            letter-spacing: 0.1em;
+        }
+
+        .stat-value { 
+            color: var(--text-main); 
+            font-family: system-ui, -apple-system, sans-serif; 
+            font-weight: 600;
+        }
+        
+        .highlight-stable {
+            color: #9ae6b4;
+            text-shadow: 0 0 8px rgba(154, 230, 180, 0.4);
+            font-weight: 700;
+        }
+
+        .highlight-high {
+            color: #ff4444;
+            text-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+            font-weight: 700;
+        }
+
+        /* LOADING SCREEN */
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #05070b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.8s ease;
+        }
+        
+        .loader-text {
+            color: var(--accent);
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.1em;
+            font-size: 1.2rem;
+            animation: pulse 1.5s infinite;
+            padding: 20px;
+            text-align: center;
+        }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* Mobile Menu Button */
+        #mobile-menu-btn { display: none; }
+        
+        /* --- COLLAPSIBLE STATS CSS (Global) --- */
+        /* Hide mobile header on Desktop by default */
+        .stats-mobile-header { display: none; }
+
+        /* --- STATS BOX */
+        .planet-stats {
+            bottom: 2rem;
+            right: 2rem;
+            text-align: right;
+            background: rgba(11, 15, 25, 0.6);
+            padding: 1.5rem;
+            border-radius: 4px; /* Using fixed px to match new button */
+            border: 1px solid rgba(79, 209, 197, 0.3);
+            backdrop-filter: blur(5px);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 1s ease-out 1s forwards;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            z-index: 20;
+        }
+
+        /* --- NEW ORBIT BUTTON (Styled & Animated) --- */
+        #orbit-btn {
+            position: absolute;
+            bottom: 2rem; 
+            right: 18rem; /* DESKTOP: Sits to the left of stats box */
+            
+            padding: 1rem 1.5rem; 
+            display: flex;
+            align-items: center;
+            gap: 10px; 
+            
+            background: rgba(11, 15, 25, 0.6);
+            border: 1px solid rgba(79, 209, 197, 0.3);
+            color: #4fd1c5;
+            
+            border-radius: 4px;
+            
+            font-family: system-ui, sans-serif;
+            text-transform: uppercase;
+            font-weight: 700;
+            font-size: 0.85rem; 
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            z-index: 20;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+
+            /* Animation */
+            opacity: 0; 
+            transform: translateY(20px); 
+            animation: slideUp 1s ease-out 1.2s forwards; 
+        }
+
+        #orbit-btn:hover {
+            background: rgba(79, 209, 197, 0.1);
+            border-color: #4fd1c5;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(79, 209, 197, 0.4);
+        }
+
+        /* Icon Style */
+        .btn-icon { width: 18px; height: 18px; fill: currentColor; }
+
+        /* --- POPUP LABEL --- */
+        #location-label {
+            position: fixed; 
+            display: none;
+            flex-direction: column; /* Stacks Name on top of Image */
+            align-items: center;    
+            
+            /* TEAL Border & Text */
+            border: 1px solid #4fd1c5; 
+            background: rgba(11, 15, 25, 0.95);
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            
+            z-index: 1000;
+            font-family: system-ui, sans-serif;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+            
+            /* Center the label perfectly above the dot */
+            transform: translate(-50%, -100%); 
+            margin-top: -15px; /* Nudge up slightly so arrow touches dot */
+            
+            pointer-events: auto !important; 
+            cursor: pointer;
+        }
+        
+        /* The Teal Arrow pointing down */
+        #location-label::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px 6px 0;
+            border-style: solid;
+            border-color: #4fd1c5 transparent transparent transparent; 
+        }
+
+       
+
+        /* --- 3. PANORAMIC MODAL (Vertical Box Style) --- */
+        .pan-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10002;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+        }
+
+        .pan-modal.active { display: flex; }
+
+        /* The Vertical Viewport Box */
+        .pan-container {
+            width: 85vw;           /* Mobile width */
+            max-width: 400px;      /* Desktop max width */
+            height: 60vh;          /* Vertical height */
+            background: #000;
+            border-top: 2px solid #4fd1c5;
+            border-bottom: 2px solid #4fd1c5;
+            overflow: hidden;      /* Hides the rest of the panoramic image */
+            position: relative;
+            cursor: grab;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+        
+        .pan-container:active { cursor: grabbing; }
+
+        /* The Image (Fits height, overflows width) */
+        .pan-image {
+            height: 100%;      
+            width: auto;       
+            max-width: none;   
+            position: absolute;
+            left: 0; top: 0;
+            user-select: none;
+            -webkit-user-drag: none;
+            will-change: transform; 
+
+        }
+
+        .pan-controls {
+            margin-top: 15px;
+            color: var(--text-muted);
+            font-family: system-ui, sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .close-hint {
+            display: block;
+            margin-top: 8px;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.4); /* Faded Gray */
+            font-size: 0.8rem;
+        }
+
+        /* --- ORIGINAL MOBILE TWEAKS (Restored & Fixed) --- */
+        @media (max-width: 800px) { 
+            /* 1. LAYOUT & CANVAS */
+            .main { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; }
+            #canvas-container { position: absolute !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; }
+            #mobile-menu-btn { display: flex; position: fixed; top: 15px; left: 15px; z-index: 10001; }
+            
+            /* 2. HEADER & SUBTITLE */
+            .planet-header { top: 70px !important; left: 50% !important; transform: translateX(-50%); text-align: center; width: 100%; padding: 0 10px; }
+            .planet-title { font-size: 2rem !important; }
+            .planet-subtitle { font-size: 0.65rem !important; letter-spacing: 0.05em !important; white-space: nowrap !important; overflow: visible; width: auto; display: inline-block; }
+            
+            /* 3. STATS BOX POSITIONING (Original Logic) */
+            .planet-stats {
+                bottom: 4.55rem !important; 
+                right: 1rem !important; /* Reduced right margin to give more space */
+                left: auto !important;
+                transform: none !important;
+                width: auto !important;
+                padding: 1rem 1.5rem !important;
+                display: flex; flex-direction: column;
+                cursor: pointer; pointer-events: auto !important;
+                opacity: 1 !important; 
+                animation: none !important;
+            }
+
+            /* 4. ORBIT BUTTON (Left of Stats Box - SMALLER SIZE) */
+            #orbit-btn {
+                bottom: 4.55rem;
+                right: auto;
+                left: 1rem; 
+                width: auto;
+                
+                /* --- KEY CHANGES FOR MOBILE SIZE --- */
+                padding: 0.7rem 0.9rem; /* Smaller padding */
+                font-size: 0.7rem; /* Smaller text */
+                gap: 5px; /* Closer icon spacing */
+                
+                opacity: 1 !important;
+                animation: none !important;
+                transform: none !important;
+            }
+            
+            /* Make icon smaller on mobile too */
+            #orbit-btn .btn-icon { width: 14px; height: 14px; }
+
+            /* Stats Mobile Header */
+            .stats-mobile-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; color: #4fd1c5; font-family: system-ui, sans-serif; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; }
+            .toggle-icon { font-size: 1.2rem; font-weight: 400; transition: transform 0.3s ease; }
+
+            /* Content Wrapper */
+            .stats-content-wrapper { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s ease, opacity 0.3s ease; }
+            .stat-row { margin-bottom: 0.5rem; font-size: 0.85rem !important; }
+            .stat-label { font-size: 0.65rem !important; }
+
+            /* Open State */
+            .planet-stats.open .stats-content-wrapper { max-height: 300px; opacity: 1; margin-top: 1rem; }
+            .planet-stats.open .toggle-icon { transform: rotate(45deg); color: #ff4444; }
+        }
+
+        .creatures-list {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            pointer-events: auto !important;
+        }
+
+        .creatures-list span {
+            display: inline-block;
+            margin: 0 8px;
+            cursor: pointer;
+            position: relative;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            transition: all 0.2s ease;
+            pointer-events: auto !important;
+        }
+
+        .type-Dark { color: #a569bd; text-shadow: 0 0 8px rgba(142, 68, 173, 0.6); }
+        .type-Earth { color: #e0cdae; text-shadow: 0 0 8px rgba(210, 180, 140, 0.6); }
+        .type-Fire { color: #f39c12; text-shadow: 0 0 8px rgba(230, 126, 34, 0.6); }
+        .type-Forest { color: #2ecc71; text-shadow: 0 0 8px rgba(39, 174, 96, 0.6); }
+        .type-Light { color: #ffffff; text-shadow: 0 0 8px rgba(241, 242, 246, 0.6); }
+        .type-Thunder { color: #f4d03f; text-shadow: 0 0 8px rgba(241, 196, 15, 0.6); }
+        .type-Water { color: #5dade2; text-shadow: 0 0 8px rgba(52, 152, 219, 0.6); }
+        .type-Wind { color: #87CEEB; text-shadow: 0 0 8px rgba(135, 206, 235, 0.6); }
+
+        .creatures-list span:hover {
+            transform: scale(1.05);
+            filter: brightness(1.3);
+        }
+
+        .creature-card-preview {
+            display: none;
+            position: fixed;
+            z-index: 10003;
+            pointer-events: none;
+        }
+
+        .creature-card-preview img {
+            max-width: 200px;
+            max-height: 280px;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            border: 2px solid #4fd1c5;
+        }
+
+        @media (min-width: 801px) {
+            .creatures-list span:hover > .creature-card-preview {
+                display: block;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .creature-card-preview.mobile-active {
+                /* Flex allows us to stack the Image and the Hint Text vertically */
+                display: flex !important; 
+                flex-direction: column;
+                align-items: center;
+                
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important; 
+                z-index: 10005;
+                pointer-events: auto; 
+            }
+            
+            .creature-card-preview.mobile-active img {
+                max-width: 60vw;
+                max-height: 45vh;
+                box-shadow: 0 0 30px rgba(0,0,0,0.9);
+                border-radius: 8px; /* Ensure rounded corners on the card */
+            }
+
+        .population-info {
+            margin-top: 50px !important;
+            padding-top: 30px !important;
+            border-top: 1px solid rgba(79, 209, 197, 0.2);
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(79, 209, 197, 0.7);
+            font-family: system-ui, sans-serif;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .population-info .pop-icon {
+            display: inline-block;
+            margin-right: 8px;
+            opacity: 0.7;
+            vertical-align: middle;
+            width: 20px !important;
+            height: 20px !important;
+        }
+
+            /* The "Tap to Close" Flag */
+            .mobile-close-hint {
+                margin-top: 12px;
+                background: rgba(0, 0, 0, 0.8);
+                color: #4fd1c5; /* Teal text */
+                border: 1px solid #4fd1c5;
+                padding: 6px 16px;
+                border-radius: 20px;
+                font-family: system-ui, sans-serif;
+                font-size: 0.75rem;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                pointer-events: none; /* Clicks pass through to the main container */
+                box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+                animation: fadeIn 0.3s ease-out;
+            }
+        }
+
+        /* Hide the hint on Desktop */
+        @media (min-width: 801px) {
+            .mobile-close-hint {
+                display: none;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <button id="mobile-menu-btn">&#9776;</button>
+
+    <div class="sidebar"></div>
+
+    <div class="main">
+        
+        <div class="loading-overlay" id="loader">
+            <div class="loader-text">TRAVELING TO MYRITHIL...</div>
+        </div>
+
+        <div class="planet-ui planet-header">
+            <h1 class="planet-title">Myrithil</h1>
+            <div class="planet-subtitle">Orbit: <span class="highlight-stable">Stable</span> // <span class="highlight-sector">Sector 7</span> // <span class="highlight-system">Aethelgrad System</span></div>
+        </div>
+
+        <!-- NEW: ENTER ORBIT BUTTON -->
+        <button id="orbit-btn">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12,2A10,10 0 1,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 1,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 1,1 6,12A6,6 0 0,1 12,6M12,8A4,4 0 1,0 16,12A4,4 0 0,0 12,8Z"/></svg>
+            <span>ENTER ORBIT</span>
+        </button>
+        <!-- NEW: POPUP LABEL -->
+        <div id="location-label"></div>
+
+        <div class="planet-ui planet-stats" id="statsBox">
+            <!-- Header (Visible) -->
+            <div class="stats-mobile-header">
+                <span>Planetary Data</span>
+                <span class="toggle-icon">+</span>
+            </div>
+
+            <!-- Content (Hidden) -->
+            <div class="stats-content-wrapper">
+                <div class="stat-row">
+                    <span class="stat-label">Diameter</span>
+                    <span class="stat-value">13,942 KM</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Terrain</span>
+                    <span class="stat-value">Terrestrial</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Gravity</span>
+                    <span class="stat-value">10.24 m/s²</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Population</span>
+                    <span class="stat-value">3.86 Billion</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Magic Density</span>
+                    <span class="stat-value highlight-high">HIGH</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="canvas-container"></div>
+    </div>
+    <div id="pan-modal" class="pan-modal">
+        <div class="pan-container" id="pan-container">
+            <img id="pan-image" class="pan-image" src="" alt="Location View" draggable="false">
+        </div>
+
+        <div class="pan-controls">
+            <span style="color:#4fd1c5; font-weight:bold;">Drag</span> or <span style="color:#4fd1c5; font-weight:bold;">Swipe</span> to look around
+            <span class="close-hint">Click outside the image to close</span>
+            <div class="creatures-list" id="creaturesList"></div>
+        </div>
+    </div>
+    
+    <div id="cardPreview" class="creature-card-preview" onclick="closeMobileCard()">
+        <img id="cardPreviewImg" src="" alt="Creature Card">
+        <div class="mobile-close-hint">TAP CARD TO CLOSE</div>
+    </div>
+    <script src="locations_data.js"></script>
+    <script src="locations_data_night.js"></script>
+    <script src="locations_creatures.js"></script>
+    <script src="locations_population.js"></script>
+    <script src="sidebar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const THREE = window.THREE;
+        const CONTAINER = document.getElementById('canvas-container');
+        const TEXTURE_URL = 'MyrithilPlanet.png'; 
+        
+        let isRotating = true; // Control flag for rotation
+                let lastSelectedMesh = null;
+                let mobileLight = null;
+                let markersGroup = null;
+                let isOrbitMode = false;
+                let isDraggingPan = false;
+                let hasMoved = false; // Tracks if we actually dragged
+                let startPanX = 0;
+                let currentTranslate = 0;
+                let prevTranslate = 0;
+
+        const orbitBtn = document.getElementById('orbit-btn');
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        const locationLabel = document.getElementById('location-label');
+        const panModal = document.getElementById('pan-modal');
+        const panImg = document.getElementById('pan-image');
+        const panContainer = document.getElementById('pan-container');
+
+        // --- 1. SETUP RENDERER & SCENE ---
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x05070b, 0.0001);
+
+        const isMobile = window.innerWidth < 768;
+        let planetMesh; 
+        let cloudMesh; 
+
+        // --- DEFINE MOONS GLOBALLY ---
+        let moon1Pivot, moon2Pivot;
+        let moon1Mesh, moon2Mesh;
+
+        // ZOOM SETTINGS
+        const initialDistance = isMobile ? 35 : 30;
+        
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50000);
+        camera.position.set(0, 0, initialDistance);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+        CONTAINER.appendChild(renderer.domElement);
+
+        // --- 2. FIX RESIZING ---
+        function handleResize() {
+            const width = CONTAINER.clientWidth || window.innerWidth;
+            const height = CONTAINER.clientHeight || window.innerHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+        handleResize();
+        window.addEventListener('resize', handleResize);
+
+        // --- 3. ORBIT CONTROLS ---
+        class SimpleOrbitControls {
+            constructor(camera, domElement) {
+                this.camera = camera;
+                this.domElement = domElement;
+                this.target = new THREE.Vector3();
+                this.spherical = new THREE.Spherical();
+                this.sphericalDelta = new THREE.Spherical();
+                this.minDistance = isMobile ? 25 : 20;  
+                this.maxDistance = isMobile ? 60 : 55; 
+                this.isDown = false;
+                this.isPinching = false;
+                this.startX = 0;
+                this.startY = 0;
+                this.initialPinchDist = 0;
+                this.initialRadius = 0;
+                this.sensitivity = isMobile ? 0.002 : 0.005;
+                
+                this.domElement.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: false });
+                this.domElement.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
+                this.domElement.addEventListener('touchend', this.onUp.bind(this));
+                this.domElement.addEventListener('mousedown', this.onDown.bind(this));
+                this.domElement.addEventListener('mousemove', this.onMove.bind(this));
+                this.domElement.addEventListener('mouseup', this.onUp.bind(this));
+                this.domElement.addEventListener('wheel', this.onWheel.bind(this), { passive: false });
+            }
+
+            onWheel(e) {
+                e.preventDefault();
+                const offset = new THREE.Vector3().copy(this.camera.position).sub(this.target);
+                const currentSpherical = new THREE.Spherical().setFromVector3(offset);
+                currentSpherical.radius += e.deltaY * 0.05;
+                currentSpherical.radius = Math.max(this.minDistance, Math.min(this.maxDistance, currentSpherical.radius));
+                offset.setFromSpherical(currentSpherical);
+                this.camera.position.copy(this.target).add(offset);
+                this.camera.lookAt(this.target);
+            }
+
+            onDown(e) {
+                this.isDown = true;
+                this.startX = e.clientX;
+                this.startY = e.clientY;
+            }
+
+            onMove(e) {
+                if(!this.isDown) return;
+                const deltaX = (e.clientX - this.startX) * this.sensitivity;
+                const deltaY = (e.clientY - this.startY) * this.sensitivity;
+                this.rotate(deltaX, deltaY);
+                this.startX = e.clientX;
+                this.startY = e.clientY;
+            }
+
+            onTouchStart(e) {
+                if (e.touches.length === 1) {
+                    this.isDown = true;
+                    this.startX = e.touches[0].pageX;
+                    this.startY = e.touches[0].pageY;
+                } else if (e.touches.length === 2) {
+                    this.isPinching = true;
+                    this.isDown = false;
+                    const dx = e.touches[0].pageX - e.touches[1].pageX;
+                    const dy = e.touches[0].pageY - e.touches[1].pageY;
+                    this.initialPinchDist = Math.sqrt(dx * dx + dy * dy);
+                    const offset = new THREE.Vector3().copy(this.camera.position).sub(this.target);
+                    this.spherical.setFromVector3(offset);
+                    this.initialRadius = this.spherical.radius;
+                }
+            }
+
+            onTouchMove(e) {
+                if(e.touches) e.preventDefault(); 
+                if (e.touches.length === 1 && this.isDown) {
+                    const deltaX = (e.touches[0].pageX - this.startX) * this.sensitivity;
+                    const deltaY = (e.touches[0].pageY - this.startY) * this.sensitivity;
+                    this.rotate(deltaX, deltaY);
+                    this.startX = e.touches[0].pageX;
+                    this.startY = e.touches[0].pageY;
+                } else if (e.touches.length === 2 && this.isPinching) {
+                    const dx = e.touches[0].pageX - e.touches[1].pageX;
+                    const dy = e.touches[0].pageY - e.touches[1].pageY;
+                    const currentDist = Math.sqrt(dx * dx + dy * dy);
+                    if (this.initialPinchDist > 0) {
+                        const scale = this.initialPinchDist / currentDist;
+                        this.spherical.radius = this.initialRadius * scale;
+                        this.spherical.radius = Math.max(this.minDistance, Math.min(this.maxDistance, this.spherical.radius));
+                        const offset = new THREE.Vector3();
+                        offset.setFromSpherical(this.spherical);
+                        this.camera.position.copy(this.target).add(offset);
+                        this.camera.lookAt(this.target);
+                    }
+                }
+            }
+
+            onUp() { this.isDown = false; this.isPinching = false; }
+            rotate(deltaX, deltaY) {
+                this.sphericalDelta.theta -= deltaX;
+                this.sphericalDelta.phi -= deltaY;
+            }
+            update() {
+                if (!this.isPinching) {
+                    const offset = new THREE.Vector3().copy(this.camera.position).sub(this.target);
+                    this.spherical.setFromVector3(offset);
+                    this.spherical.theta += this.sphericalDelta.theta;
+                    this.spherical.phi += this.sphericalDelta.phi;
+                    this.spherical.makeSafe();
+                    this.spherical.radius = Math.max(this.minDistance, Math.min(this.maxDistance, this.spherical.radius));
+                    this.sphericalDelta.theta *= 0.9;
+                    this.sphericalDelta.phi *= 0.9;
+                    offset.setFromSpherical(this.spherical);
+                    this.camera.position.copy(this.target).add(offset);
+                    this.camera.lookAt(this.target);
+                }
+            }
+        }
+        const controls = new SimpleOrbitControls(camera, renderer.domElement);
+
+        // 1. PROCEDURAL NOISE GENERATOR
+        // Creates a texture in memory so you don't need external image files
+        function createNoiseTexture() {
+            const size = 512;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, size, size);
+
+            for (let i = 0; i < 500; i++) {
+                const x = Math.random() * size;
+                const y = Math.random() * size;
+                const r = Math.random() * 50 + 20;
+                
+                // Keep the opacity low to allow layering
+                const opacity = Math.random() * 0.1;
+                
+                const grd = ctx.createRadialGradient(x, y, 0, x, y, r);
+                grd.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
+                grd.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                
+                ctx.fillStyle = grd;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            return texture;
+        }
+
+        const noiseTexture = createNoiseTexture();
+
+         const Perlin = {
+            init: function() {
+                this.p = new Uint8Array(512);
+                const p = new Uint8Array(256);
+                for(let i=0; i<256; i++) p[i] = i;
+                for(let i=255; i>0; i--) {
+                    const r = Math.floor(Math.random() * (i+1));
+                    [p[i], p[r]] = [p[r], p[i]];
+                }
+                for(let i=0; i<512; i++) this.p[i] = p[i & 255];
+            },
+            fade: function(t) { return t*t*t*(t*(t*6-15)+10); },
+            lerp: function(t, a, b) { return a + t * (b - a); },
+            grad: function(hash, x, y, z) {
+                const h = hash & 15;
+                const u = h < 8 ? x : y, v = h < 4 ? y : h===12||h===14 ? x : z;
+                return ((h&1) === 0 ? u : -u) + ((h&2) === 0 ? v : -v);
+            },
+            noise: function(x, y, z) {
+                if(!this.p) this.init();
+                const X = Math.floor(x) & 255, Y = Math.floor(y) & 255, Z = Math.floor(z) & 255;
+                x -= Math.floor(x); y -= Math.floor(y); z -= Math.floor(z);
+                const u = this.fade(x), v = this.fade(y), w = this.fade(z);
+                const A = this.p[X]+Y, AA = this.p[A]+Z, AB = this.p[A+1]+Z;
+                const B = this.p[X+1]+Y, BA = this.p[B]+Z, BB = this.p[B+1]+Z;
+                return this.lerp(w, this.lerp(v, this.lerp(u, this.grad(this.p[AA], x, y, z),
+                    this.grad(this.p[BA], x-1, y, z)), this.lerp(u, this.grad(this.p[AB], x, y-1, z),
+                    this.grad(this.p[BB], x-1, y-1, z))), this.lerp(v, this.lerp(u, this.grad(this.p[AA+1], x, y, z-1),
+                    this.grad(this.p[BA+1], x-1, y, z-1)), this.lerp(u, this.grad(this.p[AB+1], x, y-1, z-1),
+                    this.grad(this.p[BB+1], x-1, y-1, z-1))));
+            }
+        };
+        Perlin.init();
+
+        function createCloudTexture() {
+            const width = 1024;
+            const height = 512;
+            const size = width * height;
+            const data = new Uint8Array(size * 4);
+            const zSeed = Math.random() * 100;
+
+            // Helper: Maps 2D coordinates to a 3D Cylinder to ensure the X-axis wraps seamlessly
+            const cylinderNoise = (u, v, freq, seed) => {
+                const angle = u * Math.PI * 2; // Convert U (0-1) to an angle (0-360)
+                
+                // Project into 3D space:
+                // We form a circle using Cos/Sin for the X axis wrapping.
+                // We keep Y linear (v).
+                // We use the Z-dimension of the noise for the circle depth + seed.
+                const radius = freq / (2 * Math.PI); // Scale radius so frequency matches roughly
+                
+                return Perlin.noise(
+                    Math.cos(angle) * radius,     // X: Circle wrap
+                    v * freq,                     // Y: Linear vertical
+                    Math.sin(angle) * radius + seed // Z: Circle wrap + seed offset
+                );
+            };
+
+            for (let i = 0; i < size; i++) {
+                const x = i % width;
+                const y = Math.floor(i / width);
+                
+                // UV Coordinates (0 to 1)
+                let u = x / width;
+                let v = y / height;
+
+                // 1. SEAMLESS DOMAIN WARPING
+                // We use the cylinder wrapper for the distortion too, 
+                // otherwise the distortion itself creates a seam!
+                const warpX = cylinderNoise(u, v, 4, zSeed);
+                const warpY = cylinderNoise(u, v, 4, zSeed + 5.2);
+                
+                const distortedU = u + (warpX * 0.1); 
+                const distortedV = v + (warpY * 0.1); 
+
+                // 2. FRACTAL NOISE SUMMATION (Octaves)
+                // Use the cylinder wrapper for the actual clouds
+                
+                // Layer 1: Big Shapes
+                let n = cylinderNoise(distortedU, distortedV, 6, zSeed);
+                
+                // Layer 2: Medium Details
+                n += cylinderNoise(distortedU, distortedV, 12, zSeed + 10) * 0.5;
+                
+                // Layer 3: Fine Details
+                n += cylinderNoise(distortedU, distortedV, 24, zSeed + 20) * 0.25;
+
+                // Normalize to 0...1 range
+                n = n * 0.5 + 0.5;
+
+                // 3. CONTRAST & COVERAGE
+                const coverage = 0.45; 
+                if (n < coverage) {
+                    n = 0; 
+                } else {
+                    n = (n - coverage) / (1 - coverage); 
+                    n = Math.pow(n, 1.2); 
+                }
+
+                // 4. POLE SOFTENING 
+                // Fades clouds at the very top/bottom to hide the sphere pinching
+                const poleMask = Math.sin(v * Math.PI);
+                n *= poleMask;
+
+                const stride = i * 4;
+                data[stride] = 255;     // R
+                data[stride + 1] = 255; // G
+                data[stride + 2] = 255; // B
+                data[stride + 3] = Math.floor(n * 255); // Alpha
+            }
+
+            const texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
+            texture.magFilter = THREE.LinearFilter;
+            texture.minFilter = THREE.LinearFilter;
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.needsUpdate = true;
+            return texture;
+        }
+
+        const cloudTexture = createCloudTexture();
+
+        // 2. AURORA SHADER (The "Curtain" Effect)
+        const auroraVertexShader = `
+        varying vec2 vUv;
+        varying vec3 vNormal; // We need the normal to detect sunlight
+        varying vec3 vViewPosition;
+        
+        void main() {
+            vUv = uv;
+            
+            // Calculate normal in World Space (to compare with fixed Sun position)
+            vNormal = normalize(mat3(modelMatrix) * normal);
+            
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            vViewPosition = -mvPosition.xyz;
+            gl_Position = projectionMatrix * mvPosition;
+        }
+    `;
+
+    const auroraFragmentShader = `
+        uniform float time;
+        uniform sampler2D tNoise;
+        uniform vec3 color;
+        uniform vec3 sunDirection; // New: Direction of the sun
+        uniform float isNorth; // 1.0 for North, -1.0 for South
+        
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        varying vec3 vViewPosition;
+
+        void main() {
+            // --- 1. Day/Night Mask ---
+            // Calculate angle between surface and sun
+            // 1.0 = Facing Sun, -1.0 = Midnight side
+            float sunDot = dot(vNormal, sunDirection);
+            
+            // Create a mask that is 1.0 at night and fades to 0.0 as it hits twilight
+            // smoothstep(limit1, limit2, value)
+            float nightMask = smoothstep(0.2, -0.2, sunDot);
+            
+            // If it's fully day, discard pixel to save performance
+            if (nightMask <= 0.01) discard;
+
+            // --- 2. Polar Mask (Wrap to Sphere) ---
+            // Sphere UV.y goes 0 (South) to 1 (North)
+            float polarMask = 0.0;
+            
+            if (isNorth > 0.0) {
+                // North Pole: Visible from uv.y 0.85 to 1.0
+                polarMask = smoothstep(0.80, 0.86, vUv.y) * (1.0 - smoothstep(0.98, 1.0, vUv.y));
+            } else {
+                // South Pole: Visible from uv.y 0.15 to 0.0
+                polarMask = smoothstep(0.20, 0.14, vUv.y) * (1.0 - smoothstep(0.02, 0.0, vUv.y));
+            }
+
+            // --- 3. Flowing Noise ---
+            vec2 uv1 = vUv + vec2(time * 0.03, time * 0.0); // Spin around pole
+            vec2 uv2 = vUv + vec2(time * -0.02, time * 0.04); // Ripple up/down
+            
+            float n1 = texture2D(tNoise, uv1 * vec2(1.5, 1.0)).r; // Stretch noise horizontally
+            float n2 = texture2D(tNoise, uv2 * vec2(4.0, 1.0)).r;
+            float noise = (n1 + n2) * 0.5;
+            
+            // Boost contrast of noise to make "streaks"
+            noise = pow(noise, 2.0) * 1.5;
+
+            // --- 4. Fresnel Glow (Soft edges) ---
+            // Makes it fade when looking straight down at it, stronger at glancing angles
+            vec3 normal = normalize(vNormal);
+            vec3 viewDir = normalize(vViewPosition);
+            float fresnel = pow(1.0 - abs(dot(normal, viewDir)), 2.0);
+
+            float alpha = noise * polarMask * nightMask * (0.4 + fresnel * 0.6) * 4.0;
+
+            
+            gl_FragColor = vec4(color, alpha);
+        }
+    `;
+
+        // 4. GLOBAL VARIABLES FOR EFFECTS
+        let auroraNorth, auroraSouth;
+
+        // 5. INIT FUNCTION: Call this to spawn Auroras
+        function initAuroras() {
+        if (!planetGroup) return;
+
+        // NEW GEOMETRY: Sphere, slightly larger than planet (5.0 -> 5.15)
+        // High segment count (64,64) ensures it curves smoothly
+        const geo = new THREE.SphereGeometry(5.15, 64, 64);
+        
+        // Material: North (Teal/Green)
+        const matNorth = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                tNoise: { value: noiseTexture },
+                color: { value: new THREE.Color(0x4fd1c5) },
+                sunDirection: { value: new THREE.Vector3(1, 0, 0) }, // Default
+                isNorth: { value: 1.0 } // Tell shader this is North
+            },
+            vertexShader: auroraVertexShader,
+            fragmentShader: auroraFragmentShader,
+            side: THREE.DoubleSide, // Viewable from space and ground
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            transparent: true
+        });
+
+        // Material: South (Purple/Pink)
+        const matSouth = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                tNoise: { value: noiseTexture },
+                color: { value: new THREE.Color(0xbf40bf) },
+                sunDirection: { value: new THREE.Vector3(1, 0, 0) },
+                isNorth: { value: -1.0 } // Tell shader this is South
+            },
+            vertexShader: auroraVertexShader,
+            fragmentShader: auroraFragmentShader,
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            transparent: true
+        });
+
+        auroraNorth = new THREE.Mesh(geo, matNorth);
+        // Note: No position shift needed! It's a sphere centered on the planet.
+        
+        auroraSouth = new THREE.Mesh(geo, matSouth);
+
+        planetGroup.add(auroraNorth);
+        planetGroup.add(auroraSouth);
+    }
+
+        // 6. HELPER: Lat/Lon to Vector3
+        function getVectorFromCoords(x, y, radius) {
+            const phi = y * Math.PI;
+            const theta = (x * 2 * Math.PI) - 1.57;
+            const vec = new THREE.Vector3();
+            vec.setFromSphericalCoords(radius, phi, theta);
+            return vec;
+        }
+
+        // --- 4. LIGHTING ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.02);
+        scene.add(ambientLight);
+        const sunLight = new THREE.DirectionalLight(0xfff0dd, 2.25);
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 500;
+        sunLight.shadow.camera.left = -15;
+        sunLight.shadow.camera.right = 15;
+        sunLight.shadow.camera.top = 15;
+        sunLight.shadow.camera.bottom = -15;
+        
+        // CRITICAL FIXES FOR SOFT SHADOWS:
+        sunLight.shadow.bias = -0.0001; 
+        sunLight.shadow.radius = 2; // Blurs the shadow edges (Three.js PCFSoft feature)
+        scene.add(sunLight);
+        const rimLight = new THREE.DirectionalLight(0xb0c4de, 0.5); 
+        rimLight.position.set(-20, 5, -20);
+        scene.add(rimLight);
+
+        let timeOfDay = 0;
+        function updateDayNightCycle() {
+            timeOfDay += 0.0001;
+            if (timeOfDay > 1) timeOfDay = 0;
+            const sunAngle = timeOfDay * Math.PI * 2;
+            const sunDistance = 50;
+            sunLight.position.set(
+                Math.cos(sunAngle) * sunDistance,
+                Math.sin(sunAngle) * sunDistance * 0.4,
+                Math.sin(sunAngle) * sunDistance * 0.3
+            );
+            const dayIntensity = Math.max(0, Math.sin(sunAngle));
+            sunLight.intensity = 1.2 + dayIntensity * 0.8;
+            const sunsetFactor = Math.abs(Math.sin(sunAngle * 0.5));
+            sunLight.color.setRGB(1, 0.94 + sunsetFactor * 0.06, 0.87 + sunsetFactor * 0.13);
+            ambientLight.intensity = 0.02 + dayIntensity * 0.15;
+            rimLight.intensity = 0.5 + (1 - dayIntensity) * 0.3;
+        }
+
+        // --- 5. PLANET ---
+        const planetGroup = new THREE.Group();
+        if (isMobile) planetGroup.position.y = 0;
+        scene.add(planetGroup);
+
+        function removeLoader() {
+            const loader = document.getElementById('loader');
+            if(loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 800);
+            }
+        }
+
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.load(TEXTURE_URL, (texture) => {
+            const geometry = new THREE.SphereGeometry(5.0, 64, 64);
+            const material = new THREE.MeshStandardMaterial({
+                map: texture, roughness: 0.9, metalness: 0.05, bumpMap: texture, bumpScale: 0.06
+            });
+            planetMesh = new THREE.Mesh(geometry, material);
+            
+            planetMesh.receiveShadow = true; // Planet allows clouds to cast shadow on it
+            
+            planetGroup.add(planetMesh);
+            
+            const cloudAlphaMap = cloudTexture.clone(); 
+
+            const cloudGeo = new THREE.SphereGeometry(5.08, 128, 128); 
+            
+             const cloudMat = new THREE.MeshStandardMaterial({
+                map: cloudTexture,          // The White Shapes
+                alphaMap: cloudAlphaMap,    // The Transparency Mask (We will animate this)
+                transparent: true,
+                opacity: 0.95,             
+                side: THREE.DoubleSide,
+                depthWrite: false,         
+                color: 0xffffff,
+                
+                // FIX THE SHINE:
+                roughness: 1.0,  // Matte finish (Cotton)
+                metalness: 0.0,
+            });
+
+            cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
+            cloudMesh.castShadow = true; 
+            cloudMesh.receiveShadow = true;
+
+            // Shadows need to match the morphing alpha map
+            cloudMesh.customDepthMaterial = new THREE.MeshDepthMaterial({
+                depthPacking: THREE.RGBADepthPacking,
+                map: cloudTexture,
+                alphaMap: cloudAlphaMap, // Use the animated map for shadows too
+                alphaTest: 0.2
+            });
+
+            planetGroup.add(cloudMesh);
+
+            const atmoGeo = new THREE.SphereGeometry(7.0, 64, 64);
+            const atmoMat = new THREE.ShaderMaterial({
+                transparent: true, side: THREE.BackSide, blending: THREE.AdditiveBlending,
+                uniforms: { glowColor: { value: new THREE.Color(0x3a7bd5) }, viewVector: { value: camera.position } },
+                vertexShader: `uniform vec3 viewVector; varying vec3 vNormal; varying vec3 vViewVector;
+                    void main() { vNormal = normalize(normalMatrix * normal); vViewVector = normalize(normalMatrix * viewVector);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+                fragmentShader: `uniform vec3 glowColor; varying vec3 vNormal; varying vec3 vViewVector;
+                    void main() { float viewDot = dot(vNormal, vViewVector); float intensity = pow(viewDot, 4.0);
+                    intensity = intensity * 1.8; gl_FragColor = vec4(glowColor, intensity); }`
+            });
+            const atmosphere = new THREE.Mesh(atmoGeo, atmoMat);
+            planetGroup.add(atmosphere);
+            removeLoader();
+            initAuroras();
+        }, undefined, (err) => { console.error(err); removeLoader(); });
+
+        // --- VENUS SHADER (Magma + Lighting) ---
+        const venusVertexShader = `
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            void main() {
+                vUv = uv;
+                vNormal = normalize(normalMatrix * normal);
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const venusFragmentShader = `
+            uniform sampler2D map;
+            uniform float time;
+            uniform vec3 sunDirection;
+            varying vec2 vUv;
+            varying vec3 vNormal;
+
+            void main() {
+                vec4 texColor = texture2D(map, vUv);
+
+                // Heat/Magma Logic
+                float brightness = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
+                float pulse = sin(time * 0.5) * 0.2 + 0.8; 
+                vec3 magma = texColor.rgb * vec3(1.5, 0.8, 0.5) * pulse * 1.5;
+                vec3 baseColor = mix(texColor.rgb * 0.5, magma, brightness);
+
+                // --- LIGHTING ---
+                float lightIntensity = max(0.25, dot(vNormal, sunDirection)); // Raised from 0.1 to 0.25
+                
+                // --- INTERNAL GLOW (Orange lava glow even in darkness) ---
+                vec3 internalGlow = vec3(1.0, 0.4, 0.1) * brightness * 0.3; // Orange glow on bright areas
+                
+                gl_FragColor = vec4((baseColor * lightIntensity) + internalGlow, 1.0);
+            }
+        `;
+
+        // --- JUPITER SHADER (Gas Bands + Lighting) ---
+        const jupiterVertexShader = `
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            void main() {
+                vUv = uv;
+                vNormal = normalize(normalMatrix * normal);
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const jupiterFragmentShader = `
+            uniform sampler2D map;
+            uniform float time;
+            uniform vec3 sunDirection;
+            varying vec2 vUv;
+            varying vec3 vNormal;
+
+            void main() {
+                // Flowing Band Logic
+                float bandSpeed = sin(vUv.y * 20.0) * 0.05; 
+                vec2 flowUv = vec2(vUv.x + time * bandSpeed * 0.2, vUv.y);
+                float turbulence = sin(vUv.x * 10.0 + time) * 0.005;
+                flowUv.y += turbulence;
+
+                vec4 color = texture2D(map, flowUv);
+
+                // Atmosphere Edge
+                vec3 viewDir = vec3(0.0, 0.0, 1.0); 
+                float fresnel = pow(1.0 - dot(vNormal, viewDir), 2.0);
+                vec3 atmosphere = vec3(0.3, 0.2, 0.1) * fresnel;
+
+                // --- LIGHTING ---
+                float lightIntensity = max(0.05, dot(vNormal, sunDirection));
+
+                gl_FragColor = vec4((color.rgb + atmosphere) * lightIntensity, 1.0);
+            }
+        `;
+
+        // --- 1. MARS (Dust Storms + Lighting) ---
+        const marsVertexShader = `
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            void main() {
+                vUv = uv;
+                vNormal = normalize(normalMatrix * normal);
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const marsFragmentShader = `
+            uniform sampler2D map;
+            uniform float time;
+            uniform vec3 sunDirection;
+            varying vec2 vUv;
+            varying vec3 vNormal;
+
+            void main() {
+                vec4 texColor = texture2D(map, vUv);
+                
+                // Noise for Dust
+                float noiseA = sin(vUv.x * 25.0 + time * 0.15);
+                float noiseB = cos(vUv.y * 25.0 - time * 0.1);
+                float dust = smoothstep(0.4, 0.9, (noiseA + noiseB) * 0.5);
+                vec3 dustColor = vec3(0.7, 0.3, 0.1);
+                vec3 surfaceColor = mix(texColor.rgb, dustColor, dust * 0.5);
+                
+                // --- LIGHTING CALCULATION ---
+                float lightIntensity = dot(vNormal, sunDirection);
+                lightIntensity = max(0.05, lightIntensity);
+                
+                gl_FragColor = vec4(surfaceColor * lightIntensity, 1.0);
+            }
+        `;
+
+        // --- 2. MAKEMAKE (Cryo Glow + Lighting) ---
+        const makemakeVertexShader = `
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            varying vec3 vViewPosition;
+            void main() {
+                vUv = uv;
+                vNormal = normalize(normalMatrix * normal);
+                vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                vViewPosition = -mvPosition.xyz;
+                gl_Position = projectionMatrix * mvPosition;
+            }
+        `;
+
+        const makemakeFragmentShader = `
+            uniform sampler2D map;
+            uniform vec3 sunDirection;
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            varying vec3 vViewPosition;
+
+            void main() {
+                vec4 texColor = texture2D(map, vUv);
+                
+                vec3 normal = normalize(vNormal);
+                vec3 viewDir = normalize(vViewPosition);
+                
+                // Rim Light (Ice Atmosphere)
+                float fresnel = pow(1.0 - dot(normal, viewDir), 2.5);
+                vec3 iceColor = vec3(0.5, 0.9, 1.0);
+                
+                // --- LIGHTING CALCULATION ---
+                float lightIntensity = max(0.05, dot(normal, sunDirection));
+                
+                vec3 finalColor = (texColor.rgb * lightIntensity) + (iceColor * fresnel * 0.6);
+                
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+        // --- 3. ERIS (Deep Freeze + Lighting) ---
+        const erisVertexShader = `
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            void main() {
+                vUv = uv;
+                vNormal = normalize(normalMatrix * normal);
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const erisFragmentShader = `
+            uniform sampler2D map;
+            uniform float time;
+            uniform vec3 sunDirection;
+            varying vec2 vUv;
+            varying vec3 vNormal;
+
+            void main() {
+                // Shifting Gas distortion
+                vec2 shiftUv = vUv;
+                shiftUv.y += sin(vUv.x * 10.0 + time * 0.2) * 0.005;
+                
+                vec4 texColor = texture2D(map, shiftUv);
+                
+                // Cold Desaturation
+                vec3 gray = vec3(dot(texColor.rgb, vec3(0.299, 0.587, 0.114)));
+                vec3 coldLook = mix(texColor.rgb, gray, 0.3);
+                coldLook *= vec3(0.9, 0.95, 1.1);
+                
+                // --- LIGHTING CALCULATION ---
+                float lightIntensity = max(0.45, dot(vNormal, sunDirection));
+                
+                gl_FragColor = vec4(coldLook * lightIntensity, 1.0);
+            }
+        `;
+
+        // --- 4. MOON 1 (Heat Haze + Lighting) ---
+        const moon1VertexShader = `
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            void main() {
+                vUv = uv;
+                vNormal = normalize(normalMatrix * normal);
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const moon1FragmentShader = `
+            uniform sampler2D map;
+            uniform float time;
+            uniform vec3 sunDirection;
+            varying vec2 vUv;
+            varying vec3 vNormal;
+
+            void main() {
+                // Heat Ripple
+                vec2 heatUv = vUv;
+                float ripple = sin(vUv.y * 30.0 + time * 2.0) * 0.003;
+                heatUv.x += ripple;
+                
+                vec4 color = texture2D(map, heatUv);
+                color.r *= 1.2;
+                
+                // --- LIGHTING ---
+                float lightIntensity = max(0.02, dot(vNormal, sunDirection));
+                
+                gl_FragColor = vec4(color.rgb * lightIntensity, 1.0);
+            }
+        `;
+
+        // --- 5. MOON 2 (Bioluminescence + Lighting) ---
+        const moon2VertexShader = `
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            void main() {
+                vUv = uv;
+                vNormal = normalize(normalMatrix * normal);
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const moon2FragmentShader = `
+            uniform sampler2D map;
+            uniform float time;
+            uniform vec3 sunDirection;
+            varying vec2 vUv;
+            varying vec3 vNormal;
+
+            void main() {
+                vec4 texColor = texture2D(map, vUv);
+                
+                // Glow Logic
+                float brightness = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
+                float glowMask = smoothstep(0.4, 0.1, brightness);
+                float pulse = sin(time * 1.5) * 0.5 + 0.5;
+                vec3 glowColor = vec3(0.0, 0.6, 1.0) * glowMask * pulse * 0.6;
+                
+                // --- LIGHTING ---
+                float lightIntensity = max(0.02, dot(vNormal, sunDirection));
+                
+                vec3 finalColor = (texColor.rgb * lightIntensity) + glowColor;
+                
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+        // --- STARFIELD SHADER (Realistic Twinkling & Colors) ---
+        const starVertexShader = `
+            attribute float size;
+            attribute vec3 customColor;
+            attribute float twinkleSpeed;
+
+            varying vec3 vColor;
+            varying float vTwinkle;
+
+            uniform float time;
+
+            void main() {
+                vColor = customColor;
+
+                // FIX 1: Disable Twinkle 
+                // We force this to 0.0 so the brightness never pulses.
+                vTwinkle = 0.0;
+
+                vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                
+                // FIX 2: Stabilize Size
+                // We calculate how big the star *should* be based on distance
+                float computedSize = size * (300.0 / -mvPosition.z);
+                
+                // We use max() to ensure the star is NEVER smaller than 2.0 pixels.
+                // This prevents it from disappearing between screen pixels when you rotate.
+                gl_PointSize = max(computedSize, 2.0);
+                
+                gl_Position = projectionMatrix * mvPosition;
+            }
+        `;
+
+            const starFragmentShader = `
+            uniform sampler2D pointTexture;
+            varying vec3 vColor;
+            varying float vTwinkle;
+            varying float vSpeed; // We need to know if speed is 0
+
+            void main() {
+                // 1. Make it a circle (Soft Edge)
+                vec2 coord = gl_PointCoord - vec2(0.5);
+                float dist = length(coord);
+                if (dist > 0.5) discard;
+
+                // Create a soft glow from center
+                float alpha = 1.0 - (dist * 2.0);
+                alpha = pow(alpha, 1.5); 
+
+                // 2. SUBTLE PULSE (Realism Fix)
+                // If speed is 0, brightness is 1.0 (Steady)
+                // If it has speed, it only varies slightly (0.85 to 1.0)
+                float brightness = 1.0;
+                if (vTwinkle != 0.0) {
+                    brightness = 0.925 + (vTwinkle * 0.075); 
+                }
+
+                gl_FragColor = vec4(vColor, alpha * brightness);
+            }
+        `;
+
+        // MOON 1 LOADER
+        moon1Pivot = new THREE.Object3D();
+        moon1Pivot.position.set(0, 0, -9); 
+        moon1Pivot.rotation.x = 0.2;       
+        moon1Pivot.rotation.z = 0.4; 
+        moon1Pivot.rotation.y = -0.5;
+        planetGroup.add(moon1Pivot);
+        
+        textureLoader.load('lroc_color_poles_1k.png', (t) => {
+            const moon1Mat = new THREE.ShaderMaterial({
+                uniforms: {
+                    map: { value: t },
+                    time: { value: 0 },
+                    sunDirection: { value: new THREE.Vector3(1,0,0) }
+                },
+                vertexShader: moon1VertexShader,
+                fragmentShader: moon1FragmentShader
+            });
+
+            moon1Mesh = new THREE.Mesh(new THREE.SphereGeometry(1.1, 32, 32), moon1Mat);
+            moon1Mesh.position.set(32, 0, 0); 
+            moon1Pivot.add(moon1Mesh);
+            window.moon1Mesh = moon1Mesh;
+        });
+
+        // MOON 2 LOADER
+        moon2Pivot = new THREE.Object3D();
+        moon2Pivot.position.set(0, 0, -9); 
+        moon2Pivot.rotation.x = -0.3;      
+        moon2Pivot.rotation.z = -0.6;
+        planetGroup.add(moon2Pivot);
+        
+        textureLoader.load('lroc_color_poles_1k1.png', (t) => {
+            const moon2Mat = new THREE.ShaderMaterial({
+                uniforms: {
+                    map: { value: t },
+                    time: { value: 0 },
+                    sunDirection: { value: new THREE.Vector3(1,0,0) }
+                },
+                vertexShader: moon2VertexShader,
+                fragmentShader: moon2FragmentShader
+            });
+
+            moon2Mesh = new THREE.Mesh(new THREE.SphereGeometry(0.85, 32, 32), moon2Mat);
+            moon2Mesh.position.set(-42, 0, 0); 
+            moon2Pivot.add(moon2Mesh);
+            window.moon2Mesh = moon2Mesh;
+        });
+
+        // --- DISTANT SOLAR SYSTEM PLANETS ---
+        
+        const sunX = 800;
+        const sunZ = -1000;
+
+        // 1. Venus (Left) - FIERY
+        const venusPivot = new THREE.Object3D();
+        venusPivot.position.set(sunX, 0, sunZ);
+        scene.add(venusPivot);
+        textureLoader.load('8k_venus_surface.jpg', (t) => {
+            const venusMat = new THREE.ShaderMaterial({
+                uniforms: {
+                    map: { value: t },
+                    time: { value: 0 },
+                    sunDirection: { value: new THREE.Vector3(1,0,0) }
+                },
+                vertexShader: venusVertexShader,
+                fragmentShader: venusFragmentShader
+            });
+
+            const venusMesh = new THREE.Mesh(new THREE.SphereGeometry(6, 64, 64), venusMat);
+            venusMesh.position.set(-980, 50, 1100); 
+            venusMesh.userData = { rotationSpeed: -0.0003, pivot: venusPivot, orbitSpeed: 0.000005 };
+            venusPivot.add(venusMesh);
+            window.venusMesh = venusMesh;
+        });
+
+        // 2. Mars (Dust Storms)
+        const marsPivot = new THREE.Object3D();
+        marsPivot.position.set(sunX, 0, sunZ);
+        scene.add(marsPivot);
+        textureLoader.load('images-planet3.jpg', (t) => { 
+            const marsMat = new THREE.ShaderMaterial({
+                uniforms: { 
+                    map: { value: t }, 
+                    time: { value: 0 },
+                    sunDirection: { value: new THREE.Vector3(1,0,0) }
+                },
+                vertexShader: marsVertexShader,
+                fragmentShader: marsFragmentShader
+            });
+
+            const marsMesh = new THREE.Mesh(new THREE.SphereGeometry(5, 64, 64), marsMat);
+            marsMesh.position.set(-580, -110, 750); 
+            marsMesh.userData = { rotationSpeed: 0.0005, pivot: marsPivot, orbitSpeed: 0.000008 };
+            marsPivot.add(marsMesh);
+            window.marsMesh = marsMesh;
+        });
+
+        // 3. Makemake (Cryo Fresnel)
+        const makemakePivot = new THREE.Object3D();
+        makemakePivot.position.set(sunX, 0, sunZ);
+        scene.add(makemakePivot);
+        textureLoader.load('images-planet2.jpg', (t) => { 
+            const makemakeMat = new THREE.ShaderMaterial({
+                uniforms: { 
+                    map: { value: t },
+                    sunDirection: { value: new THREE.Vector3(1,0,0) }
+                }, 
+                vertexShader: makemakeVertexShader,
+                fragmentShader: makemakeFragmentShader
+            });
+
+            const makemakeMesh = new THREE.Mesh(new THREE.SphereGeometry(5.5, 64, 64), makemakeMat);
+            makemakeMesh.position.set(-950, 90, 1350);
+            makemakeMesh.userData = { rotationSpeed: 0.0004, pivot: makemakePivot, orbitSpeed: 0.000006 };
+            makemakePivot.add(makemakeMesh);
+            window.makemakeMesh = makemakeMesh;
+        });
+
+        // 4. Jupiter (Top Right) - GAS BANDS
+        const jupiterPivot = new THREE.Object3D();
+        jupiterPivot.position.set(sunX, 0, sunZ);
+        jupiterPivot.rotation.z = 0.1; 
+        scene.add(jupiterPivot);
+        textureLoader.load('gas giant-equirectangular-5-2048x1024.png', (t) => {
+            t.wrapS = THREE.RepeatWrapping;
+            t.wrapT = THREE.RepeatWrapping;
+
+            const jupiterMat = new THREE.ShaderMaterial({
+                uniforms: {
+                    map: { value: t },
+                    time: { value: 0 },
+                    sunDirection: { value: new THREE.Vector3(1,0,0) }
+                },
+                vertexShader: jupiterVertexShader,
+                fragmentShader: jupiterFragmentShader
+            });
+
+            const jupiterMesh = new THREE.Mesh(new THREE.SphereGeometry(18, 64, 64), jupiterMat);
+            jupiterMesh.position.set(-380, 170, 1450);
+            jupiterMesh.userData = { rotationSpeed: 0.0008, pivot: jupiterPivot, orbitSpeed: 0.000004 };
+            jupiterPivot.add(jupiterMesh);
+            window.jupiterMesh = jupiterMesh;
+        });
+
+        // 5. Eris (Deep Freeze)
+        const erisPivot = new THREE.Object3D();
+        erisPivot.position.set(sunX, 0, sunZ);
+        scene.add(erisPivot);
+        textureLoader.load('images-planet.jpg', (t) => {
+            const erisMat = new THREE.ShaderMaterial({
+                uniforms: { 
+                    map: { value: t }, 
+                    time: { value: 0 },
+                    sunDirection: { value: new THREE.Vector3(1,0,0) }
+                },
+                vertexShader: erisVertexShader,
+                fragmentShader: erisFragmentShader
+            });
+
+            const erisMesh = new THREE.Mesh(new THREE.SphereGeometry(3.5, 64, 64), erisMat);
+            erisMesh.position.set(-920, 60, 700); 
+            erisMesh.userData = { rotationSpeed: 0.001, pivot: erisPivot, orbitSpeed: 0.000009 };
+            erisPivot.add(erisMesh);
+            window.erisMesh = erisMesh;
+        });
+        
+        setTimeout(removeLoader, 2000);
+               
+        // --- STARS ---
+        const starsCount = 6000;
+        const starsGeo = new THREE.BufferGeometry();
+        const starPositions = [];
+        const starColors = [];
+        const starSizes = [];
+        const starSpeeds = [];
+
+        const colorChoices = [
+	        new THREE.Color(0x9bb0ff), // O-type (Blue-White) - Hot
+	        new THREE.Color(0xaabfff), // B-type (Blue-White)
+	        new THREE.Color(0xcad7ff), // A-type (White)
+	        new THREE.Color(0xf8f7ff), // F-type (Yellow-White)
+	        new THREE.Color(0xfff4ea), // G-type (Yellow - Like our Sun)
+	        new THREE.Color(0xffd2a1), // K-type (Orange)
+	        new THREE.Color(0xffcc6f)  // M-type (Red) - Cool
+        ];
+
+        for(let i = 0; i < starsCount; i++) {
+            // Position
+            const r = 10000 + Math.random() * 15000;
+            const theta = 2 * Math.PI * Math.random();
+            const phi = Math.acos(2 * Math.random() - 1);
+    
+            const x = r * Math.sin(phi) * Math.cos(theta);
+            const y = r * Math.sin(phi) * Math.sin(theta);
+            const z = r * Math.cos(phi);
+    
+            starPositions.push(x, y, z);
+
+            // Color
+            const colorRandom = Math.random();
+            let color;
+            if(colorRandom > 0.95) color = colorChoices[0];
+            else if(colorRandom > 0.8) color = colorChoices[2];
+            else if(colorRandom > 0.5) color = colorChoices[4];
+            else color = colorChoices[6];
+    
+            starColors.push(color.r, color.g, color.b);
+
+            // Size
+            starSizes.push(Math.random() * 10.0 + 2.0); 
+
+            // --- REALISM LOGIC IS HERE ---
+            // 99% of stars get Speed 0 (Static)
+            // 1% of stars get a slow speed (Subtle Pulse)
+            if (Math.random() > 0.99) {
+                starSpeeds.push(Math.random() * 0.4 + 0.1); 
+            } else {
+                starSpeeds.push(0); 
+            }
+        }
+
+        starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
+        starsGeo.setAttribute('customColor', new THREE.Float32BufferAttribute(starColors, 3));
+        starsGeo.setAttribute('size', new THREE.Float32BufferAttribute(starSizes, 1));
+        starsGeo.setAttribute('twinkleSpeed', new THREE.Float32BufferAttribute(starSpeeds, 1));
+
+        const starsMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 }
+            },
+            vertexShader: starVertexShader,
+            fragmentShader: starFragmentShader,
+            transparent: true,
+            depthWrite: false, 
+            depthTest: true,  
+            blending: THREE.AdditiveBlending
+        });
+
+        const starField = new THREE.Points(starsGeo, starsMaterial);
+        starField.renderOrder = -1;
+        starField.frustumCulled = false; 
+        scene.add(starField)
+
+        const shootingStars = [];
+
+        function createShootingStar() {
+            // Create a thicker, glowing line
+            const points = [];
+            points.push(new THREE.Vector3(0, 0, 0));
+            points.push(new THREE.Vector3(-8, 0, 0)); // Longer tail
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            
+            // Brighter, thicker material
+            const material = new THREE.LineBasicMaterial({ 
+                color: 0xffffff, 
+                transparent: true, 
+                opacity: 1,
+                linewidth: 3 // Note: This doesn't work in WebGL, but we'll add glow
+            });
+            
+            const star = new THREE.Line(geometry, material);
+            
+            // Random start position (wider spread)
+            const startPos = new THREE.Vector3(
+                (Math.random() - 0.5) * 400,
+                (Math.random() - 0.5) * 400,
+                (Math.random() - 0.5) * 400
+            );
+            
+            // Faster velocity for more visible streak
+            const velocity = new THREE.Vector3(
+                (Math.random() - 0.5) * 4,
+                (Math.random() - 0.5) * 4 - 2, // Bias downward
+                (Math.random() - 0.5) * 2
+            );
+            
+            star.position.copy(startPos);
+            star.lookAt(startPos.clone().add(velocity));
+            
+            // Add a point light for glow effect
+            const glow = new THREE.PointLight(0xffffff, 2, 20);
+            star.add(glow);
+            
+            scene.add(star);
+            
+            return { mesh: star, velocity: velocity, life: 150 }; // Longer life
+        }
+
+        // In your animate() function, replace the shooting star section:
+        if(Math.random() < 0.05) shootingStars.push(createShootingStar()); // 5% chance instead of 1.5%
+
+        for (let i = shootingStars.length - 1; i >= 0; i--) {
+            const star = shootingStars[i];
+            star.mesh.position.add(star.velocity);
+            star.life--;
+            
+            // Slower fade
+            star.mesh.material.opacity = star.life / 150;
+            
+            // Fade the glow too
+            if(star.mesh.children[0]) {
+                star.mesh.children[0].intensity = (star.life / 150) * 2;
+            }
+            
+            if (star.life <= 0) {
+                scene.remove(star.mesh);
+                star.mesh.geometry.dispose();
+                star.mesh.material.dispose();
+                shootingStars.splice(i, 1);
+            }
+        }
+
+        function createGalaxyTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 32; canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw a soft glow gradient
+            const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+            grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            grad.addColorStop(0.2, 'rgba(255, 255, 255, 0.8)');
+            grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 32, 32);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            return texture;
+        }
+
+        // --- 2. HIGH QUALITY GALAXY GENERATOR ---
+        const galaxyTexture = createGalaxyTexture();
+
+        function createGalaxy(posVector, rotationVector, scale, colorInsideHex, colorOutsideHex) {
+		    const parameters = {
+		        count: 10000,
+		        size: 60,
+		        radius: 2000,
+		        branches: 3,
+		        spin: 1.9,
+		        randomness: 0.05,
+		        randomnessPower: 3,
+		        innerRadiusOnly: 0.4  // ONLY USE INNER 40% - NO OUTER EDGES
+		    };
+
+		    const geometry = new THREE.BufferGeometry();
+		    const positions = new Float32Array(parameters.count * 3);
+		    const colors = new Float32Array(parameters.count * 3);
+		    const colorIn = new THREE.Color(colorInsideHex);
+		    const colorOut = new THREE.Color(colorOutsideHex);
+
+		    for(let i = 0; i < parameters.count; i++) {
+		        const i3 = i * 3;
+		        const r = Math.random() * parameters.radius * parameters.innerRadiusOnly; // LIMIT RADIUS
+		        const spinAngle = r * parameters.spin * 0.002;
+		        const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2;
+
+		        const randomX = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * parameters.randomness * r;
+		        const randomY = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * parameters.randomness * r;
+		        const randomZ = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * parameters.randomness * r;
+
+
+		        positions[i3    ] = Math.cos(branchAngle + spinAngle) * r + randomX;
+		        positions[i3 + 1] = randomY * (r * 0.005); // FLATTENED ON Y AXIS
+		        positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * r + randomZ;
+
+		        const mixedColor = colorIn.clone();
+		        mixedColor.lerp(colorOut, r / (parameters.radius * parameters.innerRadiusOnly));
+		        colors[i3    ] = mixedColor.r;
+		        colors[i3 + 1] = mixedColor.g;
+		        colors[i3 + 2] = mixedColor.b;
+		    }
+
+		    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+		    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+		    const material = new THREE.PointsMaterial({
+		        size: parameters.size,
+		        sizeAttenuation: true,
+		        depthWrite: false,
+		        blending: THREE.AdditiveBlending,
+		        vertexColors: true,
+		        map: galaxyTexture,
+		        transparent: true,
+		        opacity: 0.8
+		    });
+
+		    const galaxy = new THREE.Points(geometry, material);
+		    galaxy.position.copy(posVector);
+		    galaxy.rotation.set(rotationVector.x, rotationVector.y, rotationVector.z);
+		    galaxy.scale.set(scale, scale, scale);
+		    scene.add(galaxy);
+		}
+
+        function initDeepSpace() {
+            // Galaxy 1: The "Magma" Spiral (Top Right)
+            createGalaxy(new THREE.Vector3(8000, 3000, -8000), new THREE.Vector3(.6, 0.6, 0), 5.0, 0xffaa00, 0xaa0033);
+
+            // Galaxy 2: The "Ice" Spiral (Bottom Left)
+            createGalaxy(new THREE.Vector3(-6000, -3000, -5000), new THREE.Vector3(1.0, 0, 0.5), 6.0, 0x00ffff, 0x0033ff);
+            
+            // Galaxy 3: The "Void" Spiral (Far Center)
+            createGalaxy(new THREE.Vector3(1000, 6500, -15000), new THREE.Vector3(.2, 0, 0), 7.0, 0xffffff, 0x5500aa);
+        
+            // Galaxy 4: The "Emerald" Spiral (Far Left)
+		    createGalaxy(new THREE.Vector3(10000, -2000, -80), new THREE.Vector3(0.8, 0.3, 0.2), 3.0, 0x00ff88, 0x004422);
+
+		    // Galaxy 5: The "Solar" Spiral (Bottom Right)
+		    createGalaxy(new THREE.Vector3(900, -4000, 9000), new THREE.Vector3(0.4, 1.2, 0.6), 5.5, 0xff00ff, 0x8800ff);
+            
+            // Galaxy 6: The "Amber to Fuchsia" Spiral (Far Back Left - EMPTY ZONE)
+		    createGalaxy(new THREE.Vector3(-6000, 3000, 4000), new THREE.Vector3(0.5, 0.8, 0.3), 3.5, 0xffbb33, 0xff00ff);
+
+		    // Galaxy 7: The "Neon Green to Lavender" Spiral (Upper Right Far - EMPTY ZONE)
+		    createGalaxy(new THREE.Vector3(15000, 7000, 8000), new THREE.Vector3(0.3, 0.1, 0.7), 3.5, 0x66ff66, 0xcc99ff);
+
+		    // Galaxy 8: The "Coral" Spiral (Lower Far Right - EMPTY ZONE)
+		    createGalaxy(new THREE.Vector3(4000, -6000, -8000), new THREE.Vector3(0.8, 0.3, 0.2), 3.0, 0xdc143c, 0xff7755);
+        }
+
+        // --- 3. 10 REAL CONSTELLATIONS ---
+        function initAccurateConstellations() {
+            const group = new THREE.Group();
+            scene.add(group);
+
+            const starGeo = new THREE.SphereGeometry(15, 8, 8); 
+            const starMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.08 });
+
+            function drawConstellation(lat, lon, scale, pointsXY) {
+                const spherePoints = [];
+                const radius = 12000; 
+
+                pointsXY.forEach(pt => {
+                    const cLat = lat + (pt[1] * scale);
+                    const cLon = lon + (pt[0] * scale);
+                    const phi = (90 - cLat) * (Math.PI / 180);
+                    const theta = (cLon + 180) * (Math.PI / 180);
+                    const x = -(radius * Math.sin(phi) * Math.cos(theta));
+                    const z = (radius * Math.sin(phi) * Math.sin(theta));
+                    const y = (radius * Math.cos(phi));
+                    const vec = new THREE.Vector3(x, y, z);
+                    spherePoints.push(vec);
+
+                    const star = new THREE.Mesh(starGeo, starMat);
+                    star.position.copy(vec);
+                    group.add(star);
+                });
+
+                const geometry = new THREE.BufferGeometry().setFromPoints(spherePoints);
+                group.add(new THREE.Line(geometry, lineMat));
+            }
+
+            // 1. ORION (The Hunter)
+            drawConstellation(0, 20, 2.5, [
+                [-2, 5], [-0.5, 0], [0, 0.2], [0.5, 0], [2, 3], [0.5, 0], [3, -5], [-0.5, 0], [-1.5, -4.5]
+            ]);
+
+            // 2. URSA MAJOR (Big Dipper)
+            drawConstellation(50, 120, 3.0, [
+                [-4, 1], [-2.5, 1.2], [-1.5, 0.8], [0, 0], [0, -1.5], [2.5, -1.5], [2.5, 0.5], [0, 0]
+            ]);
+
+            // 3. CASSIOPEIA (The W)
+            drawConstellation(60, -40, 2.5, [
+                [-3, 2], [-1.5, -1], [0, 0.5], [1.5, -1], [3, 1]
+            ]);
+
+            // 4. LEO (The Lion) - Sickle and Triangle
+            drawConstellation(15, 150, 2.5, [
+                [0, 2], [1, 2.5], [2, 1], [1.5, 0], [0, 0], [-2, 0.5], [-3, -1], [-0.5, -1], [0,0]
+            ]);
+
+            // 5. CYGNUS (The Swan / Northern Cross)
+            drawConstellation(40, -70, 3.0, [
+                [0, 4], [0, 1], [0, -3], [0, 1], [-3, 1], [0, 1], [3, 1]
+            ]);
+
+            // 6. SCORPIUS (The Scorpion)
+            drawConstellation(-30, -10, 2.5, [
+                [3, 2], [2, 1], [1, 1], [0, 0], [-1, -1], [-2, -2], [-2, -4], [-1, -5], [1, -4.5], [1.5, -3.5]
+            ]);
+
+            // 7. TAURUS (The Bull) - V shape + Horns
+            drawConstellation(15, 60, 2.5, [
+                [-4, 4], [-1, 0], [0, -1], [1, 0], [1.5, 1], [1, 0], [4, 3]
+            ]);
+
+            // 8. GEMINI (The Twins)
+            drawConstellation(20, 100, 2.5, [
+                [-1, 4], [-1, -2], [1, -2], [1, 4]
+            ]);
+
+            // 9. PEGASUS (The Great Square)
+            drawConstellation(20, 0, 3.0, [
+                [-2, 2], [2, 2], [2, -2], [-2, -2], [-2, 2], [-4, -1]
+            ]);
+
+            // 10. CANIS MAJOR (Big Dog)
+            drawConstellation(-20, 80, 2.5, [
+                [0, 2], [-1, 0], [0, -1], [0, -4], [0, -1], [2, -2]
+            ]);
+        }
+
+        // --- EXECUTE ---
+        initDeepSpace();
+        initAccurateConstellations();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            updateDayNightCycle();
+
+            // --- NEW: UPDATE SHADERS ---
+            const time = performance.now() * 0.001; // Current time in seconds
+
+            // 1. Update Aurora
+            // Get Sun Direction relative to (0,0,0)
+            const sunDir = new THREE.Vector3().copy(sunLight.position).normalize();
+
+            if (window.venusMesh && window.venusMesh.material.uniforms) {
+                window.venusMesh.material.uniforms.time.value = time;
+                window.venusMesh.material.uniforms.sunDirection.value.copy(sunDir);
+                if(isRotating) {
+                    window.venusMesh.rotation.y += window.venusMesh.userData.rotationSpeed;
+                    window.venusMesh.userData.pivot.rotation.y += window.venusMesh.userData.orbitSpeed;
+                }
+            }
+
+            if (window.marsMesh && window.marsMesh.material.uniforms) {
+                window.marsMesh.material.uniforms.time.value = time;
+                window.marsMesh.material.uniforms.sunDirection.value.copy(sunDir);
+                if(isRotating) {
+                    window.marsMesh.rotation.y += window.marsMesh.userData.rotationSpeed;
+                    window.marsMesh.userData.pivot.rotation.y += window.marsMesh.userData.orbitSpeed;
+                }
+            }
+            
+            if (window.makemakeMesh && window.makemakeMesh.material.uniforms) {
+                window.makemakeMesh.material.uniforms.sunDirection.value.copy(sunDir);
+                if(isRotating) {
+                    window.makemakeMesh.rotation.y += window.makemakeMesh.userData.rotationSpeed;
+                    window.makemakeMesh.userData.pivot.rotation.y += window.makemakeMesh.userData.orbitSpeed;
+                }
+            }
+
+            if (window.jupiterMesh && window.jupiterMesh.material.uniforms) {
+                window.jupiterMesh.material.uniforms.time.value = time;
+                window.jupiterMesh.material.uniforms.sunDirection.value.copy(sunDir);
+                if(isRotating) {
+                    window.jupiterMesh.rotation.y += window.jupiterMesh.userData.rotationSpeed;
+                    window.jupiterMesh.userData.pivot.rotation.y += window.jupiterMesh.userData.orbitSpeed;
+                }
+            }
+            
+            if (window.erisMesh && window.erisMesh.material.uniforms) {
+                window.erisMesh.material.uniforms.time.value = time;
+                window.erisMesh.material.uniforms.sunDirection.value.copy(sunDir);
+                if(isRotating) {
+                    window.erisMesh.rotation.y += window.erisMesh.userData.rotationSpeed;
+                    window.erisMesh.userData.pivot.rotation.y += window.erisMesh.userData.orbitSpeed;
+                }
+            }
+
+            if (window.moon1Mesh && window.moon1Mesh.material.uniforms) {
+                window.moon1Mesh.material.uniforms.time.value = time;
+                window.moon1Mesh.material.uniforms.sunDirection.value.copy(sunDir);
+            }
+            
+            if (window.moon2Mesh && window.moon2Mesh.material.uniforms) {
+                window.moon2Mesh.material.uniforms.time.value = time;
+                window.moon2Mesh.material.uniforms.sunDirection.value.copy(sunDir);
+            }
+
+            if (starField && starField.material.uniforms) {
+	            starField.material.uniforms.time.value = time;
+            }
+            
+            
+            if (auroraNorth) {
+                auroraNorth.material.uniforms.time.value = time;
+                auroraNorth.material.uniforms.sunDirection.value.copy(sunDir);
+                // Rotate slightly to make the gas "swirl" around the pole
+                auroraNorth.rotation.y += 0.0002; 
+            }
+            if (auroraSouth) {
+                auroraSouth.material.uniforms.time.value = time;
+                auroraSouth.material.uniforms.sunDirection.value.copy(sunDir);
+                auroraSouth.rotation.y -= 0.0002;
+            }
+
+            // ONLY ROTATE IF THE FLAG IS TRUE
+            if (isRotating) {
+                if (planetMesh) planetMesh.rotation.y += 0.0004;
+                if (cloudMesh) {
+                    // 1. Rotate the whole cloud layer (Wind)
+                    cloudMesh.rotation.y += 0.00055;
+                    
+                    // 2. MORPH THE CLOUDS (The "Dissolving" Effect)
+                    // We slide the transparency mask slightly across the surface.
+                    // This causes edges to fade out and centers to thicken.
+                    cloudMesh.material.alphaMap.offset.x += 0.0002; 
+                    cloudMesh.material.alphaMap.offset.y -= 0.0001; 
+                    
+                    // Keep the shadows synced with the morphing
+                    if(cloudMesh.customDepthMaterial.alphaMap) {
+                        cloudMesh.customDepthMaterial.alphaMap.offset.x += 0.0002;
+                        cloudMesh.customDepthMaterial.alphaMap.offset.y -= 0.0001;
+                    }
+                }
+                if (moon1Pivot) moon1Pivot.rotation.y += 0.0002; 
+                if (moon2Pivot) moon2Pivot.rotation.y -= 0.00015; 
+                if (moon1Mesh) moon1Mesh.rotation.y += 0.0006;
+                if (moon2Mesh) moon2Mesh.rotation.y += 0.001;
+                if (window.venusMesh) {
+                    window.venusMesh.rotation.y += window.venusMesh.userData.rotationSpeed;
+                    window.venusMesh.userData.pivot.rotation.y += window.venusMesh.userData.orbitSpeed;
+                }
+                if (window.marsMesh) {
+                    window.marsMesh.rotation.y += window.marsMesh.userData.rotationSpeed;
+                    window.marsMesh.userData.pivot.rotation.y += window.marsMesh.userData.orbitSpeed;
+                }
+                if (window.makemakeMesh) {
+                    window.makemakeMesh.rotation.y += window.makemakeMesh.userData.rotationSpeed;
+                    window.makemakeMesh.userData.pivot.rotation.y += window.makemakeMesh.userData.orbitSpeed;
+                }
+                if (window.jupiterMesh) {
+                    window.jupiterMesh.rotation.y += window.jupiterMesh.userData.rotationSpeed;
+                    window.jupiterMesh.userData.pivot.rotation.y += window.jupiterMesh.userData.orbitSpeed;
+                }
+                if (window.erisMesh) {
+                    window.erisMesh.rotation.y += window.erisMesh.userData.rotationSpeed;
+                    window.erisMesh.userData.pivot.rotation.y += window.erisMesh.userData.orbitSpeed;
+                }
+            }
+            
+            if(typeof updateLabelPosition === 'function') updateLabelPosition();
+
+            if(Math.random() < 0.015) shootingStars.push(createShootingStar());
+            for (let i = shootingStars.length - 1; i >= 0; i--) {
+                const star = shootingStars[i];
+                star.mesh.position.add(star.velocity);
+                star.life--;
+                star.mesh.material.opacity = star.life / 50;
+                if (star.life <= 0) {
+                    scene.remove(star.mesh);
+                    star.mesh.geometry.dispose(); star.mesh.material.dispose();
+                    shootingStars.splice(i, 1);
+                }
+            }
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+        const statsBox = document.getElementById('statsBox');
+        if (statsBox) {
+            statsBox.addEventListener('click', () => {
+                if (window.innerWidth <= 800) statsBox.classList.toggle('open');
+            });
+        }
+
+        async function toggleOrbitMode() {
+            if (!planetMesh) return;
+            const iconPlanet = `<svg class="btn-icon" viewBox="0 0 24 24"><path d="M12,2A10,10 0 1,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 1,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 1,1 6,12A6,6 0 0,1 12,6M12,8A4,4 0 1,0 16,12A4,4 0 0,0 12,8Z"/></svg>`;
+
+            if (markersGroup) {
+                isOrbitMode = !isOrbitMode;
+                markersGroup.visible = isOrbitMode;
+                orbitBtn.innerHTML = isOrbitMode ? `${iconPlanet}<span>EXIT ORBIT</span>` : `${iconPlanet}<span>ENTER ORBIT</span>`; 
+                if (!isOrbitMode) deselectMarker();
+                return;
+            }
+
+            orbitBtn.textContent = "Scanning..."; 
+            
+            try {
+                const response = await fetch('map_locations_3D.json');
+                if (!response.ok) throw new Error("Failed to load map data");
+                const data = await response.json();
+
+                markersGroup = new THREE.Group();
+                const pinGeo = new THREE.SphereGeometry(0.06, 16, 16);
+                const pinMat = new THREE.MeshBasicMaterial({ color: 0xff4444, toneMapped: false });
+                const hitGeo = new THREE.SphereGeometry(1.5, 8, 8); 
+                const hitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+                
+                data.locations.forEach(loc => {
+                    const y = loc.coordinates2D ? loc.coordinates2D.y : loc.coordinates.y;
+                    const x = loc.coordinates2D ? loc.coordinates2D.x : loc.coordinates.x;
+                    const phi = y * Math.PI;
+                    const theta = (x * 2 * Math.PI) - 1.57; 
+                    
+                    const marker = new THREE.Mesh(pinGeo, pinMat.clone());
+                    marker.position.setFromSphericalCoords(5.05, phi, theta);
+                    
+                    // --- CHANGED: LOAD DAY AND NIGHT IMAGES ---
+                    
+                    // 1. Find Day Image
+                    let dayImage = ""; 
+                    if (typeof PLANET_LOCATIONS !== 'undefined') {
+                        const match = PLANET_LOCATIONS.find(item => item.name === loc.name);
+                        if (match) dayImage = match.image;
+                    }
+
+                    // 2. Find Night Image (Fallback to day if missing)
+                    let nightImage = dayImage; 
+                    if (typeof PLANET_LOCATIONS_NIGHT !== 'undefined') {
+                        const matchNight = PLANET_LOCATIONS_NIGHT.find(item => item.name === loc.name);
+                        if (matchNight) nightImage = matchNight.image;
+                    }
+
+                    // 3. Save BOTH to userData
+                    marker.userData = { 
+                        name: loc.name, 
+                        imageDay: dayImage, 
+                        imageNight: nightImage, 
+                        isVisual: true 
+                    };
+                    // ------------------------------------------
+
+                    markersGroup.add(marker);
+
+                    const hitbox = new THREE.Mesh(hitGeo, hitMat);
+                    hitbox.position.copy(marker.position);
+                    hitbox.userData = { 
+                        name: loc.name, 
+                        imageDay: dayImage, 
+                        imageNight: nightImage, 
+                        visualMesh: marker 
+                    };
+                    markersGroup.add(hitbox);
+                    
+                    if (!isMobile) marker.add(new THREE.PointLight(0xff0000, 1, 1));
+                });
+
+                planetMesh.add(markersGroup);
+                isOrbitMode = true;
+                orbitBtn.innerHTML = `${iconPlanet}<span>EXIT ORBIT</span>`;
+            } catch (error) {
+                console.error("Error:", error);
+                orbitBtn.textContent = "Error";
+            }
+        }
+
+        function openPanModal(imageSrc, locationName) {
+            panModal.classList.add('active');
+            panImg.src = imageSrc;
+
+            panImg.onload = function() {
+                const containerW = panContainer.offsetWidth;
+                const imgW = panImg.offsetWidth;
+                
+                currentTranslate = (containerW - imgW) / 2;
+                prevTranslate = currentTranslate;
+                
+                panImg.style.transform = `translateX(${currentTranslate}px)`;
+            };
+            
+            populateCreatures(locationName);
+        }
+
+        function closePanModal() {
+            panModal.classList.remove('active');
+            panImg.src = ""; // Clear src to prevent flicker on next open
+            closeMobileCard(); 
+        }
+        
+        // CLICK ANYWHERE TO CLOSE
+        panModal.addEventListener('click', function(e) {
+            const card = document.getElementById('cardPreview');
+            
+            // If the card is open on mobile, IGNORE background clicks.
+            // The user MUST tap the card itself to close it first.
+            if (card.classList.contains('mobile-active')) {
+                return; 
+            }
+
+            // Otherwise, if clicking the dark background, close the location view
+            if (e.target === panModal) {
+                closePanModal();
+            }
+        });
+
+        const cardPreview = document.getElementById('cardPreview');
+        const cardPreviewImg = document.getElementById('cardPreviewImg');
+
+        function populateCreatures(locationName) {
+            const creaturesList = document.getElementById('creaturesList');
+            if (!creaturesList) return;
+            
+            const creatures = LOCATION_CREATURES[locationName];
+            const population = LOCATION_POPULATIONS[locationName];
+            
+            let html = '';
+            
+            // Add creatures if they exist
+            if (creatures && creatures.length > 0) {
+                html += creatures.map(creature => `
+                    <span 
+                        class="type-${creature.type}" 
+                        onmouseenter="showCreatureCard(event, ${JSON.stringify(creature).replace(/"/g, '&quot;')})"
+                        onmouseleave="hideCreatureCard()"
+                        onclick="toggleMobileCard(event, ${JSON.stringify(creature).replace(/"/g, '&quot;')})"
+                    >
+                        ${creature.name}
+                    </span>
+                `).join('');
+            }
+            
+            // Add population if it exists
+            if (population) {
+                html += `<div class="population-info" style="margin-top: 10px; padding-top: 10px;">
+                    <svg class="pop-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="vertical-align: middle; margin-bottom: 2px;">
+                        <path d="M9 13.75c-2.34 0-7 1.17-7 3.5V19h14v-1.75c0-2.33-4.66-3.5-7-3.5zM4.34 17c.84-.58 2.87-1.25 4.66-1.25s3.82.67 4.66 1.25H4.34zM9 12c1.93 0 3.5-1.57 3.5-3.5S10.93 5 9 5 5.5 6.57 5.5 8.5 7.07 12 9 12zm0-5c.83 0 1.5.67 1.5 1.5S9.83 10 9 10s-1.5-.67-1.5-1.5S8.17 7 9 7zm7.04 6.81c1.16.84 1.96 1.96 1.96 3.44V19h4v-1.75c0-2.02-3.5-3.17-5.96-3.44zM15 12c1.93 0 3.5-1.57 3.5-3.5S16.93 5 15 5c-.54 0-1.04.13-1.5.35.63.89 1 1.98 1 3.15s-.37 2.26-1 3.15c.46.22.96.35 1.5.35z"/>
+                    </svg>
+                    ${population}
+                </div>`;
+            }
+            
+            creaturesList.innerHTML = html;
+        }
+
+        // --- MOBILE CARD LOGIC ---
+
+        function toggleMobileCard(e, creature) {
+            // Only run this logic on mobile screens
+            if (window.innerWidth > 800) return;
+
+            e.stopPropagation(); // Stop the click from bubbling up to the modal background
+
+            const preview = document.getElementById('cardPreview');
+            const img = document.getElementById('cardPreviewImg');
+            const imgSrc = creature.images?.small || '';
+
+            // If no image, do nothing
+            if (!imgSrc) return;
+
+            // Check if we are clicking the same creature that is already open
+            if (preview.classList.contains('mobile-active') && img.src.includes(imgSrc)) {
+                // Close it
+                closeMobileCard();
+            } else {
+                // Open it
+                img.src = imgSrc;
+                preview.classList.add('mobile-active');
+            }
+        }
+
+        function closeMobileCard() {
+            const preview = document.getElementById('cardPreview');
+            preview.classList.remove('mobile-active');
+            preview.style.display = 'none'; 
+        }
+
+        function showCreatureCard(e, creature) {
+            if (window.innerWidth <= 800) return; // Desktop only
+            
+            const imgSrc = creature.images?.small || '';
+            if (!imgSrc) return;
+            
+            console.log('Showing card:', imgSrc); // DEBUG
+            
+            cardPreviewImg.src = imgSrc;
+            cardPreview.style.display = 'block';
+            
+            cardPreview.style.left = (e.pageX + 20) + 'px';
+            cardPreview.style.top = (e.pageY - 140) + 'px';
+        }
+
+        function hideCreatureCard() {
+            cardPreview.style.display = 'none';
+        }
+        function isLocationInNight(mesh) {
+            if (!mesh || !sunLight) return false;
+
+            // 1. Get the absolute world position of the marker
+            const locationPos = new THREE.Vector3();
+            mesh.getWorldPosition(locationPos);
+            locationPos.normalize();
+
+            // 2. Get the direction of the sunlight
+            const sunDir = sunLight.position.clone().normalize();
+
+            // 3. Compare angles. Result < -0.1 means it's on the dark side.
+            return locationPos.dot(sunDir) < -0.1;
+        }
+        
+        // 2. MOUSE CLICK (Strict Selection Logic)
+        function onMouseClick(event) {
+            if (!isOrbitMode || !markersGroup) return;
+
+            if (lastSelectedMesh) {
+                deselectMarker();
+                return;
+            }
+
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(markersGroup.children);
+
+            if (intersects.length > 0) {
+                const hit = intersects[0];
+                const data = hit.object.userData;
+                const visualMesh = data.visualMesh || hit.object;
+
+                if (data.name && visualMesh) {
+                    isRotating = false; 
+                    
+                    // --- CHANGED: DETERMINE WHICH IMAGE TO SHOW ---
+                    const isNight = isLocationInNight(visualMesh);
+                    
+                    // If isNight is true, use imageNight. Otherwise imageDay.
+                    const currentImage = isNight ? data.imageNight : data.imageDay;
+                    // ----------------------------------------------
+
+                    locationLabel.innerHTML = `
+                        <div style="font-weight:700; letter-spacing:1px; color:#4fd1c5; margin-bottom:5px;">${data.name}</div>
+                        
+                        <div style="width: 100px; height: 100px; overflow: hidden; position: relative; border-radius: 4px; border: 1px solid rgba(79, 209, 197, 0.5);">
+                            
+                            <!-- Use currentImage here -->
+                            <img src="${currentImage}" 
+                                 style="position: absolute; 
+                                        top: 80%; 
+                                        left: 50%; 
+                                        transform: translate(-50%, -50%); 
+                                        min-width: 100%; 
+                                        min-height: 100%; 
+                                        width: auto !important; 
+                                        height: 175% !important; 
+                                        max-width: none !important; 
+                                        max-height: none !important;" 
+                                 alt="View">
+                        </div>
+                    `;
+                    
+                    // Pass the specific image URL to the full screen modal
+                    locationLabel.onclick = function() { openPanModal(currentImage, data.name); };
+                    
+                    locationLabel.style.display = 'flex'; 
+
+                    visualMesh.material.color.setHex(0xffaa00);
+                    visualMesh.scale.set(1.5, 1.5, 1.5);
+                    lastSelectedMesh = visualMesh;
+
+                    if (isMobile) {
+                        mobileLight = new THREE.PointLight(0xffaa00, 1.5, 2);
+                        visualMesh.add(mobileLight);
+                    }
+                    
+                    updateLabelPosition();
+                }
+            }
+        }
+
+        function deselectMarker() {
+            locationLabel.style.display = 'none';
+            isRotating = true; // Resume rotation
+            if (lastSelectedMesh) {
+                lastSelectedMesh.material.color.setHex(0xff4444);
+                lastSelectedMesh.scale.set(1, 1, 1);
+                lastSelectedMesh = null;
+                if (isMobile && mobileLight) {
+                    mobileLight.parent.remove(mobileLight);
+                    mobileLight = null;
+                }
+            }
+        }
+
+        // 3. STATIONARY LABEL UPDATER (Called in Animate Loop)
+        function updateLabelPosition() {
+            if (!lastSelectedMesh || locationLabel.style.display === 'none') return;
+
+            const vector = new THREE.Vector3();
+            lastSelectedMesh.getWorldPosition(vector);
+            vector.project(camera);
+
+            const rect = renderer.domElement.getBoundingClientRect();
+            const x = rect.left + (vector.x * 0.5 + 0.5) * rect.width;
+            const y = rect.top + (-(vector.y * 0.5) + 0.5) * rect.height;
+
+            locationLabel.style.left = x + 'px';
+            locationLabel.style.top = y + 'px';
+        }
+       
+        // 5. DRAG LOGIC
+        function startDrag(e) {
+            isDraggingPan = true;
+            startPanX = getPositionX(e);
+            panContainer.style.cursor = 'grabbing';
+            e.stopPropagation(); // Don't trigger modal close
+        }
+
+        function endDrag() {
+            isDraggingPan = false;
+            prevTranslate = currentTranslate;
+            panContainer.style.cursor = 'grab';
+        }
+
+        function moveDrag(e) {
+            if (!isDraggingPan) return;
+            if(e.type === 'touchmove') e.preventDefault(); 
+            
+            const currentX = getPositionX(e);
+            const diff = currentX - startPanX;
+            currentTranslate = prevTranslate + diff;
+            
+            const containerWidth = panContainer.offsetWidth;
+            const imgWidth = panImg.offsetWidth;
+            
+            if(imgWidth <= containerWidth) {
+                // If image is smaller than screen, center it? or just lock it.
+                currentTranslate = (containerWidth - imgWidth) / 2;
+            } else {
+                 const minTranslate = containerWidth - imgWidth; 
+                 const maxTranslate = 0; 
+                 if (currentTranslate > maxTranslate) currentTranslate = maxTranslate;
+                 if (currentTranslate < minTranslate) currentTranslate = minTranslate;
+            }
+
+            panImg.style.transform = `translateX(${currentTranslate}px)`;
+        }
+
+        function getPositionX(event) {
+            return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+        }
+
+        panContainer.addEventListener('mousedown', startDrag);
+        panContainer.addEventListener('touchstart', startDrag, {passive: false});
+        panContainer.addEventListener('mouseup', endDrag);
+        panContainer.addEventListener('mouseleave', endDrag);
+        panContainer.addEventListener('touchend', endDrag);
+        panContainer.addEventListener('mousemove', moveDrag);
+        panContainer.addEventListener('touchmove', moveDrag, {passive: false});
+
+        // Event Listeners for Orbit
+        orbitBtn.addEventListener('click', toggleOrbitMode);
+        
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let lastTouchTime = 0;
+        const canvasEl = renderer.domElement;
+
+        canvasEl.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            if(e.target !== orbitBtn && !lastSelectedMesh) { 
+                 // If not clicking button and nothing selected, just rotate
+                 isRotating = true; 
+            }
+        }, { passive: false });
+
+        canvasEl.addEventListener('touchend', (e) => {
+            const dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
+            const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+            if (dx < 40 && dy < 40) {
+                if (e.cancelable) e.preventDefault(); 
+                lastTouchTime = Date.now();
+                const mockEvent = { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY };
+                onMouseClick(mockEvent);
+            }
+        });
+
+        // 4. Desktop Mouse Click (The Fix)
+        canvasEl.addEventListener('click', (e) => {
+            // CHECK: Did a touch event happen less than 500ms ago?
+            const timeSinceTouch = Date.now() - lastTouchTime;
+            
+            if (timeSinceTouch < 500) {
+                // YES -> It's a Ghost Click. IGNORE IT.
+                return;
+            }
+
+            // NO -> It's a real mouse click. Proceed.
+            onMouseClick(e);
+        });
+    </script>
+</body>
+</html>

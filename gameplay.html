@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Mystik Creatures™ — Official Gameplay</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Social Media Preview Tags -->
+  <meta property="og:title" content="Mystik Creatures™ TCG" />
+  <meta property="og:description" content="A New Realm Awaits" />
+
+  <!-- Directs to your logo on the live site -->
+  <meta property="og:image" content="https://nerdrealm.github.io/MystikCreatures/MystikLogo-PNG.png" />
+
+  <!-- Directs to your main page -->
+  <meta property="og:url" content="https://nerdrealm.github.io/MystikCreatures/index.html" />
+
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+    
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    
+    /* MAIN CONTENT */
+    .main { flex: 1; padding: 1.5rem 1.5rem 2.5rem; max-width: calc(100% - 260px); }
+    .main-inner { max-width: 1000px; margin: 0 auto; }
+    section {
+      background: rgba(7, 10, 18, 0.95);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(45, 55, 72, 0.9);
+      box-shadow: var(--shadow-soft);
+      padding: 1.4rem 1.5rem 1.3rem;
+    }
+    h2 { margin: 0 0 1.5rem; font-size: 1.05rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; }
+
+    /* VIDEO STYLES */
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+      height: 0;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: #000;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: 0;
+    }
+
+    /* DISCLAIMER FLAG */
+    .version-flag {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-text);
+      color: var(--warning-text);
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 2rem;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .version-flag i { margin-top: 3px; font-size: 1.1em; }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #1a202c; }
+      .main { max-width: 100%; padding: 1rem 1rem 2rem; }
+    }
+    /* --- MOBILE OPTIMIZATION --- */
+    
+    /* 1. Mobile Label (Hidden on Desktop) */
+    .mobile-label { display: none; }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #1a202c; }
+      .main { max-width: 100%; padding: 1rem 1rem 2rem; }
+
+      /* Force table elements to behave like blocks */
+      .table-wrapper { max-height: none; border: none; overflow: visible; }
+      table, thead, tbody, th, td, tr { display: block; }
+      
+      /* Hide Table Headers */
+      thead tr { position: absolute; top: -9999px; left: -9999px; }
+      
+      /* Style the Row as a "Card" */
+      tbody tr { 
+        background: var(--bg-panel-soft);
+        margin-bottom: 1.5rem; 
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        padding: 1.25rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      }
+
+      /* Style the Cells */
+      td { 
+        border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.05); 
+        padding: 0.5rem 0;
+        text-align: left !important;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; 
+      }
+      td:last-child { border-bottom: none; }
+
+      /* Reveal Labels */
+      .mobile-label {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        margin-right: 10px;
+        min-width: 80px; 
+      }
+
+      /* Name & Image (First Cell) */
+      td:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center !important;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+      }
+      td:first-child .mobile-label { display: none; } /* Hide label for name */
+      
+      td:first-child div { font-size: 1.3rem !important; margin-bottom: 10px; }
+      .card-thumbnail { max-height: 200px; width: auto; }
+
+      /* Details Block */
+      td:nth-child(5) { 
+          display: block; 
+          margin-top: 0.5rem;
+          background: rgba(0,0,0,0.2);
+          padding: 10px;
+          border-radius: 8px;
+      }
+      td:nth-child(5) .mobile-label {
+          display: block;
+          margin-bottom: 5px;
+          border-bottom: 1px solid #333;
+          padding-bottom: 2px;
+          width: 100%;
+      }
+      
+      .detail-text { text-align: left; }
+    }
+
+  </style>
+</head>
+<body>
+  <button id="mobile-menu-btn">&#9776;</button>
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+    <div class="main-inner">
+      <section>
+        <h2>Official Gameplay</h2>
+        <div class="version-flag" style="border-color: var(--accent); color: var(--accent); background: var(--accent-soft); margin-bottom: 1rem;">
+          <i class="fa-solid fa-lock"></i>
+          <div>
+            <strong>Official Rulebook:</strong> 
+            The full written Rulebook will be released at a later date to protect Intellectual Property. Please refer to the gameplay videos below for current mechanics.
+          </div>
+        </div>
+        <!-- DISCLAIMER FLAG -->
+        <div class="version-flag">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <div>
+            <strong>Version Notice:</strong> 
+            The videos below may contain card artwork or designs from previous versions of Mystik Creatures™. While the core gameplay mechanics remain consistent, please refer to the <a href="card_list.html" style="color: inherit; text-decoration: underline;">Card List</a> for the most up-to-date card information.
+          </div>
+        </div>
+
+        <!-- VIDEO 1 -->
+        <h3 style="margin-top:0; color:var(--text-main); font-size:1rem; margin-bottom:0.5rem;">Official Gameplay Part 1</h3>
+        <div class="video-wrapper">
+          <!-- UPDATED LINK: /embed/ instead of /watch?v= -->
+          <iframe 
+            src="https://www.youtube.com/embed/_khuEgEkPd4"
+            title="Mystik Creatures Gameplay Part 1"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            allowfullscreen>
+          </iframe>
+        </div>
+
+        <!-- VIDEO 2 -->
+        <h3 style="color:var(--text-main); font-size:1rem; margin-bottom:0.5rem;">Official Gameplay Part 2</h3>
+        <div class="video-wrapper">
+          <!-- UPDATED LINK: /embed/ instead of /watch?v= -->
+          <iframe 
+            src="https://www.youtube.com/embed/3BvQVjNy1B4"
+            title="Mystik Creatures Gameplay Part 2"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            allowfullscreen>
+          </iframe>
+        </div>
+
+      </section>
+    </div>
+  </main>
+  </script>
+  <script src="sidebar.js"></script>
+  <script src="footer.js"></script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Mystik Creatures™ – News & Updates</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Social Media Preview Tags -->
+  <meta property="og:title" content="Mystik Creatures™ TCG" />
+  <meta property="og:description" content="A New Realm Awaits" />
+
+  <!-- Directs to your logo on the live site -->
+  <meta property="og:image" content="https://nerdrealm.github.io/MystikCreatures/MystikLogo-PNG.png" />
+
+  <!-- Directs to your main page -->
+  <meta property="og:url" content="https://nerdrealm.github.io/MystikCreatures/index.html" />
+
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+    
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    
+    /* --- MAIN CONTENT --- */
+    .main {
+      flex: 1;
+      padding: 1.5rem 1.5rem 2.5rem;
+      max-width: calc(100% - 260px);
+      background: #ffffff;
+    }
+    .main-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    section {
+      background: transparent;
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h2 {
+      margin: 0 0 1.5rem;
+      font-size: 1.5rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #1877f2;
+      border-bottom: none;
+      width: 100%;
+      padding-bottom: 1rem;
+      text-align: left;
+    }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #1a202c; }
+      .main { max-width: 100%; padding: 1rem 1rem 2rem; }
+    }
+    /* --- MOBILE OPTIMIZATION --- */
+    
+    /* 1. Mobile Label (Hidden on Desktop) */
+    .mobile-label { display: none; }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #1a202c; }
+      .main { max-width: 100%; padding: 1rem 1rem 2rem; }
+
+      /* Force table elements to behave like blocks */
+      .table-wrapper { max-height: none; border: none; overflow: visible; }
+      table, thead, tbody, th, td, tr { display: block; }
+      
+      /* Hide Table Headers */
+      thead tr { position: absolute; top: -9999px; left: -9999px; }
+      
+      /* Style the Row as a "Card" */
+      tbody tr { 
+        background: var(--bg-panel-soft);
+        margin-bottom: 1.5rem; 
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        padding: 1.25rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      }
+
+      /* Style the Cells */
+      td { 
+        border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.05); 
+        padding: 0.5rem 0;
+        text-align: left !important;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; 
+      }
+      td:last-child { border-bottom: none; }
+
+      /* Reveal Labels */
+      .mobile-label {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        margin-right: 10px;
+        min-width: 80px; 
+      }
+
+      /* Name & Image (First Cell) */
+      td:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center !important;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+      }
+      td:first-child .mobile-label { display: none; } /* Hide label for name */
+      
+      td:first-child div { font-size: 1.3rem !important; margin-bottom: 10px; }
+      .card-thumbnail { max-height: 200px; width: auto; }
+
+      /* Details Block */
+      td:nth-child(5) { 
+          display: block; 
+          margin-top: 0.5rem;
+          background: rgba(0,0,0,0.2);
+          padding: 10px;
+          border-radius: 8px;
+      }
+      td:nth-child(5) .mobile-label {
+          display: block;
+          margin-bottom: 5px;
+          border-bottom: 1px solid #333;
+          padding-bottom: 2px;
+          width: 100%;
+      }
+      
+      .detail-text { text-align: left; }
+    }
+
+  </style>
+</head>
+<body>
+  <button id="mobile-menu-btn">&#9776;</button>
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+    <div class="main-inner">
+      <section>
+        <h2>Latest News & Updates</h2>
+        
+        <!-- FACEBOOK WIDGET CONTAINER -->
+        <div class="sk-ww-facebook-page-posts" data-embed-id="25632952"></div><script src="https://widgets.sociablekit.com/facebook-page-posts/widget.js" defer></script>
+      </section>
+    </div>
+  </main>
+  <script src="sidebar.js"></script>
+  <script src="footer.js"></script>
+</body>
+</html>

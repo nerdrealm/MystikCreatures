@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Mystik Creatures™ – Card List</title>
+  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* --- PILLS & GLOWS --- */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+      white-space: nowrap;
+      margin: 2px;
+    }
+    .pill-Dark    { border-color: #8e44ad; color: #a569bd; background: rgba(142, 68, 173, 0.15); }
+    .pill-Earth   { border-color: #d2b48c; color: #e0cdae; background: rgba(210, 180, 140, 0.15); }
+    .pill-Fire    { border-color: #e67e22; color: #f39c12; background: rgba(230, 126, 34, 0.15); }
+    .pill-Forest  { border-color: #27ae60; color: #2ecc71; background: rgba(39, 174, 96, 0.15); }
+    .pill-Light   { border-color: #f1f2f6; color: #ffffff; background: rgba(241, 242, 246, 0.15); }
+    .pill-Thunder { border-color: #f1c40f; color: #f4d03f; background: rgba(241, 196, 15, 0.15); }
+    .pill-Water   { border-color: #3498db; color: #5dade2; background: rgba(52, 152, 219, 0.15); }
+    .pill-Wind    { border-color: #87CEEB; color: #87CEEB; background: rgba(135, 206, 235, 0.15); }
+    .pill-Blank   { border-color: #718096; color: #a0aec0; background: rgba(113, 128, 150, 0.15); }
+
+    /* --- MATCHING TEXT COLORS (For Numbers) --- */
+    .text-Dark    { color: #a569bd; font-weight: bold; }
+    .text-Earth   { color: #e0cdae; font-weight: bold; }
+    .text-Fire    { color: #f39c12; font-weight: bold; }
+    .text-Forest  { color: #2ecc71; font-weight: bold; }
+    .text-Light   { color: #ffffff; font-weight: bold; }
+    .text-Thunder { color: #f4d03f; font-weight: bold; }
+    .text-Water   { color: #5dade2; font-weight: bold; }
+    .text-Wind    { color: #87CEEB; font-weight: bold; }
+    .text-Blank   { color: #a0aec0; font-weight: bold; }
+
+    /* Damage Red Highlight */
+    .stat-damage  { color: #f56565; font-weight: bold; text-shadow: 0 0 8px rgba(245, 101, 101, 0.4); }
+
+    /* Stat Glows */
+    .level-common   { color: #fff; text-shadow: 0 0 8px #a0aec0; font-weight: 700; } 
+    .level-uncommon { color: #fff; text-shadow: 0 0 8px #2ecc71; font-weight: 700; } 
+    .level-rare     { color: #fff; text-shadow: 0 0 8px #3498db; font-weight: 700; } 
+    .level-ultra    { color: #fff; text-shadow: 0 0 8px #9b59b6; font-weight: 700; } 
+    .stat-glow      { color: #fff; text-shadow: 0 0 8px #f1c40f; font-weight: 700; font-size: 0.9rem; }
+
+    /* Rarity Text Glows */
+    .rarity-text-Common     { color: #fff; text-shadow: 0 0 8px #a0aec0; font-weight: 700; }
+    .rarity-text-Uncommon   { color: #fff; text-shadow: 0 0 8px #2ecc71; font-weight: 700; }
+    .rarity-text-Rare       { color: #fff; text-shadow: 0 0 8px #3498db; font-weight: 700; }
+    .rarity-text-UltraRare  { color: #fff; text-shadow: 0 0 8px #9b59b6; font-weight: 700; }
+    .rarity-text-HiddenRare { color: #fff; text-shadow: 0 0 8px #f1c40f; font-weight: 700; }
+    .rarity-text-Borderless { color: #fff; text-shadow: 0 0 8px #e74c3c; font-weight: 700; }
+
+    /* --- DESKTOP CARD GRID --- */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem 0;
+    }
+
+    .card-item {
+      background: linear-gradient(145deg, #0b0f19 0%, #05070b 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card-item:hover {
+      border-color: var(--accent);
+      box-shadow: 0 8px 32px rgba(79, 209, 197, 0.2);
+      transform: translateY(-4px);
+    }
+
+    .card-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .card-item-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent);
+      flex: 1;
+    }
+
+    .card-item-image {
+      text-align: center;
+      margin: 0.5rem 0;
+    }
+
+    .card-item-image img {
+      max-height: 220px;
+      width: auto;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .card-item-image img:hover {
+      transform: scale(1.05);
+    }
+
+    .card-item-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: var(--radius-sm);
+    }
+
+    .stat-box {
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-value {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .card-item-details {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .card-item-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+    }
+
+    /* --- TABLE STYLES --- */
+    .table-wrapper {
+      max-height: 70vh;
+      overflow: auto;
+      border-radius: 8px;
+      border: 1px solid #1a202c;
+      display: none; /* Hidden on desktop by default */
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      min-width: 100%;
+      background: #05070c;
+    }
+    thead {
+      position: sticky;
+      top: 0;
+      background: #111320;
+      z-index: 10;
+    }
+    th, td {
+      padding: 0.5rem 0.65rem;
+      text-align: left;
+      border-bottom: 1px solid #1a202c;
+      white-space: nowrap;
+      vertical-align: top;
+    }
+    th:not(:first-child), td:not(:first-child) {
+        text-align: center;
+        vertical-align: middle;
+    }
+    th {
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    tbody tr:nth-child(even) { background: #080a13; }
+    tbody tr:hover { background: rgba(79, 209, 197, 0.1); }
+    
+    .detail-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: normal;
+      min-width: 300px;
+      max-width: 500px;
+      line-height: 1.4;
+      text-align: left;
+      margin: 0 auto;
+    }
+    .sub-header {
+      color: #fff;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 2px;
+      margin-top: 6px;
+      line-height: 1.5; /* Added for better spacing on wrap */
+    }
+    
+    /* Forces the cost (2 Fire) to not wrap in the middle of itself */
+    .attack-cost-wrapper {
+      white-space: nowrap;
+      display: inline-block;
+    }
+    
+    /* Container for Cost AND Damage */
+    .attack-stats-line {
+      display: inline;
+    }
+
+    /* --- CONTROLS --- */
+    .tabs { display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; }
+    .tab-btn { background: transparent; border: 1px solid var(--border-subtle); color: var(--text-muted); padding: 0.6rem 1.5rem; border-radius: 999px; cursor: pointer; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; transition: 0.2s; }
+    .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+    
+    .filters-bar { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; background: var(--bg-panel); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-subtle); align-items: center; flex-wrap: wrap; }
+    .filter-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    select { background: var(--bg-panel-soft); border: 1px solid var(--border-subtle); color: white; padding: 0.5rem 1rem; border-radius: 6px; min-width: 150px; cursor: pointer; }
+    
+    /* Pagination */
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 1.5rem; }
+    .page-btn { background: var(--bg-panel); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 0.5rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; }
+    .page-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--bg-panel-soft); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Thumbnails */
+    .card-thumbnail { display: block; margin-top: 8px; max-height: 150px; width: auto; border-radius: 5px; cursor: pointer; transition: transform 0.2s; border: 2px solid transparent; }
+    .card-thumbnail:hover { transform: scale(1.1) translateY(-2px); z-index: 5; position: relative; }
+    .thumb-Common { border-color: #a0aec0; box-shadow: 0 0 8px rgba(160, 174, 192, 0.4); }
+    .thumb-Uncommon { border-color: #2ecc71; box-shadow: 0 0 8px rgba(46, 204, 113, 0.4); }
+    .thumb-Rare { border-color: #3498db; box-shadow: 0 0 8px rgba(52, 152, 219, 0.4); }
+    .thumb-UltraRare { border-color: #9b59b6; box-shadow: 0 0 12px rgba(155, 89, 182, 0.6); }
+    .thumb-HiddenRare { border-color: #f1c40f; box-shadow: 0 0 12px rgba(241, 196, 15, 0.6); }
+    .thumb-Borderless { border-color: #e74c3c; box-shadow: 0 0 12px rgba(231, 76, 60, 0.6); }
+
+    /* Modal */
+    .image-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 9999; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(4px); }
+    .image-modal.active { display: flex; }
+    .image-modal img { max-width: 90%; max-height: 90vh; border-radius: 12px; box-shadow: 0 0 40px rgba(79, 209, 197, 0.2); border: 1px solid #333; }
+    .image-modal-text { position: absolute; bottom: 20px; color: var(--text-muted); font-size: 0.9rem; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 999px; }
+
+    /* Sidebar Image Styles */
+    .sidebar-powers { text-align: center; margin: -0.25rem 0 1.5rem 0; padding: 0 0.5rem; }
+    .sidebar-powers img { max-width: 60%; height: auto; display: block; margin: 0 auto; }
+    .sidebar-logo-bottom { text-align: center; margin-top: -1rem; margin-bottom: -1rem; padding: 0 0.5rem; }
+    .sidebar-logo-bottom img { max-width: 100%; height: auto; display: block; margin: 0 auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+
+/* --- MOBILE OPTIMIZATION --- */
+    
+    /* 1. Mobile Label (Hidden on Desktop) */
+    .mobile-label { display: none; }
+    
+    /* Mobile-specific Tabs */
+    @media (max-width: 800px) {
+      .tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+      .tab-btn {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.75rem;
+        text-align: center;
+        width: 100%;
+      }
+      
+      /* Make filters more compact on mobile */
+      .filters-bar {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.75rem;
+      }
+      .filter-group {
+        width: 100%;
+      }
+      .filter-group label {
+        font-size: 0.75rem;
+        margin-bottom: 0.25rem;
+      }
+      select {
+        width: 100%;
+        padding: 0.6rem;
+        font-size: 0.85rem;
+      }
+      
+      body { flex-direction: column; }
+      .sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #1a202c; }
+      .main { max-width: 100%; padding: 1rem 1rem 2rem; }
+
+      /* MOBILE: Hide grid, show table */
+      .card-grid { display: none !important; }
+      .table-wrapper { display: block !important; }
+
+      /* Force table elements to behave like blocks */
+      .table-wrapper { max-height: none; border: none; overflow: visible; }
+      table, thead, tbody, th, td, tr { display: block; }
+      
+      /* Hide Table Headers */
+      thead tr { position: absolute; top: -9999px; left: -9999px; }
+      
+      /* Style the Row as a "Card" */
+      tbody tr { 
+        background: var(--bg-panel-soft);
+        margin-bottom: 1.5rem; 
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        padding: 1.25rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      }
+
+      /* Style the Cells */
+      td { 
+        border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.05); 
+        padding: 0.5rem 0;
+        text-align: left !important;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; 
+      }
+      td:last-child { border-bottom: none; }
+
+      /* Reveal Labels */
+      .mobile-label {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        margin-right: 10px;
+        min-width: 80px; 
+      }
+
+      /* Name & Image (First Cell) */
+      td:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center !important;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+      }
+      td:first-child .mobile-label { display: none; } /* Hide label for name */
+      
+      td:first-child div { font-size: 1.3rem !important; margin-bottom: 10px; }
+      .card-thumbnail { max-height: 200px; width: auto; }
+
+      /* Details Block */
+      td:nth-child(5) { 
+          display: block; 
+          margin-top: 0.5rem;
+          background: rgba(0,0,0,0.2);
+          padding: 10px;
+          border-radius: 8px;
+      }
+      td:nth-child(5) .mobile-label {
+          display: block;
+          margin-bottom: 5px;
+          border-bottom: 1px solid #333;
+          padding-bottom: 2px;
+          width: 100%;
+      }
+      
+      /* NEW RULE: Push attack stats (Cost + Damage) to new line on mobile */
+      .attack-stats-line {
+        display: block;
+        margin-top: 4px;
+        margin-bottom: 2px;
+        color: #ddd; /* slightly lighter to differentiate from name */
+      }
+      
+      .detail-text { text-align: left; }
+    }
+
+    
+  </style>
+</head>
+<body>
+  <button id="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
+ <aside class="sidebar"></aside>
+
+  <main class="main">
+    <h1>Card List</h1>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="setTab('Creature', this)">Creatures</button>
+      <button class="tab-btn" onclick="setTab('Secret', this)">Secret Cards</button>
+      <button class="tab-btn" onclick="setTab('Power', this)">Power Cards</button>
+      <button class="tab-btn" onclick="setTab('Promo', this)">Promo Cards</button>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label>Filter by Type / Subtype</label>
+        <select id="filter-type" onchange="applyFilters()">
+            <option value="">All Types</option>
+        </select>
+      </div>
+      
+      <div class="filter-group" id="filter-group-level">
+        <label>Filter by Level</label>
+        <select id="filter-level" onchange="applyFilters()">
+            <option value="">All Levels</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Filter by Rarity</label>
+        <select id="filter-rarity" onchange="applyFilters()">
+            <option value="">All Rarities</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- DESKTOP CARD GRID -->
+    <div id="card-grid" class="card-grid"></div>
+
+    <!-- MOBILE TABLE (Hidden on Desktop) -->
+    <div class="table-wrapper">
+      <table id="data-table">
+        <thead><!-- Headers injected by JS --></thead>
+        <tbody><!-- Rows injected by JS --></tbody>
+      </table>
+    </div>
+
+    <div id="pagination" class="pagination">
+      <button id="btn-prev" class="page-btn" onclick="changePage(-1)">Previous</button>
+      <span id="page-info">Page 1 of 1</span>
+      <button id="btn-next" class="page-btn" onclick="changePage(1)">Next</button>
+    </div>
+    
+    <p id="count-display" style="color:var(--text-muted); font-size:0.8rem; margin-top:0.5rem; text-align:center;"></p>
+  </main>
+  
+  <div class="image-modal" id="image-modal" onclick="closeModal()">
+    <img id="modal-image" src="" alt="">
+    <div class="image-modal-text">Click anywhere to close</div>
+  </div>
+
+  <script src="cards_data.js"></script>
+  <script src="promo.js"></script>
+  <script>
+    let currentTab = 'Creature';
+    let currentData = [];
+    let sortCol = 'name';
+    let sortAsc = true;
+    let currentPage = 1;
+    let itemsPerPage = 30; 
+    const IMAGE_EXT = '.png';
+
+    function isMobile() { return window.innerWidth <= 800; }
+    window.addEventListener('resize', () => applyFilters());
+
+    function getLevelClass(level) {
+      if (!level || isNaN(level)) return '';
+      const lvl = parseInt(level);
+      if (lvl >= 1 && lvl <= 3) return 'level-common';
+      if (lvl >= 4 && lvl <= 6) return 'level-uncommon';
+      if (lvl >= 7 && lvl <= 9) return 'level-rare';
+      if (lvl >= 10) return 'level-ultra';
+      return ''; 
+    }
+
+    function hasExtension(path) { return /\.[a-zA-Z0-9]+$/.test(path); }
+    function getCardImageUrl(card) {
+      if (!card.images || !card.images.small) return null;
+      const path = card.images.small;
+      return hasExtension(path) ? path : path + IMAGE_EXT;
+    }
+
+    // Modal Logic
+    function enlargeImage(url, name) {
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('modal-image');
+      modalImg.src = url;
+      modalImg.alt = name;
+      modal.classList.add('active');
+    }
+    
+    function closeModal() { document.getElementById('image-modal').classList.remove('active'); }
+
+    // Columns
+    const columnsConfig = {
+      'Creature': [
+        { key: 'name', label: 'Name' },
+        { key: 'types', label: 'Type' },
+        { key: 'level', label: 'Level' },
+        { key: 'hp', label: 'HP' },
+        { key: 'details', label: 'Abilities & Attacks' }, 
+        { key: 'weakness', label: 'Weakness' },
+        { key: 'retreat', label: 'Retreat' },
+        { key: 'rarity', label: 'Rarity' },
+        { key: 'setId', label: 'Set ID' }
+      ],
+      'Secret': [
+        { key: 'name', label: 'Name' },
+        { key: 'subtypes', label: 'Subtype' },
+        { key: 'effectText', label: 'Effect Text' },
+        { key: 'rarity', label: 'Rarity' },
+        { key: 'setId', label: 'Set ID' }
+      ],
+      'Power': [
+        { key: 'name', label: 'Name' },
+        { key: 'powerType', label: 'Power Type' },
+        { key: 'powerValue', label: 'Value' },
+        { key: 'rarity', label: 'Rarity' },
+        { key: 'setId', label: 'Set ID' }
+      ],
+      'Promo': [
+        { key: 'name', label: 'Name' },
+        { key: 'types', label: 'Type' },
+        { key: 'level', label: 'Level' },
+        { key: 'hp', label: 'HP' },
+        { key: 'details', label: 'Abilities & Attacks' },
+        { key: 'weakness', label: 'Weakness' },
+        { key: 'retreat', label: 'Retreat' },
+        { key: 'rarity', label: 'Rarity' },
+        { key: 'setId', label: 'Set ID' }
+      ]
+    };
+
+    function setTab(tab, btn) {
+      currentTab = tab;
+      currentPage = 1;
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      else buttons.forEach(b => { if (b.innerText.includes(tab==='Secret'?'Secret':tab)) b.classList.add('active'); });
+
+      const filterBar = document.querySelector('.filters-bar');
+      if (tab === 'Power' || tab === 'Promo') {
+          filterBar.style.display = 'none';
+          document.getElementById('filter-type').value = "";
+          document.getElementById('filter-rarity').value = "";
+          document.getElementById('filter-level').value = "";
+      } else {
+          filterBar.style.display = 'flex';
+          populateDropdowns(); 
+      }
+  
+      const thead = document.querySelector('#data-table thead');
+      let headerHTML = '<tr>';
+      columnsConfig[tab].forEach(col => {
+        const onClick = col.key === 'details' || col.key === 'effectText' ? '' : `onclick="handleSort('${col.key}')"`;
+        headerHTML += `<th ${onClick} data-key="${col.key}">${col.label}</th>`;
+      });
+      headerHTML += '</tr>';
+      thead.innerHTML = headerHTML;
+      applyFilters();
+    }
+
+    function populateDropdowns() {
+      // Use PROMO_CARDS for Promo tab, CARDS for others
+      const sourceData = currentTab === 'Promo' ? PROMO_CARDS : CARDS;
+      const tabCards = currentTab === 'Promo' ? sourceData : sourceData.filter(c => c.supertype === currentTab);
+  
+      const rarities = [...new Set(tabCards.map(c => c.rarity).filter(Boolean))].sort();
+      document.getElementById('filter-rarity').innerHTML = '<option value="">All Rarities</option>' + rarities.map(r => `<option value="${r}">${r}</option>`).join('');
+
+      const typeSelect = document.getElementById('filter-type');
+      let types = [];
+      if(currentTab === 'Creature' || currentTab === 'Promo') {
+        tabCards.forEach(c => { if(c.types) c.types.forEach(t => types.push(t)); });
+      } else if (currentTab === 'Secret') {
+        tabCards.forEach(c => { if(c.subtypes) c.subtypes.forEach(t => types.push(t)); });
+      } else {
+        tabCards.forEach(c => { if(c.powerType) types.push(c.powerType); });
+      }
+      types = [...new Set(types)].sort(); 
+      typeSelect.innerHTML = '<option value="">All Types</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+
+      const levelSelect = document.getElementById('filter-level');
+      const levelGroup = document.getElementById('filter-group-level');
+      if (currentTab === 'Creature' || currentTab === 'Promo') {
+          levelGroup.style.display = 'flex';
+          const levels = [...new Set(tabCards.map(c => c.level).filter(l => l !== undefined && l !== null))].sort((a,b) => a - b);
+          levelSelect.innerHTML = '<option value="">All Levels</option>' + levels.map(l => `<option value="${l}">Level ${l}</option>`).join('');
+      } else {
+          levelGroup.style.display = 'none';
+          levelSelect.value = "";
+      }
+    }
+
+    function applyFilters() {
+      const typeVal = document.getElementById('filter-type').value;
+      const rarityVal = document.getElementById('filter-rarity').value;
+      const levelVal = document.getElementById('filter-level').value;
+
+      itemsPerPage = 30;
+      if (isMobile() && (currentTab === 'Creature' || currentTab === 'Secret' || currentTab === 'Promo') && typeVal !== "") {
+        itemsPerPage = 10; 
+      }
+      currentPage = 1;
+
+      // Use PROMO_CARDS array for Promo tab, CARDS array for everything else
+      const sourceData = currentTab === 'Promo' ? PROMO_CARDS : CARDS;
+
+      currentData = sourceData.filter(c => {
+        // For Promo tab, no supertype check needed (all cards in PROMO_CARDS are promo)
+        if (currentTab !== 'Promo' && c.supertype !== currentTab) return false;
+    
+        if (rarityVal && c.rarity !== rarityVal) return false;
+        if (typeVal) {
+            if (currentTab === 'Creature' || currentTab === 'Promo') { 
+              if (!c.types || !c.types.includes(typeVal)) return false; 
+            }
+            else if (currentTab === 'Secret') { 
+              if (!c.subtypes || !c.subtypes.includes(typeVal)) return false; 
+            }
+            else if (currentTab === 'Power') { 
+              if (c.powerType !== typeVal) return false; 
+            }
+        }
+        if ((currentTab === 'Creature' || currentTab === 'Promo') && levelVal) { 
+          if (c.level != levelVal) return false; 
+        }
+        return true;
+      });
+      renderTable();
+    }
+
+    function handleSort(key) {
+      if (sortCol === key) sortAsc = !sortAsc;
+      else { sortCol = key; sortAsc = true; }
+      document.querySelectorAll('th').forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        if(th.getAttribute('data-key') === key) th.classList.add(sortAsc ? 'sorted-asc' : 'sorted-desc');
+      });
+      renderTable();
+    }
+
+    function changePage(direction) {
+      const totalPages = Math.ceil(currentData.length / itemsPerPage);
+      const newPage = currentPage + direction;
+      if (newPage > 0 && newPage <= totalPages) {
+        currentPage = newPage;
+        renderTable();
+        document.querySelector('.filters-bar').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function getValue(obj, key) {
+        if (key === 'setId') return obj.collectionNumber || obj.setId;
+        if (key === 'types' && obj.types) return obj.types[0];
+        if (key === 'subtypes' && obj.subtypes) return obj.subtypes[0];
+        if (key === 'weakness' && obj.weaknesses) return obj.weaknesses[0]?.PowerType;
+        return obj[key];
+    }
+
+    function renderTable() {
+      // 1. Sort
+      currentData.sort((a, b) => {
+        let valA = getValue(a, sortCol);
+        let valB = getValue(b, sortCol);
+        if (!isNaN(parseFloat(valA)) && !isNaN(parseFloat(valB))) return sortAsc ? valA - valB : valB - valA;
+        valA = (valA || '').toString().toLowerCase();
+        valB = (valB || '').toString().toLowerCase();
+        if (valA < valB) return sortAsc ? -1 : 1;
+        if (valA > valB) return sortAsc ? 1 : -1;
+        return 0;
+      });
+
+      // 2. Paginate
+      let pageData;
+      const totalPages = Math.ceil(currentData.length / itemsPerPage) || 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      pageData = currentData.slice(startIndex, endIndex);
+
+      document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+      document.getElementById('btn-prev').disabled = (currentPage === 1);
+      document.getElementById('btn-next').disabled = (currentPage === totalPages);
+
+      // 3. DESKTOP: Render Card Grid
+      if (!isMobile()) {
+        renderCardGrid(pageData);
+      } else {
+        // 4. MOBILE: Render Table
+        renderMobileTable(pageData);
+      }
+      
+      document.getElementById('count-display').textContent = `Showing ${pageData.length} of ${currentData.length} cards (Page ${currentPage})`;
+    }
+
+    function renderCardGrid(pageData) {
+      const grid = document.getElementById('card-grid');
+      grid.innerHTML = '';
+
+      pageData.forEach(c => {
+        const imgUrl = getCardImageUrl(c);
+        const rarityClean = c.rarity ? c.rarity.replace(/\s+/g, '') : '';
+        const rarityClass = c.rarity ? `thumb-${rarityClean}` : '';
+        const rarityDisplay = c.rarity ? `<span class="rarity-text-${rarityClean}">${c.rarity}</span>` : '—';
+
+        let cardHTML = '<div class="card-item">';
+        
+        cardHTML += `<div style="text-align:center; font-weight:700; font-size:1.4rem; color:var(--accent); margin-bottom:-0.5rem;">${c.name}</div>`;
+
+        if (imgUrl) {
+          cardHTML += '<div class="card-item-image">';
+          cardHTML += `<img src="${imgUrl}" class="${rarityClass}" onclick="enlargeImage('${imgUrl}', '${c.name.replace(/'/g, "\\'")}')" alt="${c.name}">`;
+          cardHTML += '</div>';
+        }
+
+        if (currentTab === 'Creature' || currentTab === 'Promo') {
+          const levelDisplay = c.level ? `<span class="${getLevelClass(c.level)}">${c.level}</span>` : '—';
+          const hpDisplay = c.hp ? `<span class="stat-glow">${c.hp}</span>` : '—';
+          const type = (c.types || []).map(t => `<span class="pill pill-${t}">${t}</span>`).join(' ');
+
+          cardHTML += '<div class="card-item-stats">';
+          cardHTML += `<div class="stat-box"><div class="stat-label">Level</div><div class="stat-value">${levelDisplay}</div></div>`;
+          cardHTML += `<div class="stat-box"><div class="stat-label">HP</div><div class="stat-value">${hpDisplay}</div></div>`;
+          cardHTML += `<div class="stat-box"><div class="stat-label">Type</div><div class="stat-value">${type}</div></div>`;
+          cardHTML += '</div>';
+
+          let detailsHTML = '<div class="card-item-details">';
+          if (c.abilities) c.abilities.forEach(ab => { 
+            detailsHTML += `<div style="margin-bottom:0.75rem;"><span style="color:#feebc8; font-weight:700;">Ability: ${ab.name}</span><br>${ab.effectText}</div>`; 
+          });
+          if (c.attacks) c.attacks.forEach(atk => { 
+            const costHtml = atk.cost.map(x => {
+              const pType = x.PowerType || x.powerType || 'Blank';
+              return `<span class="text-${pType}">${x.count}</span> <span class="pill pill-${pType}">${pType}</span>`;
+            }).join(' ');
+            detailsHTML += `<div style="margin-bottom:0.75rem;"><span style="font-weight:700; color:#fff;">${atk.name}</span> (${costHtml}) <span class="stat-damage">- ${atk.damage || 0} Dmg</span><br>${atk.effectText || ''}</div>`; 
+          });
+          detailsHTML += '</div>';
+          cardHTML += detailsHTML;
+
+          let weakStr = '—';
+          if (c.weaknesses && c.weaknesses.length > 0) {
+            weakStr = c.weaknesses.map(w => 
+              `<span class="pill pill-${w.PowerType}">${w.PowerType}</span> <span class="text-${w.PowerType}">x${w.multiplier}</span>`
+            ).join(' ');
+          }
+          let retreatStr = '—';
+          if (c.retreatCost && c.retreatCost.length > 0) {
+            retreatStr = c.retreatCost.map(rc => {
+              const pType = rc.PowerType || rc.powerType || 'Blank';
+              return `<span class="pill pill-${pType}">${pType}</span> <span class="text-${pType}">x${rc.count}</span>`;
+            }).join(' ');
+          }
+
+          cardHTML += '<div class="card-item-footer">';
+          cardHTML += `<div><span class="stat-label">Weakness:</span> ${weakStr}</div>`;
+          cardHTML += `<div><span class="stat-label">Retreat:</span> ${retreatStr}</div>`;
+          cardHTML += `<div><span class="stat-label">Rarity:</span> ${rarityDisplay}</div>`;
+          cardHTML += `<div><span class="stat-label">ID:</span> ${c.collectionNumber || c.setId || '—'}</div>`;
+          cardHTML += '</div>';
+
+        } else if (currentTab === 'Secret') {
+          const subtype = (c.subtypes || []).map(t => `<span class="pill pill-${t}">${t}</span>`).join(' ');
+          
+          cardHTML += '<div class="card-item-stats">';
+          cardHTML += `<div class="stat-box"><div class="stat-label">Subtype</div><div class="stat-value">${subtype}</div></div>`;
+          cardHTML += '</div>';
+
+          cardHTML += `<div class="card-item-details">${c.effectText || ''}</div>`;
+          
+          cardHTML += '<div class="card-item-footer">';
+          cardHTML += `<div><span class="stat-label">Rarity:</span> ${rarityDisplay}</div>`;
+          cardHTML += `<div><span class="stat-label">ID:</span> ${c.collectionNumber || c.setId || '—'}</div>`;
+          cardHTML += '</div>';
+
+        } else {
+          const pType = c.powerType ? `<span class="pill pill-${c.powerType}">${c.powerType}</span>` : '—';
+          
+          cardHTML += '<div class="card-item-stats">';
+          cardHTML += `<div class="stat-box"><div class="stat-label">Power Type</div><div class="stat-value">${pType}</div></div>`;
+          cardHTML += `<div class="stat-box"><div class="stat-label">Value</div><div class="stat-value">${c.powerValue || '—'}</div></div>`;
+          cardHTML += '</div>';
+
+          cardHTML += '<div class="card-item-footer">';
+          cardHTML += `<div><span class="stat-label">Rarity:</span> ${rarityDisplay}</div>`;
+          cardHTML += `<div><span class="stat-label">ID:</span> ${c.collectionNumber || c.setId || '—'}</div>`;
+          cardHTML += '</div>';
+        }
+
+        cardHTML += '</div>';
+        grid.innerHTML += cardHTML;
+      });
+    }
+
+    function renderMobileTable(pageData) {
+      const tbody = document.querySelector('#data-table tbody');
+      tbody.innerHTML = '';
+
+      pageData.forEach(c => {
+        let rowHTML = '<tr>';
+        const imgUrl = getCardImageUrl(c);
+        const rarityClean = c.rarity ? c.rarity.replace(/\s+/g, '') : '';
+        const rarityClass = c.rarity ? `thumb-${rarityClean}` : '';
+        const imgHTML = imgUrl 
+          ? `<img src="${imgUrl}" class="card-thumbnail ${rarityClass}" onclick="enlargeImage('${imgUrl}', '${c.name.replace(/'/g, "\\'")}')" alt="${c.name}" title="Click to enlarge">` 
+          : '';
+        const rarityDisplay = c.rarity ? `<span class="rarity-text-${rarityClean}">${c.rarity}</span>` : '—';
+
+        if (currentTab === 'Creature' || currentTab === 'Promo') {
+          const type = (c.types || []).map(t => `<span class="pill pill-${t}">${t}</span>`).join(' ');
+          const levelDisplay = c.level ? `<span class="${getLevelClass(c.level)}">${c.level}</span>` : '—';
+          const hpDisplay = c.hp ? `<span class="stat-glow">${c.hp}</span>` : '—';
+          
+          let weakStr = '—';
+          if (c.weaknesses && c.weaknesses.length > 0) {
+            weakStr = c.weaknesses.map(w => 
+                `<span class="pill pill-${w.PowerType}">${w.PowerType}</span> <span class="text-${w.PowerType}" style="margin-left:2px;">x${w.multiplier}</span>`
+            ).join(' ');
+          }
+
+          let retreatStr = '—';
+          if (c.retreatCost && c.retreatCost.length > 0) {
+            retreatStr = c.retreatCost.map(rc => {
+                const pType = rc.PowerType || rc.powerType || 'Blank';
+                return `<span class="pill pill-${pType}">${pType}</span> <span class="text-${pType}" style="margin-left:2px;">x${rc.count}</span>`;
+            }).join(' ');
+          }
+
+          let detailsHTML = '<div class="detail-text">';
+          if (c.abilities) c.abilities.forEach(ab => { 
+              detailsHTML += `<span class="sub-header" style="color:#feebc8">Ability: ${ab.name}</span>${ab.effectText}<br><br>`; 
+          });
+          
+          if (c.attacks) c.attacks.forEach(atk => { 
+              // Wraps cost in a no-wrap span for the symbols
+              const costHtml = atk.cost.map(x => {
+                const pType = x.PowerType || x.powerType || 'Blank';
+                return `<span class="text-${pType}">${x.count}</span> <span class="pill pill-${pType}">${pType}</span>`;
+              }).join(' ');
+              
+              const costWrapper = `<span class="attack-cost-wrapper">(${costHtml})</span>`;
+
+              // MODIFIED: Wraps the COST + DAMAGE in a span called "attack-stats-line"
+              // On desktop this is inline. On mobile, it is block (new line).
+              detailsHTML += `<span class="sub-header">${atk.name} <span class="attack-stats-line">${costWrapper} <span class="stat-damage">- ${atk.damage || 0} Dmg</span></span></span>${atk.effectText || ''}<br><br>`; 
+          });
+          detailsHTML += '</div>';
+
+          rowHTML += `
+            <td style="vertical-align:top;">
+                <div style="font-weight:bold; color:var(--accent); font-size:1rem;">${c.name}</div>
+                ${imgHTML}
+            </td>
+            <td><span class="mobile-label">Type:</span> <div style="text-align:right">${type}</div></td>
+            <td><span class="mobile-label">Level:</span> <div style="text-align:right">${levelDisplay}</div></td>
+            <td><span class="mobile-label">HP:</span> <div style="text-align:right">${hpDisplay}</div></td>
+            <td><span class="mobile-label">Details:</span> ${detailsHTML}</td>
+            <td><span class="mobile-label">Weakness:</span> <div style="text-align:right">${weakStr}</div></td>
+            <td><span class="mobile-label">Retreat:</span> <div style="text-align:right">${retreatStr}</div></td>
+            <td><span class="mobile-label">Rarity:</span> <div style="text-align:right">${rarityDisplay}</div></td>
+            <td><span class="mobile-label">Set ID:</span> <div style="text-align:right">${c.collectionNumber || c.setId || '—'}</div></td>
+          `;
+        } else if (currentTab === 'Secret') {
+          const subtype = (c.subtypes || []).map(t => `<span class="pill pill-${t}">${t}</span>`).join(' ');
+          rowHTML += `
+            <td style="vertical-align:top;">
+                <div style="font-weight:bold; color:var(--accent); font-size:1rem;">${c.name}</div>
+                ${imgHTML}
+            </td>
+            <td><span class="mobile-label">Subtype:</span> <div style="text-align:right">${subtype}</div></td>
+            <td><span class="mobile-label">Effect:</span> <div class="detail-text">${c.effectText || ''}</div></td>
+            <td><span class="mobile-label">Rarity:</span> <div style="text-align:right">${rarityDisplay}</div></td>
+            <td><span class="mobile-label">Set ID:</span> <div style="text-align:right">${c.collectionNumber || c.setId || '—'}</div></td>
+          `;
+        } else {
+           const pType = c.powerType ? `<span class="pill pill-${c.powerType}">${c.powerType}</span>` : '—';
+           rowHTML += `
+            <td style="vertical-align:top;">
+                <div style="font-weight:bold; color:var(--accent); font-size:1rem;">${c.name}</div>
+                ${imgHTML}
+            </td>
+            <td><span class="mobile-label">Type:</span> <div style="text-align:right">${pType}</div></td>
+            <td><span class="mobile-label">Value:</span> <div style="text-align:right">${c.powerValue || '—'}</div></td>
+            <td><span class="mobile-label">Rarity:</span> <div style="text-align:right">${rarityDisplay}</div></td>
+            <td><span class="mobile-label">Set ID:</span> <div style="text-align:right">${c.collectionNumber || c.setId || '—'}</div></td>
+          `;
+        }
+        rowHTML += '</tr>';
+        tbody.innerHTML += rowHTML;
+      });
+    }
+
+    applyFilters();
+  </script>
+  <script src="sidebar.js"></script>
+  <script src="footer.js"></script>
+</body>
+</html>

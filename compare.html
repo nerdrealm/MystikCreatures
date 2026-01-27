@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Mystik Creatures™ — Compare Creatures</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Social Media Preview Tags -->
+  <meta property="og:title" content="Mystik Creatures™ TCG" />
+  <meta property="og:description" content="A New Realm Awaits" />
+
+  <!-- Directs to your logo on the live site -->
+  <meta property="og:image" content="https://nerdrealm.github.io/MystikCreatures/MystikLogo-PNG.png" />
+
+  <!-- Directs to your main page -->
+  <meta property="og:url" content="https://nerdrealm.github.io/MystikCreatures/index.html" />
+
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    
+    
+    /* --- FILTER CONTROLS --- */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      align-items: flex-start;
+    }
+    .filters label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      width: 100%;
+      flex: 1;
+      min-width: 250px;
+    }
+    .filters label > div {
+      display: flex; 
+      flex-wrap: wrap;
+      gap: 0.4rem; 
+      margin-top: 0.3rem;
+    }
+    .filters select {
+      background: var(--bg-panel-soft);
+      border-radius: 999px;
+      border: 1px solid #2d3748;
+      padding: 0.4rem 0.7rem;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+      flex: 1;
+      min-width: 120px;
+    }
+    .filters select:focus {
+      border-color: var(--accent);
+    }
+
+    /* --- EMPTY STATE (Shows when no cards selected) --- */
+    #empty-state-msg {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+      border: 2px dashed var(--border-subtle);
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,0.02);
+      margin-top: 1rem;
+      display: block; /* Default state */
+    }
+    #empty-state-msg strong {
+      display: block;
+      color: var(--accent);
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* --- RESULTS CONTAINER (Hidden by default) --- */
+    #comparison-results {
+      display: none; /* Controlled by JS */
+    }
+
+    /* --- PREVIEW SECTION (Images) --- */
+    .preview-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .preview-card {
+      flex: 1;
+      min-width: 0;
+      background: var(--bg-panel-soft);
+      border-radius: 12px;
+      border: 1px solid #1a202c;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+    /* Visual coloring to match headers */
+    #preview-a { border-top: 3px solid #48bb78; }
+    #preview-b { border-top: 3px solid #f56565; }
+
+    .preview-image img {
+      display: block;
+      width: 120px;
+      border-radius: 8px;
+      border: 1px solid #2d3748;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: transform 0.2s;
+    }
+    .preview-image img:hover {
+      transform: scale(1.05);
+    }
+    .preview-meta {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--text-main);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.1rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(79, 209, 197, 0.7);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--accent);
+      background: rgba(79, 209, 197, 0.11);
+      margin-right: 5px;
+    }
+
+    /* --- TABLE STYLES (Desktop) --- */
+    .table-wrapper {
+      border-radius: 8px;
+      border: 1px solid #1a202c;
+      background: #05070c;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      table-layout: fixed;
+    }
+    thead {
+      background: #111320;
+    }
+    th, td {
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid #1a202c;
+      text-align: center;
+      vertical-align: middle;
+      word-wrap: break-word;
+    }
+    /* The Stat Label Column */
+    th:first-child, td:first-child {
+      text-align: left;
+      width: 20%;
+      font-weight: bold;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      border-right: 1px solid #1a202c;
+    }
+    th {
+      color: var(--text-main);
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    /* Specific Header Colors for clarity */
+    #header-a { color: #48bb78; }
+    #header-b { color: #f56565; }
+
+    tbody tr:nth-child(even) { background: #080a13; }
+    
+    /* Comparison Highlight Classes */
+    .highlight {
+      background: rgba(79, 209, 197, 0.12);
+    }
+    .advantage {
+      border: 1px solid rgba(79, 209, 197, 0.5);
+    }
+
+    footer {
+      margin-top: 0.6rem;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+    .detail-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      white-space: normal;
+      line-height: 1.5;
+      text-align: center;
+    }
+    .sub-header {
+      color: #fff;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 4px;
+      margin-top: 8px;
+    }
+    .sub-header:first-child { 
+      margin-top: 0; 
+    }
+    .attack-header {
+      color: #feebc8;
+    }
+    
+    /* --- RARITY TEXT GLOWS --- */
+    .rarity-text-Common     { color: #fff; text-shadow: 0 0 8px #a0aec0; font-weight: 700; }
+    .rarity-text-Uncommon   { color: #fff; text-shadow: 0 0 8px #2ecc71; font-weight: 700; }
+    .rarity-text-Rare       { color: #fff; text-shadow: 0 0 8px #3498db; font-weight: 700; }
+    .rarity-text-UltraRare  { color: #fff; text-shadow: 0 0 8px #9b59b6; font-weight: 700; }
+    .rarity-text-HiddenRare { color: #fff; text-shadow: 0 0 8px #f1c40f; font-weight: 700; }
+    .rarity-text-Borderless { color: #fff; text-shadow: 0 0 8px #e74c3c; font-weight: 700; }
+
+    h2 { 
+      color: var(--accent); 
+    }    
+    
+    /* --- MOBILE RESPONSIVENESS FIXES --- */
+    @media (max-width: 800px) {
+      .filters label > span {
+        display: block !important; /* Override the display:none */
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        position: static;
+        max-height: none;
+        border-right: none;
+        border-bottom: 1px solid #1a202c;
+      }
+      .main {
+        max-width: 100%;
+        padding: 1rem;
+      }
+      section {
+        padding: 1rem;
+      }
+      
+      /* DROPDOWN FIXES */
+      .filters {
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+      .filters select:nth-child(3) {
+        width: 100%; /* Make the Card Name selector full width */
+      }
+
+      /* PREVIEW CARDS (Ensure 50/50 split on mobile) */
+      .preview-row {
+        gap: 10px;
+        flex-direction: row; /* Force side-by-side */
+      }
+      .preview-card {
+        padding: 0.5rem;
+      }
+      .preview-image img {
+        width: 80px; 
+      }
+      .preview-meta {
+        font-size: 0.9rem;
+      }
+
+      /* --- TABLE TO CARD TRANSFORMATION (SIDE-BY-SIDE) --- */
+      
+      /* 1. Remove Table wrapping/borders */
+      .table-wrapper {
+        border: none;
+        background: transparent;
+      }
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      
+      /* 2. Hide Table Headers */
+      thead { display: none; }
+
+      /* 3. Make the Row a Flex Container */
+      tbody tr {
+        display: flex; /* This enables columns */
+        flex-wrap: wrap;
+        background: var(--bg-panel-soft);
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        padding: 0;
+        overflow: hidden; /* Keeps borders clean */
+      }
+
+      /* 4. The Label (e.g. "HP") goes on TOP, full width */
+      td:first-child {
+        width: 100%;
+        text-align: center;
+        background: #151923;
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+        padding: 0.6rem;
+        color: var(--accent);
+        font-size: 0.85rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+      }
+
+      /* 5. Card A Value (Left Side - 50%) */
+      td:nth-child(2) {
+        width: 50%;
+        border-right: 1px solid var(--border-subtle);
+        border-bottom: none;
+        padding: 0.8rem 0.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 60px;
+      }
+
+      /* 6. Card B Value (Right Side - 50%) */
+      td:nth-child(3) {
+        width: 50%;
+        border-bottom: none;
+        padding: 0.8rem 0.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 60px;
+      }
+      
+      /* Ensure long text in attacks wraps properly inside the 50% width */
+      .detail-text {
+        font-size: 0.75rem;
+        word-break: break-word;
+      }
+    }
+
+    .main h1, .page-title {
+      color: var(--accent) !important;
+    }
+
+    /* Sidebar Image Styles */
+    .sidebar-powers {
+      text-align: center;
+      margin: -0.25rem 0 1.5rem 0; /* Spacing around the powers image */
+      padding: 0 0.5rem;
+    }
+    .sidebar-powers img {
+      max-width: 60%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .sidebar-logo-bottom {
+      text-align: center;
+      margin-top: -1rem; 
+      margin-bottom: 1rem;
+      padding: 0 0.5rem;
+    }
+    .sidebar-logo-bottom img {
+      max-width: 100%; /* Adjusts the logo size so it's not too huge */
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); /* Optional: adds a nice shadow to the logo */
+    }
+
+    /* New Elemental Icon Styles (For Card Preview) */
+    .elemental-icon-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 6px;
+      flex-wrap: wrap; /* Allows wrapping if many types */
+    }
+    .element-icon {
+      width: 28px; /* Adjust size as needed */
+      height: 28px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+    }
+
+    /* --- Type Pills for Weakness Table & Preview --- */
+    .type-pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border: 1px solid transparent;
+        margin-right: 4px;
+        margin-bottom: 2px;
+        color: #fff; /* Default text color fallback */
+        background: #1a202c; /* Default bg fallback */
+    }
+
+    /* Type Specific Colors (Matching Deck Builder) */
+    .type-pill-Dark { border-color: #8e44ad; color: #8e44ad; background: rgba(142, 68, 173, 0.15); }
+    .type-pill-Earth { border-color: #d2b48c; color: #d2b48c; background: rgba(210, 180, 140, 0.15); }
+    .type-pill-Fire { border-color: #e67e22; color: #e67e22; background: rgba(230, 126, 34, 0.15); }
+    .type-pill-Forest { border-color: #27ae60; color: #27ae60; background: rgba(39, 174, 96, 0.15); }
+    .type-pill-Light { border-color: #f1f2f6; color: #f1f2f6; background: rgba(241, 242, 246, 0.15); }
+    .type-pill-Thunder { border-color: #f1c40f; color: #f1c40f; background: rgba(241, 196, 15, 0.15); }
+    .type-pill-Water { border-color: #3498db; color: #3498db; background: rgba(52, 152, 219, 0.15); }
+    .type-pill-Wind { border-color: #87CEEB; color: #87CEEB; background: rgba(135, 206, 235, 0.15); }
+    .type-pill-Blank { border-color: #718096; color: #a0aec0; background: rgba(113, 128, 150, 0.15); }
+
+    /* Image enlargement modal */
+    .image-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    .image-modal.active {
+      display: flex;
+    }
+    .image-modal img {
+      max-width: 90%;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(79, 209, 197, 0.3);
+    }
+    .image-modal-text {
+      position: absolute;
+      bottom: 20px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    
+  </style>
+</head>
+<body data-page="compare">
+    <button id="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>  
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+    <div class="main-inner">
+      <section>
+        <h2>Compare Two Creature Cards</h2>
+        <p class="section-subtitle">
+          Choose any two Creature cards to compare stats.
+        </p>
+
+        <!-- CONTROLS -->
+        <div class="filters">
+          <label>
+            <span style="color:#48bb78; font-weight:bold;">Card A</span>
+            <div style="display: flex; gap: 0.4rem; margin-top: 0.3rem;">
+              <select id="filter-type-a" onchange="buildDropdownA()">
+                <option value="">All Types</option>
+              </select>
+              <select id="filter-level-a" onchange="buildDropdownA()">
+                <option value="">All Levels</option>
+              </select>
+              <select id="select-a"></select>
+            </div>
+          </label>
+          <label>
+            <span style="color:#f56565; font-weight:bold;">Card B</span>
+            <div style="display: flex; gap: 0.4rem; margin-top: 0.3rem;">
+              <select id="filter-type-b" onchange="buildDropdownB()">
+                <option value="">All Types</option>
+              </select>
+              <select id="filter-level-b" onchange="buildDropdownB()">
+                <option value="">All Levels</option>
+              </select>
+              <select id="select-b"></select>
+            </div>
+          </label>
+        </div>
+
+        <!-- EMPTY STATE MESSAGE (Shows by default) -->
+        <div id="empty-state-msg">
+          <strong>Waiting for Selection</strong>
+          Please select a card for both A and B to see the comparison.
+        </div>
+
+        <!-- RESULTS CONTAINER (Hidden by default) -->
+        <div id="comparison-results">
+            
+            <!-- PREVIEW IMAGES -->
+            <div class="preview-row">
+              <div class="preview-card" id="preview-a">
+                <div class="preview-image"></div>
+                <div class="preview-meta muted">Select Card A</div>
+              </div>
+              <div class="preview-card" id="preview-b">
+                <div class="preview-image"></div>
+                <div class="preview-meta muted">Select Card B</div>
+              </div>
+            </div>
+
+            <!-- COMPARISON TABLE -->
+            <div class="table-wrapper">
+              <table id="compare-table">
+                <thead>
+                  <tr>
+                    <th>Stat</th>
+                    <th id="header-a">Card A</th>
+                    <th id="header-b">Card B</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-field="hp">
+                    <td>HP</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr data-field="level">
+                    <td>Level</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr data-field="attack1">
+                    <td>Attack 1</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr data-field="attack2">
+                    <td>Attack 2</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr data-field="weak">
+                    <td>Weakness</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr data-field="rarity">
+                    <td>Rarity</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="muted" style="margin-top:1rem; border-top:1px solid #2d3748; padding-top:0.5rem;">
+              <span class="pill">Note</span> 
+              Highlights indicate a raw stat advantage only.
+            </p>
+        </div>
+
+        <footer>
+        </footer>
+      </section>
+    </div>
+  </main>
+
+  <!-- Image enlargement modal -->
+  <div class="image-modal" id="image-modal" onclick="closeModal()">
+    <img id="modal-image" src="" alt="">
+    <div class="image-modal-text">Click anywhere to close</div>
+  </div>
+
+  <script src="cards_data.js"></script>
+  
+  <script>
+    const IMAGE_EXT = '.png';
+    let CREATURES = [];
+
+    function getCardImageUrl(card) {
+      if (!card || !card.images || !card.images.small) return null;
+      const path = card.images.small;
+      return path.includes('.') ? path : path + IMAGE_EXT;
+    }
+
+    // UPDATED function to show Icon + Pill side-by-side
+    function getElementIconsHTML(card) {
+        if (!card.types || card.types.length === 0) return '';
+        
+        const path = "CardImages/icons/"; 
+        
+        const iconMap = {
+            "Dark": "PowerDark.png",       
+            "Earth": "PowerEarth.png",     
+            "Fire": "PowerFire.png",       
+            "Forest": "PowerForest.png",   
+            "Light": "PowerLight.png",     
+            "Thunder": "PowerThunder.png", 
+            "Water": "PowerWater.png",     
+            "Wind": "PowerWind.png",       
+            "Blank": "PowerBlank.png" 
+        };
+
+        let html = '<div class="elemental-icon-row">';
+        
+        card.types.forEach(type => {
+            const filename = iconMap[type];
+            if (filename) {
+                // Wrapper to group Icon and Pill together
+                html += `<div style="display:inline-flex; align-items:center; margin-right:12px;">`;
+                
+                // Icon
+                html += `<img src="${path}${filename}" class="element-icon" alt="${type}" />`;
+                
+                // Pill (using the same class structure as weakness)
+                html += `<span class="type-pill type-pill-${type}" style="margin-left:5px; margin-bottom:0;">${type}</span>`;
+                
+                html += `</div>`;
+            }
+        });
+        
+        html += '</div>';
+        return html;
+    }
+
+    // Helper to generate Pill HTML for weaknesses
+    function getWeaknessPills(card) {
+        if (!card || !card.weaknesses || card.weaknesses.length === 0) return '—';
+        return card.weaknesses.map(w => {
+            const type = w.PowerType;
+            // Generate span with specific class
+            return `<span class="type-pill type-pill-${type}">${type}</span>`;
+        }).join('');
+    }
+
+    const selectA = document.getElementById('select-a');
+    const selectB = document.getElementById('select-b');
+    const filterTypeA = document.getElementById('filter-type-a');
+    const filterLevelA = document.getElementById('filter-level-a');
+    const filterTypeB = document.getElementById('filter-type-b');
+    const filterLevelB = document.getElementById('filter-level-b');
+    const table = document.getElementById('compare-table');
+    const previewA = document.getElementById('preview-a');
+    const previewB = document.getElementById('preview-b');
+    const emptyMsg = document.getElementById('empty-state-msg');
+    const resultsContainer = document.getElementById('comparison-results');
+
+    function optionLabel(c) {
+      const types = c.types ? c.types.join('/') : (c.supertype || '');
+      return `${c.name} [${types} | ${c.rarity}]`;
+    }
+
+    function initFilters() {
+      // Filter to creatures only
+      CREATURES = CARDS.filter(c => c.supertype === 'Creature');
+
+      // Get all unique types
+      const types = new Set();
+      CREATURES.forEach(c => {
+        if (c.types) c.types.forEach(t => types.add(t));
+      });
+      const sortedTypes = Array.from(types).sort();
+      const typeOptions = '<option value="">All Types</option>' +
+        sortedTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+      
+      filterTypeA.innerHTML = typeOptions;
+      filterTypeB.innerHTML = typeOptions;
+
+      // Get all unique levels
+      const levels = new Set();
+      CREATURES.forEach(c => {
+        if (c.level) levels.add(c.level);
+      });
+      const sortedLevels = Array.from(levels).sort((a, b) => a - b);
+      const levelOptions = '<option value="">All Levels</option>' +
+        sortedLevels.map(l => `<option value="${l}">Level ${l}</option>`).join('');
+      
+      filterLevelA.innerHTML = levelOptions;
+      filterLevelB.innerHTML = levelOptions;
+    }
+
+    function buildDropdownA() {
+      const typeFilter = filterTypeA.value;
+      const levelFilter = filterLevelA.value;
+      const currentSelection = selectA.value; // Save current ID
+
+      const filtered = CREATURES.filter(c => {
+        if (typeFilter && (!c.types || !c.types.includes(typeFilter))) return false;
+        if (levelFilter && c.level != levelFilter) return false;
+        return true;
+      });
+
+      const options = filtered.map((c, idx) => {
+        // Store original index for retrieval
+        const origIdx = CREATURES.indexOf(c);
+        return { index: origIdx, label: optionLabel(c) };
+      });
+      const html = '<option value="">Select...</option>' +
+        options.map(o => `<option value="${o.index}">${o.label}</option>`).join('');
+      selectA.innerHTML = html;
+
+      selectA.innerHTML = html; // Rebuild HTML
+    
+      // Restore selection if it's still valid
+      if (currentSelection && selectA.querySelector(`option[value="${currentSelection}"]`)) {
+          selectA.value = currentSelection;
+      }
+    }
+
+    function buildDropdownB() {
+      const typeFilter = filterTypeB.value;
+      const levelFilter = filterLevelB.value;
+
+      const filtered = CREATURES.filter(c => {
+        if (typeFilter && (!c.types || !c.types.includes(typeFilter))) return false;
+        if (levelFilter && c.level != levelFilter) return false;
+        return true;
+      });
+
+      const options = filtered.map((c, idx) => {
+        const origIdx = CREATURES.indexOf(c);
+        return { index: origIdx, label: optionLabel(c) };
+      });
+      const html = '<option value="">Select...</option>' +
+        options.map(o => `<option value="${o.index}">${o.label}</option>`).join('');
+      selectB.innerHTML = html;
+    }
+
+    function getCardFromSelect(select) {
+      const idx = parseInt(select.value, 10);
+      if (isNaN(idx)) return null;
+      return CREATURES[idx] || null;
+    }
+
+    function enlargeImage(url, name) {
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('modal-image');
+  
+      modalImg.src = url;
+      modalImg.alt = name;
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('image-modal').classList.remove('active');
+    }
+
+    // Updated preview function to include icons
+    function updatePreview(previewEl, card) {
+        const imgDiv = previewEl.querySelector('.preview-image');
+        const metaDiv = previewEl.querySelector('.preview-meta'); // We will put icons in here
+        
+        if (!card) {
+            imgDiv.innerHTML = '';
+            metaDiv.innerHTML = 'Select a card';
+            metaDiv.classList.add('muted');
+            return;
+        }
+
+        // 1. Handle Card Image (Left side)
+        const url = getCardImageUrl(card);
+        if (url) {
+            imgDiv.innerHTML = `<img src="${url}" alt="${card.name}" loading="lazy" onclick="enlargeImage('${url}', '${card.name}')" />`;
+        } else {
+            imgDiv.innerHTML = `<div style="width:80px; height:110px; background:#222; display:flex; align-items:center; justify-content:center; font-size:10px; color:#555;">No Image</div>`;
+        }
+        
+        // 2. Generate Icons
+        const iconsHtml = getElementIconsHTML(card);
+
+        // 3. Handle Meta (Right side: Name TOP, Icons BOTTOM)
+        metaDiv.innerHTML = `
+            <div style="font-size:1.1rem; font-weight:bold; color:var(--text-main); margin-bottom:4px;">
+                ${card.name}
+            </div>
+            ${iconsHtml}
+        `;
+        
+        metaDiv.classList.remove('muted');
+    }
+
+    function updateComparison() {
+      const a = getCardFromSelect(selectA);
+      const b = getCardFromSelect(selectB);
+
+      // --- LOGIC: HIDE UNTIL BOTH SELECTED ---
+      if (!a || !b) {
+        emptyMsg.style.display = 'block';
+        resultsContainer.style.display = 'none';
+        return; 
+      }
+      
+      // If both selected, show results
+      emptyMsg.style.display = 'none';
+      resultsContainer.style.display = 'block';
+
+      updatePreview(previewA, a);
+      updatePreview(previewB, b);
+
+      const rows = table.querySelectorAll('tbody tr');
+      rows.forEach(row => {
+        row.children[1].textContent = '';
+        row.children[2].textContent = '';
+        row.children[1].classList.remove('highlight', 'advantage');
+        row.children[2].classList.remove('highlight', 'advantage');
+      });
+
+      // Update table headers with card names
+      document.getElementById('header-a').textContent = a.name;
+      document.getElementById('header-b').textContent = b.name;
+
+      const rowHp = table.querySelector('tr[data-field="hp"]');
+      const rowLvl = table.querySelector('tr[data-field="level"]');
+      const rowAttack1 = table.querySelector('tr[data-field="attack1"]');
+      const rowAttack2 = table.querySelector('tr[data-field="attack2"]');
+      const rowWeak = table.querySelector('tr[data-field="weak"]');
+      const rowRarity = table.querySelector('tr[data-field="rarity"]');
+
+      const hpA = a.hp != null ? Number(a.hp) : null;
+      const hpB = b.hp != null ? Number(b.hp) : null;
+      const lvlA = a.level != null ? Number(a.level) : null;
+      const lvlB = b.level != null ? Number(b.level) : null;
+
+      rowHp.children[1].textContent = hpA ?? '—';
+      rowHp.children[2].textContent = hpB ?? '—';
+      rowLvl.children[1].textContent = lvlA ?? '—';
+      rowLvl.children[2].textContent = lvlB ?? '—';
+
+      // --- RARITY WITH GLOW TEXT ---
+      const rarityCleanA = a.rarity ? a.rarity.replace(/\s+/g, '') : '';
+      const rarityCleanB = b.rarity ? b.rarity.replace(/\s+/g, '') : '';
+
+      rowRarity.children[1].innerHTML = a.rarity ? `<span class="rarity-text-${rarityCleanA}">${a.rarity}</span>` : '—';
+      rowRarity.children[2].innerHTML = b.rarity ? `<span class="rarity-text-${rarityCleanB}">${b.rarity}</span>` : '—';
+
+      // Helper function to build Attack HTML safely
+      function getAttackHtml(card, index) {
+          if (card.attacks && card.attacks[index]) {
+            const atk = card.attacks[index];
+            const cost = atk.cost ? atk.cost.map(x => `${x.count} ${x.PowerType}`).join(', ') : '—';
+            return `<div class="detail-text"><span class="sub-header attack-header">${atk.name} (${cost}) - ${atk.damage || 0} Dmg</span>${atk.effectText || ''}</div>`;
+          }
+          // Return empty placeholder if attack doesn't exist
+          return '<div class="detail-text">—</div>';
+      }
+
+      // Populate Attack 1
+      rowAttack1.children[1].innerHTML = getAttackHtml(a, 0);
+      rowAttack1.children[2].innerHTML = getAttackHtml(b, 0);
+
+      // Populate Attack 2
+      rowAttack2.children[1].innerHTML = getAttackHtml(a, 1);
+      rowAttack2.children[2].innerHTML = getAttackHtml(b, 1);
+
+      // Calculate damage for Attack 1 highlighting
+      const dmg1A = (a.attacks && a.attacks[0]) ? (parseInt(a.attacks[0].damage) || 0) : 0;
+      const dmg1B = (b.attacks && b.attacks[0]) ? (parseInt(b.attacks[0].damage) || 0) : 0;
+
+      if (dmg1A > dmg1B && dmg1B > 0) {
+        rowAttack1.children[1].classList.add('highlight', 'advantage');
+      } else if (dmg1B > dmg1A && dmg1A > 0) {
+        rowAttack1.children[2].classList.add('highlight', 'advantage');
+      } else if (dmg1A === dmg1B && dmg1A > 0) {
+        rowAttack1.children[1].classList.add('highlight');
+        rowAttack1.children[2].classList.add('highlight');
+      }
+
+      // Calculate damage for Attack 2 highlighting
+      const dmg2A = (a.attacks && a.attacks[1]) ? (parseInt(a.attacks[1].damage) || 0) : 0;
+      const dmg2B = (b.attacks && b.attacks[1]) ? (parseInt(b.attacks[1].damage) || 0) : 0;
+
+      if (dmg2A > dmg2B && dmg2B > 0) {
+        rowAttack2.children[1].classList.add('highlight', 'advantage');
+      } else if (dmg2B > dmg2A && dmg2A > 0) {
+        rowAttack2.children[2].classList.add('highlight', 'advantage');
+      } else if (dmg2A === dmg2B && dmg2A > 0) {
+        rowAttack2.children[1].classList.add('highlight');
+        rowAttack2.children[2].classList.add('highlight');
+      }
+
+      // --- WEAKNESS WITH PILLS ---
+      // Use helper to get HTML instead of plain text
+      rowWeak.children[1].innerHTML = getWeaknessPills(a);
+      rowWeak.children[2].innerHTML = getWeaknessPills(b);
+
+      // Highlight HP and Level
+      function highlightRow(row, valA, valB) {
+        const tdA = row.children[1];
+        const tdB = row.children[2];
+        if (valA == null && valB == null) return;
+        
+        if (valA == null && valB != null) {
+          tdB.classList.add('highlight', 'advantage');
+          return;
+        }
+        if (valB == null && valA != null) {
+          tdA.classList.add('highlight', 'advantage');
+          return;
+        }
+
+        if (valA > valB) {
+          tdA.classList.add('highlight', 'advantage');
+        } else if (valB > valA) {
+          tdB.classList.add('highlight', 'advantage');
+        } else {
+          tdA.classList.add('highlight');
+          tdB.classList.add('highlight');
+        }
+      }
+
+      highlightRow(rowHp, hpA, hpB);
+      highlightRow(rowLvl, lvlA, lvlB);
+    }
+
+    // Initialize
+    initFilters();
+    buildDropdownA();
+    buildDropdownB();
+    selectA.addEventListener('change', updateComparison);
+    selectB.addEventListener('change', updateComparison);
+  </script>
+  <script src="sidebar.js"></script>
+  <script src="footer.js"></script>
+</body>
+</html>

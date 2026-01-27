@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Map Location Placer (3D Sphere Ready)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #111827;
+            color: white;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+        .upload-section {
+            margin-bottom: 2rem;
+        }
+        .upload-section label {
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 0.5rem;
+            background: #1f2937;
+            border: 2px solid #374151;
+            border-radius: 0.5rem;
+            color: white;
+        }
+        input[type="file"]::-webkit-file-upload-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+        input[type="file"]::-webkit-file-upload-button:hover {
+            background: #1d4ed8;
+        }
+        .canvas-container {
+            margin-bottom: 2rem;
+            border: 2px solid #374151;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            cursor: crosshair;
+        }
+        .button {
+            background: #16a34a;
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-right: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .button:hover {
+            background: #15803d;
+        }
+        .button:disabled {
+            background: #374151;
+            cursor: not-allowed;
+        }
+        .button.secondary {
+            background: #2563eb;
+        }
+        .button.secondary:hover {
+            background: #1d4ed8;
+        }
+        .button.danger {
+            background: #dc2626;
+        }
+        .button.danger:hover {
+            background: #b91c1c;
+        }
+        .button.purple {
+            background: #7c3aed;
+        }
+        .button.purple:hover {
+            background: #6d28d9;
+        }
+        .button.orange {
+            background: #ea580c;
+        }
+        .button.orange:hover {
+            background: #c2410c;
+        }
+        .processing {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.5rem;
+        }
+        .data-preview {
+            background: #1f2937;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 2rem;
+        }
+        .data-preview h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .coords-explainer {
+            background: #374151;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        .coords-explainer strong {
+            color: #60a5fa;
+        }
+        .coords-explainer code {
+            background: #1f2937;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', monospace;
+        }
+        .data-preview pre {
+            background: #030712;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow: auto;
+            max-height: 400px;
+            font-size: 0.875rem;
+        }
+        .hidden {
+            display: none;
+        }
+        .info-box {
+            background: #1f2937;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #2563eb;
+        }
+        .selected-location {
+            background: #7c3aed;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+        .mode-indicator {
+            background: #f59e0b;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        .add-location-form {
+            background: #1f2937;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border: 2px solid #f59e0b;
+        }
+        .add-location-form input {
+            background: #374151;
+            border: 1px solid #4b5563;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            width: 300px;
+            margin-right: 0.5rem;
+        }
+        .add-location-form button {
+            padding: 0.5rem 1rem;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .add-location-form button:hover {
+            background: #d97706;
+        }
+        .edit-location-form {
+            background: #1f2937;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border: 2px solid #ea580c;
+        }
+        .edit-location-form input {
+            background: #374151;
+            border: 1px solid #4b5563;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            width: 300px;
+            margin-right: 0.5rem;
+        }
+        .edit-location-form button {
+            padding: 0.5rem 1rem;
+            background: #ea580c;
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .edit-location-form button:hover {
+            background: #c2410c;
+        }
+        .edit-location-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fantasy Map Location Placer</h1>
+        
+        <div class="upload-section">
+            <label for="imageUpload">Upload your map image:</label>
+            <input type="file" id="imageUpload" accept="image/*">
+        </div>
+
+        <div class="upload-section">
+            <label for="jsonUpload">Load existing save file (JSON):</label>
+            <input type="file" id="jsonUpload" accept=".json">
+        </div>
+
+        <div id="processing" class="processing hidden">
+            Analyzing terrain and placing locations...
+        </div>
+
+        <div id="infoBox" class="info-box hidden">
+            <strong>🗺️ Controls:</strong> Click and drag locations to move them. Click "Add Location Mode" to add new locations. Click "Edit Location Name" to rename the selected location.
+        </div>
+
+        <div id="selectedInfo" class="hidden">
+            <div class="selected-location">
+                Selected: <span id="selectedName">None</span>
+            </div>
+        </div>
+
+        <div id="addModeIndicator" class="hidden">
+            <div class="mode-indicator">
+                🆕 ADD LOCATION MODE - Click anywhere on map to add a location
+            </div>
+        </div>
+
+        <div id="addLocationForm" class="add-location-form hidden">
+            <input type="text" id="newLocationName" placeholder="Enter location name...">
+            <button id="confirmAddBtn">Add Location</button>
+            <button id="cancelAddBtn" style="background: #dc2626;">Cancel</button>
+        </div>
+
+        <div id="editLocationForm" class="edit-location-form hidden">
+            <label>Edit Location Name:</label>
+            <input type="text" id="editLocationName" placeholder="Enter new name...">
+            <button id="confirmEditBtn">Save Name</button>
+            <button id="cancelEditBtn" style="background: #dc2626;">Cancel</button>
+        </div>
+
+        <div id="canvasContainer" class="canvas-container hidden">
+            <canvas id="mapCanvas"></canvas>
+        </div>
+
+        <div id="buttonContainer" class="hidden">
+            <button id="downloadBtn" class="button">
+                <span>💾</span>
+                Save Data (JSON)
+            </button>
+            <button id="addLocationBtn" class="button purple">
+                <span>➕</span>
+                Add Location Mode
+            </button>
+            <button id="editLocationBtn" class="button orange">
+                <span>✏️</span>
+                Edit Location Name
+            </button>
+            <button id="deleteLocationBtn" class="button danger">
+                <span>🗑️</span>
+                Delete Selected
+            </button>
+            <button id="resetBtn" class="button secondary">
+                <span>🔄</span>
+                Reset to Auto-Placement
+            </button>
+        </div>
+
+        <div id="dataPreview" class="data-preview hidden">
+            <h2>Location Data Preview:</h2>
+            <div class="coords-explainer">
+                <strong>📍 3D Sphere Mapping Explained:</strong><br>
+                • <code>coordinates2D</code> - Original position on flat map (0-1 range)<br>
+                • <code>spherical</code> - Longitude/Latitude in degrees<br>
+                • <code>position3D</code> - Ready-to-use 3D coordinates for Three.js sphere (radius 5.1)<br>
+                <br>
+                <strong>Usage:</strong> Copy this JSON and use <code>position3D</code> values directly in your planet.html to place markers on the sphere!
+            </div>
+            <pre id="jsonOutput"></pre>
+        </div>
+    </div>
+
+    <script>
+        const locationNames = [
+            "Arid Wastes", "Astral Gate", "Bleached Dunes", "Cathedral of Aethelgrad",
+            "Cinder-Plateau", "Coasts of Jimbora", "Cobalt Shoals", "Cypress-Hollows",
+            "Dragon Tail Isles", "Drowning Coast", "Forbidden Archives", "Forest of Nura",
+            "Forests of Rehm", "Gale-Roost", "Gloom-Hollow", "Golden Dunes",
+            "Granalith", "Infernal Keep", "Ironwood Forest", "Jimbora",
+            "Kuroseki", "Lake Sivel", "Midnight Grove", "Midnight Thicket",
+            "Molten Basin", "Mountains of Eurotha", "Nemean", "Noxivar Black Sea",
+            "Nura", "Obsidian City", "Oceans of Nimbitu", "Plains of Akatah",
+            "Rottide Swamp", "Rottenham", "Sanctuary of the Eclipsed Sun",
+            "Sanctum of Fractured Hours", "Scorchlands", "Seas of Aurelith",
+            "Shattered Pole", "Spires of Lumos", "Star-Forge", "Sunken Dynasty",
+            "Sunken Shelves", "Thaloryn Inner Sea", "Vaelen Expanse", "Valhorian Peaks",
+            "Velmora", "Viridian Scar", "Vol-Darah", "Weeping Thicket"
+        ];
+
+        let placedLocations = null;
+        let originalLocations = null;
+        let currentImage = null;
+        let selectedLocation = null;
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        let addLocationMode = false;
+        let pendingLocationCoords = null;
+
+        function classifyTerrain(r, g, b) {
+            if (b > 100 && b > r && b > g) return 'water';
+            if (r > 200 && g > 200 && b > 200) return 'mountain';
+            if (r > 140 && r < 200 && g > 110 && g < 160 && b < 120) return 'desert';
+            if (g > r && g > b && g > 70) return 'forest';
+            if (g > 60 && g < 120 && r < 100 && b < 100) return 'swamp';
+            if (r > 100 && r < 180 && g > 100 && g < 180 && Math.abs(r - g) < 40) return 'plains';
+            return 'unknown';
+        }
+
+        function analyzeImage(img) {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            const terrainZones = {
+                water: [], mountain: [], desert: [], forest: [],
+                swamp: [], plains: [], coastal: []
+            };
+            
+            for (let y = 0; y < canvas.height; y += 5) {
+                for (let x = 0; x < canvas.width; x += 5) {
+                    const i = (y * canvas.width + x) * 4;
+                    const terrain = classifyTerrain(data[i], data[i + 1], data[i + 2]);
+                    
+                    if (terrain !== 'unknown') {
+                        terrainZones[terrain].push({ 
+                            x: x / canvas.width, 
+                            y: y / canvas.height 
+                        });
+                    }
+                }
+            }
+            
+            for (let y = 5; y < canvas.height; y += 5) {
+                for (let x = 5; x < canvas.width; x += 5) {
+                    const i = (y * canvas.width + x) * 4;
+                    const terrain = classifyTerrain(data[i], data[i + 1], data[i + 2]);
+                    
+                    if (terrain !== 'water') {
+                        let hasWaterNearby = false;
+                        for (let dy = -10; dy <= 10; dy += 5) {
+                            for (let dx = -10; dx <= 10; dx += 5) {
+                                const nx = x + dx, ny = y + dy;
+                                if (nx >= 0 && nx < canvas.width && ny >= 0 && ny < canvas.height) {
+                                    const ni = (ny * canvas.width + nx) * 4;
+                                    if (classifyTerrain(data[ni], data[ni + 1], data[ni + 2]) === 'water') {
+                                        hasWaterNearby = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (hasWaterNearby) break;
+                        }
+                        
+                        if (hasWaterNearby) {
+                            terrainZones.coastal.push({ x: x / canvas.width, y: y / canvas.height });
+                        }
+                    }
+                }
+            }
+            
+            return { terrainZones, width: canvas.width, height: canvas.height };
+        }
+
+        function getRandomPoint(points) {
+            if (!points || points.length === 0) return { x: Math.random(), y: Math.random() };
+            return points[Math.floor(Math.random() * points.length)];
+        }
+
+        function placeLocations(terrainData) {
+            const { terrainZones } = terrainData;
+            const placed = [];
+            const minDistance = 0.05;
+            
+            const isValidPlacement = (newPoint) => {
+                return !placed.some(existing => {
+                    const dx = existing.x - newPoint.x;
+                    const dy = existing.y - newPoint.y;
+                    return Math.sqrt(dx * dx + dy * dy) < minDistance;
+                });
+            };
+            
+            const tryPlace = (name, preferredTerrains, maxAttempts = 50) => {
+                for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                    for (const terrain of preferredTerrains) {
+                        const points = terrainZones[terrain];
+                        if (points && points.length > 0) {
+                            const point = getRandomPoint(points);
+                            if (isValidPlacement(point)) {
+                                return { ...point, terrain };
+                            }
+                        }
+                    }
+                }
+                const point = { x: 0.2 + Math.random() * 0.6, y: 0.2 + Math.random() * 0.6 };
+                return { ...point, terrain: 'unknown' };
+            };
+            
+            locationNames.forEach(name => {
+                const nameLower = name.toLowerCase();
+                let point;
+                
+                if (nameLower.includes('ocean') || nameLower.includes('sea')) {
+                    point = tryPlace(name, ['water']);
+                } else if (nameLower.includes('coast') || nameLower.includes('shoal') || nameLower.includes('shelves')) {
+                    point = tryPlace(name, ['coastal', 'water']);
+                } else if (nameLower.includes('island') || nameLower.includes('isle')) {
+                    point = tryPlace(name, ['coastal', 'forest', 'plains']);
+                } else if (nameLower.includes('mountain') || nameLower.includes('peak') || nameLower.includes('spire')) {
+                    point = tryPlace(name, ['mountain']);
+                } else if (nameLower.includes('forest') || nameLower.includes('grove') || nameLower.includes('thicket') || nameLower.includes('hollow')) {
+                    point = tryPlace(name, ['forest', 'plains']);
+                } else if (nameLower.includes('desert') || nameLower.includes('dune') || nameLower.includes('waste') || nameLower.includes('scorch')) {
+                    point = tryPlace(name, ['desert', 'plains']);
+                } else if (nameLower.includes('swamp') || nameLower.includes('rottide')) {
+                    point = tryPlace(name, ['swamp', 'forest']);
+                } else if (nameLower.includes('lake')) {
+                    point = tryPlace(name, ['water', 'coastal']);
+                } else if (nameLower.includes('plain')) {
+                    point = tryPlace(name, ['plains', 'desert']);
+                } else if (nameLower.includes('city') || nameLower.includes('cathedral') || nameLower.includes('sanctuary')) {
+                    point = tryPlace(name, ['plains', 'coastal', 'forest']);
+                } else {
+                    point = tryPlace(name, ['plains', 'forest', 'coastal', 'desert', 'mountain']);
+                }
+                
+                placed.push({ name, ...point });
+            });
+            
+            return placed;
+        }
+
+        function drawLocationsOnMap(img, locations) {
+            const canvas = document.getElementById('mapCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            locations.forEach(loc => {
+                const x = loc.x * canvas.width;
+                const y = loc.y * canvas.height;
+                
+                const isSelected = selectedLocation && selectedLocation.name === loc.name;
+                
+                ctx.fillStyle = isSelected ? 'rgba(124, 58, 237, 0.9)' : 'rgba(255, 0, 0, 0.8)';
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = isSelected ? 3 : 2;
+                ctx.font = isSelected ? 'bold 16px Arial' : '14px Arial';
+                
+                ctx.beginPath();
+                ctx.arc(x, y, isSelected ? 7 : 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 3;
+                ctx.strokeText(loc.name, x + 8, y + 4);
+                ctx.fillText(loc.name, x + 8, y + 4);
+            });
+        }
+
+        function getCanvasCoordinates(canvas, event) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            return {
+                x: (event.clientX - rect.left) * scaleX,
+                y: (event.clientY - rect.top) * scaleY
+            };
+        }
+
+        function findLocationAtPosition(x, y, canvas) {
+            const normalizedX = x / canvas.width;
+            const normalizedY = y / canvas.height;
+            const threshold = 10 / canvas.width;
+            
+            for (let loc of placedLocations) {
+                const dx = loc.x - normalizedX;
+                const dy = loc.y - normalizedY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < threshold) {
+                    return loc;
+                }
+            }
+            return null;
+        }
+
+        function updateDataPreview() {
+            const jsonData = {
+                locations: placedLocations.map(loc => {
+                    // FIX: Invert Y so Top of map (0) = North Pole (+PI/2)
+                    const latitude = (Math.PI / 2) - (loc.y * Math.PI); 
+
+                    // FIX: Rotate Longitude by -90 degrees (-PI/2) to align with Three.js texture wrapping
+                    const longitude = (loc.x * 2 * Math.PI) - Math.PI - (Math.PI / 2);
+                    
+                    const radius = 5.0; 
+                    
+                    const x3d = radius * Math.cos(latitude) * Math.cos(longitude);
+                    const y3d = radius * Math.sin(latitude);
+                    const z3d = radius * Math.cos(latitude) * Math.sin(longitude);
+                    
+                    return {
+                        name: loc.name,
+                        coordinates2D: { x: loc.x, y: loc.y },
+                        spherical: { 
+                            longitude: longitude * (180 / Math.PI), 
+                            latitude: latitude * (180 / Math.PI) 
+                        },
+                        position3D: { x: x3d, y: y3d, z: z3d },
+                        terrain: loc.terrain
+                    };
+                })
+            };
+            document.getElementById('jsonOutput').textContent = JSON.stringify(jsonData, null, 2);
+        }
+
+        document.getElementById('imageUpload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            document.getElementById('processing').classList.remove('hidden');
+            document.getElementById('canvasContainer').classList.add('hidden');
+            document.getElementById('buttonContainer').classList.add('hidden');
+            document.getElementById('dataPreview').classList.add('hidden');
+            document.getElementById('infoBox').classList.add('hidden');
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    currentImage = img;
+                    setTimeout(() => {
+                        const terrainData = analyzeImage(img);
+                        placedLocations = placeLocations(terrainData);
+                        originalLocations = JSON.parse(JSON.stringify(placedLocations));
+                        
+                        drawLocationsOnMap(img, placedLocations);
+                        updateDataPreview();
+                        
+                        document.getElementById('processing').classList.add('hidden');
+                        document.getElementById('canvasContainer').classList.remove('hidden');
+                        document.getElementById('buttonContainer').classList.remove('hidden');
+                        document.getElementById('dataPreview').classList.remove('hidden');
+                        document.getElementById('infoBox').classList.remove('hidden');
+                    }, 100);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('jsonUpload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.locations && Array.isArray(data.locations)) {
+                        placedLocations = data.locations.map(loc => ({
+                            name: loc.name,
+                            x: loc.coordinates2D ? loc.coordinates2D.x : loc.coordinates.x,
+                            y: loc.coordinates2D ? loc.coordinates2D.y : loc.coordinates.y,
+                            terrain: loc.terrain || 'unknown'
+                        }));
+                        
+                        if (currentImage) {
+                            drawLocationsOnMap(currentImage, placedLocations);
+                            updateDataPreview();
+                            alert('Save file loaded successfully!');
+                        } else {
+                            alert('Please upload a map image first!');
+                        }
+                    } else {
+                        alert('Invalid JSON format!');
+                    }
+                } catch (error) {
+                    alert('Error reading JSON file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        const canvas = document.getElementById('mapCanvas');
+        
+        canvas.addEventListener('mousedown', (e) => {
+            const coords = getCanvasCoordinates(canvas, e);
+            
+            if (addLocationMode) {
+                pendingLocationCoords = {
+                    x: coords.x / canvas.width,
+                    y: coords.y / canvas.height
+                };
+                document.getElementById('addLocationForm').classList.remove('hidden');
+                document.getElementById('newLocationName').focus();
+            } else {
+                const location = findLocationAtPosition(coords.x, coords.y, canvas);
+                
+                if (location) {
+                    selectedLocation = location;
+                    isDragging = true;
+                    dragOffset.x = coords.x / canvas.width - location.x;
+                    dragOffset.y = coords.y / canvas.height - location.y;
+                    
+                    document.getElementById('selectedName').textContent = location.name;
+                    document.getElementById('selectedInfo').classList.remove('hidden');
+                    
+                    drawLocationsOnMap(currentImage, placedLocations);
+                }
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging && selectedLocation && !addLocationMode) {
+                const coords = getCanvasCoordinates(canvas, e);
+                selectedLocation.x = Math.max(0, Math.min(1, coords.x / canvas.width - dragOffset.x));
+                selectedLocation.y = Math.max(0, Math.min(1, coords.y / canvas.height - dragOffset.y));
+                
+                drawLocationsOnMap(currentImage, placedLocations);
+                updateDataPreview();
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        document.getElementById('addLocationBtn').addEventListener('click', () => {
+            addLocationMode = !addLocationMode;
+            if (addLocationMode) {
+                document.getElementById('addModeIndicator').classList.remove('hidden');
+                document.getElementById('addLocationBtn').textContent = '❌ Exit Add Mode';
+            } else {
+                document.getElementById('addModeIndicator').classList.add('hidden');
+                document.getElementById('addLocationBtn').innerHTML = '<span>➕</span> Add Location Mode';
+                document.getElementById('addLocationForm').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('confirmAddBtn').addEventListener('click', () => {
+            const name = document.getElementById('newLocationName').value.trim();
+            if (name && pendingLocationCoords) {
+                placedLocations.push({
+                    name: name,
+                    x: pendingLocationCoords.x,
+                    y: pendingLocationCoords.y,
+                    terrain: 'custom'
+                });
+                
+                drawLocationsOnMap(currentImage, placedLocations);
+                updateDataPreview();
+                
+                document.getElementById('newLocationName').value = '';
+                document.getElementById('addLocationForm').classList.add('hidden');
+                pendingLocationCoords = null;
+            }
+        });
+
+        document.getElementById('cancelAddBtn').addEventListener('click', () => {
+            document.getElementById('newLocationName').value = '';
+            document.getElementById('addLocationForm').classList.add('hidden');
+            pendingLocationCoords = null;
+        });
+
+        document.getElementById('editLocationBtn').addEventListener('click', () => {
+            if (selectedLocation) {
+                document.getElementById('editLocationName').value = selectedLocation.name;
+                document.getElementById('editLocationForm').classList.remove('hidden');
+                document.getElementById('editLocationName').focus();
+            } else {
+                alert('Please select a location first!');
+            }
+        });
+
+        document.getElementById('confirmEditBtn').addEventListener('click', () => {
+            const newName = document.getElementById('editLocationName').value.trim();
+            if (newName && selectedLocation) {
+                selectedLocation.name = newName;
+                document.getElementById('selectedName').textContent = newName;
+                
+                drawLocationsOnMap(currentImage, placedLocations);
+                updateDataPreview();
+                
+                document.getElementById('editLocationForm').classList.add('hidden');
+                document.getElementById('editLocationName').value = '';
+            }
+        });
+
+        document.getElementById('cancelEditBtn').addEventListener('click', () => {
+            document.getElementById('editLocationForm').classList.add('hidden');
+            document.getElementById('editLocationName').value = '';
+        });
+
+        document.getElementById('deleteLocationBtn').addEventListener('click', () => {
+            if (selectedLocation) {
+                if (confirm(`Delete "${selectedLocation.name}"?`)) {
+                    placedLocations = placedLocations.filter(loc => loc.name !== selectedLocation.name);
+                    selectedLocation = null;
+                    document.getElementById('selectedInfo').classList.add('hidden');
+                    drawLocationsOnMap(currentImage, placedLocations);
+                    updateDataPreview();
+                }
+            } else {
+                alert('Please select a location first!');
+            }
+        });
+
+document.getElementById('downloadBtn').addEventListener('click', () => {
+            if (!placedLocations) return;
+            
+            const data = {
+                locations: placedLocations.map(loc => {
+                    // FIX: Invert Y so Top of map (0) = North Pole (+PI/2)
+                    const latitude = (Math.PI / 2) - (loc.y * Math.PI); 
+
+                    // FIX: Rotate Longitude by -90 degrees (-PI/2) to align with Three.js texture wrapping
+                    const longitude = (loc.x * 2 * Math.PI) - Math.PI - (Math.PI / 2);
+                    
+                    const radius = 5.0; 
+                    
+                    const x3d = radius * Math.cos(latitude) * Math.cos(longitude);
+                    const y3d = radius * Math.sin(latitude);
+                    const z3d = radius * Math.cos(latitude) * Math.sin(longitude);
+                    
+                    return {
+                        name: loc.name,
+                        coordinates2D: { x: loc.x, y: loc.y },
+                        spherical: { 
+                            longitude: longitude * (180 / Math.PI),
+                            latitude: latitude * (180 / Math.PI)
+                        },
+                        position3D: { x: x3d, y: y3d, z: z3d },
+                        terrain: loc.terrain
+                    };
+                })
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'map_locations_3D.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (originalLocations && currentImage) {
+                if (confirm('Reset to original auto-placement? This will remove any custom locations you added.')) {
+                    placedLocations = JSON.parse(JSON.stringify(originalLocations));
+                    selectedLocation = null;
+                    document.getElementById('selectedInfo').classList.add('hidden');
+                    drawLocationsOnMap(currentImage, placedLocations);
+                    updateDataPreview();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Mystik Creatures™ — The Mystik Codex</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Social Media Preview Tags -->
+  <meta property="og:title" content="Mystik Creatures™ TCG" />
+  <meta property="og:description" content="A New Realm Awaits" />
+
+  <!-- Directs to your logo on the live site -->
+  <meta property="og:image" content="https://nerdrealm.github.io/MystikCreatures/MystikLogo-PNG.png" />
+
+  <!-- Directs to your main page -->
+  <meta property="og:url" content="https://nerdrealm.github.io/MystikCreatures/index.html" />
+
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+    
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    
+    /* --- MAIN CONTENT --- */
+    .main {
+      flex: 1;
+      padding: 1.5rem 1.5rem 2.5rem;
+      max-width: calc(100% - 260px);
+      min-width: 0;
+    }
+    
+    /* --- FILTERS --- */
+    .filters-bar {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      background: var(--bg-panel);
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      align-items: center;
+      flex-wrap: wrap; 
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 200px;}
+    select, input[type="text"] {
+      background: var(--bg-panel-soft);
+      border: 1px solid var(--border-subtle);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    /* --- TABLE STYLES --- */
+    .table-wrapper {
+      max-height: 75vh;
+      overflow: auto;
+      border-radius: 8px;
+      border: 1px solid #1a202c;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 100%; background: #05070c; }
+    thead { position: sticky; top: 0; background: #111320; z-index: 10; }
+    
+    /* Default Cell Styling (Mobile Friendly Baseline) */
+    th, td { 
+      padding: 0.5rem 0.65rem; 
+      text-align: left; 
+      border-bottom: 1px solid #1a202c; 
+      vertical-align: top; 
+    }
+    
+    /* --- DESKTOP ALIGNMENT RULES --- */
+    @media (min-width: 801px) {
+        th:nth-child(2), td:nth-child(2),
+        th:nth-child(3), td:nth-child(3) {
+            text-align: center;
+            vertical-align: middle;
+        }
+        th:nth-child(4), td:nth-child(4) {
+            vertical-align: middle;
+            text-align: left;
+            padding: 0.5rem 2rem; 
+        }
+    }
+
+    th { font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); cursor: pointer; }
+    tbody tr:nth-child(even) { background: #080a13; }
+    tbody tr:hover { background: rgba(79, 209, 197, 0.1); }
+
+    /* --- PILLS --- */
+    .pill { display: inline-flex; align-items: center; padding: 0.15rem 0.65rem; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.2); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #fff; background: rgba(255, 255, 255, 0.05); white-space: nowrap; }
+    .pill-Dark { border-color: #8e44ad; color: #a569bd; background: rgba(142, 68, 173, 0.15); }
+    .pill-Earth { border-color: #d2b48c; color: #e0cdae; background: rgba(210, 180, 140, 0.15); }
+    .pill-Fire { border-color: #e67e22; color: #f39c12; background: rgba(230, 126, 34, 0.15); }
+    .pill-Forest { border-color: #27ae60; color: #2ecc71; background: rgba(39, 174, 96, 0.15); }
+    .pill-Light { border-color: #f1f2f6; color: #ffffff; background: rgba(241, 242, 246, 0.15); }
+    .pill-Thunder { border-color: #f1c40f; color: #f4d03f; background: rgba(241, 196, 15, 0.15); }
+    .pill-Water { border-color: #3498db; color: #5dade2; background: rgba(52, 152, 219, 0.15); }
+    .pill-Wind { border-color: #87CEEB; color: #87CEEB; background: rgba(135, 206, 235, 0.15); }
+    .pill-Blank { border-color: #718096; color: #a0aec0; background: rgba(113, 128, 150, 0.15); }
+
+    /* Level Range Glows */
+    .level-common   { color: #fff; text-shadow: 0 0 8px #a0aec0; font-weight: 700; }
+    .level-uncommon { color: #fff; text-shadow: 0 0 8px #2ecc71; font-weight: 700; }
+    .level-rare     { color: #fff; text-shadow: 0 0 8px #3498db; font-weight: 700; }
+    .level-ultra    { color: #fff; text-shadow: 0 0 8px #9b59b6; font-weight: 700; }
+    
+    .stat-glow {
+      color: #fff;
+      text-shadow: 0 0 8px #f1c40f;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    /* --- IMAGES & RARITY GLOWS --- */
+    .card-thumbnail {
+      display: block;
+      margin-top: 8px;
+      max-height: 150px;
+      width: auto;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid transparent;
+    }
+    
+    .card-thumbnail:hover {
+      transform: scale(1.1) translateY(-2px);
+      z-index: 5;
+      position: relative;
+    }
+
+    .thumb-Common { border-color: #a0aec0; box-shadow: 0 0 5px rgba(160, 174, 192, 0.4); }
+    .thumb-Uncommon { border-color: #2ecc71; box-shadow: 0 0 5px rgba(46, 204, 113, 0.4); }
+    .thumb-Rare { border-color: #3498db; box-shadow: 0 0 5px rgba(52, 152, 219, 0.4); }
+    .thumb-UltraRare { border-color: #9b59b6; box-shadow: 0 0 8px rgba(155, 89, 182, 0.5); }
+    .thumb-HiddenRare { border-color: #f1c40f; box-shadow: 0 0 8px rgba(241, 196, 15, 0.5); }
+    .thumb-Borderless { border-color: #e74c3c; box-shadow: 0 0 8px rgba(231, 76, 60, 0.5); }
+
+    /* --- LORE TEXT --- */
+    .codex-text { font-size: 0.9rem; line-height: 1.6; color: #e2e8f0; font-family: Georgia, serif; font-style: italic; white-space: normal; }
+
+    /* --- MODAL --- */
+    .image-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 9999; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(4px); }
+    .image-modal.active { display: flex; }
+    .image-modal img { max-width: 90%; max-height: 90vh; border-radius: 12px; box-shadow: 0 0 40px rgba(79, 209, 197, 0.2); border: 1px solid #333; }
+    .image-modal-text { position: absolute; bottom: 20px; color: var(--text-muted); font-size: 0.9rem; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 999px; }
+
+    /* --- PAGINATION CONTROLS --- */
+    .pagination {
+      display: flex; /* Updated: Always Visible */
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .page-btn {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--bg-panel-soft);
+    }
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    #page-info {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #1a202c; }
+      .main { max-width: 100%; padding: 1rem 1rem 2rem; }
+      
+      /* --- MOBILE CARD VIEW --- */
+      .table-wrapper { 
+        max-height: none; 
+        overflow: visible; 
+        border: none;
+      }
+      
+      table, thead, tbody, th, td, tr { 
+        display: block; 
+      }
+      
+      /* Hide Table Headers */
+      thead tr { 
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+      
+      /* Make each row look like a Card */
+      tbody tr { 
+        background: var(--bg-panel-soft);
+        margin-bottom: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        padding: 1.25rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      }
+      
+      td { 
+        border: none;
+        padding: 0.5rem 0;
+        position: relative;
+        width: 100%;
+        text-align: left;
+      }
+
+      .card-thumbnail {
+        max-height: 200px;
+        margin: 10px auto;
+        display: block;
+      }
+      
+      td:first-child {
+        text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      td:nth-child(2)::before { content: "Type: "; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
+      td:nth-child(3)::before { content: "Level: "; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
+    }
+    /* --- MOBILE OPTIMIZATION --- */
+    
+    /* 1. Mobile Label (Hidden on Desktop) */
+    .mobile-label { display: none; }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #1a202c; }
+      .main { max-width: 100%; padding: 1rem 1rem 2rem; }
+
+      /* Force table elements to behave like blocks */
+      .table-wrapper { max-height: none; border: none; overflow: visible; }
+      table, thead, tbody, th, td, tr { display: block; }
+      
+      /* Hide Table Headers */
+      thead tr { position: absolute; top: -9999px; left: -9999px; }
+      
+      /* Style the Row as a "Card" */
+      tbody tr { 
+        background: var(--bg-panel-soft);
+        margin-bottom: 1.5rem; 
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        padding: 1.25rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      }
+
+      /* Style the Cells */
+      td { 
+        border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.05); 
+        padding: 0.5rem 0;
+        text-align: left !important;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; 
+      }
+      td:last-child { border-bottom: none; }
+
+      /* Reveal Labels */
+      .mobile-label {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        margin-right: 10px;
+        min-width: 80px; 
+      }
+
+      /* Name & Image (First Cell) */
+      td:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center !important;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+      }
+      td:first-child .mobile-label { display: none; } /* Hide label for name */
+      
+      td:first-child div { font-size: 1.3rem !important; margin-bottom: 10px; }
+      .card-thumbnail { max-height: 200px; width: auto; }
+
+      /* Details Block */
+      td:nth-child(5) { 
+          display: block; 
+          margin-top: 0.5rem;
+          background: rgba(0,0,0,0.2);
+          padding: 10px;
+          border-radius: 8px;
+      }
+      td:nth-child(5) .mobile-label {
+          display: block;
+          margin-bottom: 5px;
+          border-bottom: 1px solid #333;
+          padding-bottom: 2px;
+          width: 100%;
+      }
+      
+      .detail-text { text-align: left; }
+    }
+
+      </style>
+</head>
+<body>
+  <button id="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+    <h1>The Mystik Codex</h1>
+    
+    <!-- FILTERS -->
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label>Search Name</label>
+        <input type="text" id="search-input" placeholder="e.g. Owlbear...">
+      </div>
+      <div class="filter-group">
+        <label>Filter by Type</label>
+        <select id="type-select" onchange="resetAndRender()">
+            <option value="">All Types</option>
+            <option value="Dark">Dark</option>
+            <option value="Earth">Earth</option>
+            <option value="Fire">Fire</option>
+            <option value="Forest">Forest</option>
+            <option value="Light">Light</option>
+            <option value="Thunder">Thunder</option>
+            <option value="Water">Water</option>
+            <option value="Wind">Wind</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table id="data-table">
+        <thead>
+          <tr>
+            <th width="20%">Creature</th>
+            <th width="10%">Type</th>
+            <th width="5%">Lvl</th>
+            <th>Codex Lore</th>
+          </tr>
+        </thead>
+        <tbody id="codex-body">
+          <!-- Rows injected by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION (Always Visible) -->
+    <div id="pagination" class="pagination">
+      <button id="btn-prev" class="page-btn" onclick="changePage(-1)">Previous</button>
+      <span id="page-info">Page 1 of 1</span>
+      <button id="btn-next" class="page-btn" onclick="changePage(1)">Next</button>
+    </div>
+    
+    <p id="count-display" style="color:var(--text-muted); font-size:0.8rem; margin-top:0.5rem; text-align:center;"></p>
+  </main>
+  
+  <!-- Image Enlargement Modal -->
+  <div class="image-modal" id="image-modal" onclick="closeModal()">
+    <img id="modal-image" src="" alt="">
+    <div class="image-modal-text">Click anywhere to close</div>
+  </div>
+
+  <!-- LOAD YOUR DATA FILE -->
+  <script src="cards_data.js"></script>
+  <script src="codex_data.js"></script>
+  <script>
+
+    // IMAGE & MODAL LOGIC
+    const IMAGE_EXT = '.png';
+    function getCardImageUrl(card) {
+      if (!card.images || !card.images.small) return null;
+      const path = card.images.small;
+      return (path.endsWith('.png') || path.endsWith('.jpg')) ? path : path + IMAGE_EXT;
+    }
+
+    function getLevelClass(level) {
+      if (!level || isNaN(level)) return '';
+      const lvl = parseInt(level);
+      if (lvl >= 1 && lvl <= 3) return 'level-common';
+      if (lvl >= 4 && lvl <= 6) return 'level-uncommon';
+      if (lvl >= 7 && lvl <= 9) return 'level-rare';
+      if (lvl >= 10) return 'level-ultra';
+      return ''; // Fallback
+    }
+
+    function enlargeImage(url, name) {
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('modal-image');
+  
+      modalImg.src = url;
+      modalImg.alt = name;
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('image-modal').classList.remove('active');
+    }
+
+    // --- DEBOUNCE LOGIC ---
+    let debounceTimer;
+    const searchInput = document.getElementById('search-input');
+
+    searchInput.addEventListener('input', () => {
+        // 1. Clear the previous timer if the user types again quickly
+        clearTimeout(debounceTimer);
+    
+        // 2. Start a new timer. The function runs only if 300ms pass without typing.
+        debounceTimer = setTimeout(() => {
+            resetAndRender();
+        }, 300);
+    });
+
+    // PAGINATION CONFIG
+    const ITEMS_PER_PAGE = 15; // Set to 15 items per page for all devices
+    
+    let currentPage = 1;
+    let currentFilteredData = []; // Store current dataset for pagination logic
+
+    // Helper: Reset page and render (used by Search/Filter inputs)
+    function resetAndRender() {
+        currentPage = 1;
+        renderTable();
+    }
+
+    // Helper: Change Page (Used by buttons)
+    function changePage(direction) {
+        const totalPages = Math.ceil(currentFilteredData.length / ITEMS_PER_PAGE);
+        const newPage = currentPage + direction;
+        
+        if (newPage > 0 && newPage <= totalPages) {
+            currentPage = newPage;
+            renderTable();
+            // Scroll back to top of table on page change
+            document.querySelector('.filters-bar').scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    // Helper to determine image priority (Borderless > Hidden Rare > Others)
+    function getRarityScore(rarity) {
+        if (!rarity) return 0;
+        const r = rarity.toLowerCase().replace(/\s+/g, '');
+        if (r === 'borderless') return 3;
+        if (r === 'hiddenrare') return 2;
+        return 1; 
+    }
+
+    // MAIN RENDER LOGIC
+    function renderTable() {
+      const searchVal = document.getElementById('search-input').value.toLowerCase();
+      const typeVal = document.getElementById('type-select').value;
+      const tbody = document.getElementById('codex-body');
+      
+      // Clear current table
+      tbody.innerHTML = '';
+
+      // 1. FILTER & SORT
+      const bestCardsMap = new Map(); // Changed from Set to Map
+      let filtered = [];
+
+      if (typeof CARDS !== 'undefined') {
+          const sourceData = CARDS.filter(c => c.supertype === 'Creature');
+          
+          sourceData.forEach(c => {
+             // Apply Search & Type Filters
+             if (searchVal && !c.name.toLowerCase().includes(searchVal)) return;
+             if (typeVal && (!c.types || !c.types.includes(typeVal))) return;
+             
+             // LOGIC: If card exists, check if new one has higher rarity. If so, swap it.
+             const currentScore = getRarityScore(c.rarity);
+             
+             if (!bestCardsMap.has(c.name)) {
+                 bestCardsMap.set(c.name, c);
+             } else {
+                 const existingCard = bestCardsMap.get(c.name);
+                 const existingScore = getRarityScore(existingCard.rarity);
+                 
+                 if (currentScore > existingScore) {
+                     bestCardsMap.set(c.name, c);
+                 }
+             }
+          });
+          
+          // Convert Map values back to Array
+          filtered = Array.from(bestCardsMap.values());
+      }
+
+      filtered.sort((a,b) => a.name.localeCompare(b.name));
+      currentFilteredData = filtered; // Update global state
+
+      // 2. APPLY PAGINATION LOGIC
+      const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+      
+      // Safety check
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+      const endIndex = startIndex + ITEMS_PER_PAGE;
+      const displayData = filtered.slice(startIndex, endIndex);
+
+      // 3. GENERATE HTML
+      displayData.forEach(c => {
+        const lore = loreMap[c.name] || "Log entry pending..."; 
+        const imgUrl = getCardImageUrl(c);
+        const rarityClass = c.rarity ? `thumb-${c.rarity.replace(/\s+/g, '')}` : '';
+        
+        const imgHTML = imgUrl 
+          ? `<img src="${imgUrl}" class="card-thumbnail ${rarityClass}" onclick="enlargeImage('${imgUrl}', '${c.name.replace(/'/g, "\\'")}')" alt="${c.name}" title="Click to enlarge">` 
+          : `<div style="width:60px; height:80px; background:#222; display:flex; align-items:center; justify-content:center; color:#555; font-size:10px;">No Image</div>`;
+
+        const typeHTML = (c.types || []).map(t => `<span class="pill pill-${t}">${t}</span>`).join(' ');
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td style="vertical-align:top;">
+             <div style="font-weight:bold; color:var(--accent); font-size:1rem; margin-bottom:4px;">${c.name}</div>
+             ${imgHTML}
+          </td>
+          <!-- NOTE: Inline vertical-align removed here so CSS media queries control it -->
+          <td>${typeHTML}</td>
+          <td><span class="${getLevelClass(c.level)}">${c.level}</span></td>
+          <td class="codex-text">${lore}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // 4. UPDATE PAGINATION CONTROLS
+      const paginationContainer = document.getElementById('pagination');
+      const countDisplay = document.getElementById('count-display');
+
+      // Update Text
+      countDisplay.innerText = `Showing ${displayData.length} of ${filtered.length} entries (Page ${currentPage} of ${totalPages})`;
+      
+      // Update Buttons
+      document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+      document.getElementById('btn-prev').disabled = (currentPage === 1);
+      document.getElementById('btn-next').disabled = (currentPage === totalPages);
+    }
+
+    window.addEventListener('load', renderTable);
+  </script>
+  <script src="sidebar.js"></script>
+  <script src="footer.js"></script>
+</body>
+</html>
