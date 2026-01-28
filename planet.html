@@ -1730,76 +1730,6 @@
         starField.frustumCulled = false; 
         scene.add(starField)
 
-        const shootingStars = [];
-
-        function createShootingStar() {
-            // Create a thicker, glowing line
-            const points = [];
-            points.push(new THREE.Vector3(0, 0, 0));
-            points.push(new THREE.Vector3(-8, 0, 0)); // Longer tail
-            
-            const geometry = new THREE.BufferGeometry().setFromPoints(points);
-            
-            // Brighter, thicker material
-            const material = new THREE.LineBasicMaterial({ 
-                color: 0xffffff, 
-                transparent: true, 
-                opacity: 1,
-                linewidth: 3 // Note: This doesn't work in WebGL, but we'll add glow
-            });
-            
-            const star = new THREE.Line(geometry, material);
-            
-            // Random start position (wider spread)
-            const startPos = new THREE.Vector3(
-                (Math.random() - 0.5) * 400,
-                (Math.random() - 0.5) * 400,
-                (Math.random() - 0.5) * 400
-            );
-            
-            // Faster velocity for more visible streak
-            const velocity = new THREE.Vector3(
-                (Math.random() - 0.5) * 4,
-                (Math.random() - 0.5) * 4 - 2, // Bias downward
-                (Math.random() - 0.5) * 2
-            );
-            
-            star.position.copy(startPos);
-            star.lookAt(startPos.clone().add(velocity));
-            
-            // Add a point light for glow effect
-            const glow = new THREE.PointLight(0xffffff, 2, 20);
-            star.add(glow);
-            
-            scene.add(star);
-            
-            return { mesh: star, velocity: velocity, life: 150 }; // Longer life
-        }
-
-        // In your animate() function, replace the shooting star section:
-        if(Math.random() < 0.05) shootingStars.push(createShootingStar()); // 5% chance instead of 1.5%
-
-        for (let i = shootingStars.length - 1; i >= 0; i--) {
-            const star = shootingStars[i];
-            star.mesh.position.add(star.velocity);
-            star.life--;
-            
-            // Slower fade
-            star.mesh.material.opacity = star.life / 150;
-            
-            // Fade the glow too
-            if(star.mesh.children[0]) {
-                star.mesh.children[0].intensity = (star.life / 150) * 2;
-            }
-            
-            if (star.life <= 0) {
-                scene.remove(star.mesh);
-                star.mesh.geometry.dispose();
-                star.mesh.material.dispose();
-                shootingStars.splice(i, 1);
-            }
-        }
-
         function createGalaxyTexture() {
             const canvas = document.createElement('canvas');
             canvas.width = 32; canvas.height = 32;
@@ -2126,19 +2056,7 @@
             }
             
             if(typeof updateLabelPosition === 'function') updateLabelPosition();
-
-            if(Math.random() < 0.015) shootingStars.push(createShootingStar());
-            for (let i = shootingStars.length - 1; i >= 0; i--) {
-                const star = shootingStars[i];
-                star.mesh.position.add(star.velocity);
-                star.life--;
-                star.mesh.material.opacity = star.life / 50;
-                if (star.life <= 0) {
-                    scene.remove(star.mesh);
-                    star.mesh.geometry.dispose(); star.mesh.material.dispose();
-                    shootingStars.splice(i, 1);
-                }
-            }
+            
             renderer.render(scene, camera);
         }
         animate();
