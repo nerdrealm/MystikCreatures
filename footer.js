@@ -1,6 +1,25 @@
 document.addEventListener("DOMContentLoaded", function() {
     
-  // Footer & No Right Click
+  document.addEventListener('contextmenu', function(e) {
+    if (e.target.tagName === 'IMG') {
+      e.preventDefault();
+      return false;
+    }
+  });
+
+  document.addEventListener('dragstart', function(e) {
+    if (e.target.tagName === 'IMG') {
+      e.preventDefault();
+      return false;
+    }
+  });
+
+  document.addEventListener('touchstart', function(e) {
+    if (e.target.tagName === 'IMG') {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
   const footerContent = `
     <style>
       .legal-footer {
