@@ -15,6 +15,10 @@
   --warning-bg: rgba(236, 201, 75, 0.12);
   --warning-text: #ecc94b;
   --danger: #e53e3e;
+  --color-green-status: #48bb78;
+  --color-red-status: #f56565;
+  --color-blue-status: #4299e1;
+  --color-yellow-status: #ecc94b;
 }
 
 * { box-sizing: border-box; }
