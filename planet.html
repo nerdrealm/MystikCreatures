@@ -2503,7 +2503,10 @@
         });
 
         document.addEventListener('touchstart', function(e) {
-            if (e.target.tagName === 'IMG' && !e.target.closest('#pan-modal') && !e.target.closest('#location-label')) {
+            if (e.target.tagName === 'IMG' && 
+                !e.target.closest('#pan-modal') && 
+                !e.target.closest('#location-label') && 
+                e.target.id !== 'pan-img') {
                 e.preventDefault();
             }
         }, { passive: false });
