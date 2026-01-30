@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Mystik Creatures™ — Official Shop</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Social Media Preview Tags -->
+  <meta property="og:title" content="Mystik Creatures™ TCG" />
+  <meta property="og:description" content="A New Realm Awaits" />
+
+  <!-- Directs to your logo on the live site -->
+  <meta property="og:image" content="https://nerdrealm.github.io/MystikCreatures/MystikLogo-PNG.png" />
+
+  <!-- Directs to your main page -->
+  <meta property="og:url" content="https://nerdrealm.github.io/MystikCreatures/index.html" />
+
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+    
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    
+    /* --- MAIN CONTENT --- */
+    .main { flex: 1; padding: 1.5rem 1.5rem 2.5rem; max-width: calc(100% - 260px); }
+    .main-inner { max-width: 1200px; margin: 0 auto; }
+    
+    section {
+      background: rgba(7, 10, 18, 0.95);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(45, 55, 72, 0.9);
+      box-shadow: var(--shadow-soft);
+      padding: 1.4rem 1.5rem 1.3rem;
+    }
+    h2 { margin: 0 0 0.6rem; font-size: 1.05rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); }
+    .section-subtitle { margin: 0 0 2rem; font-size: 0.85rem; color: var(--text-muted); }
+
+    /* --- SHOP GRID STYLES --- */
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .product-card {
+      background: var(--bg-panel-soft);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      border-color: var(--accent);
+    }
+
+    .product-image {
+      width: 100%;
+      aspect-ratio: 1 / 1; 
+      background: #111;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: var(--danger);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .product-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--text-main);
+      text-align: center;
+      margin-bottom: 5px;
+      line-height: 1.4;
+    }
+
+    .product-type {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* --- WRAPPED BUTTON STYLE --- */
+    .buy-btn {
+      margin-top: auto;
+      background: var(--accent);
+      color: #05070b; 
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 8px 24px; 
+      width: auto;
+      min-width: unset; 
+      display: inline-block;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .product-card:hover .buy-btn {
+      background: #81e6d9;
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(79, 209, 197, 0.4);
+    }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; position: static; height: auto; border-right: none; border-bottom: 1px solid #1a202c; }
+      .main { max-width: 100%; padding: 1rem; }
+    }
+    /* --- MOBILE OPTIMIZATION --- */
+    
+    /* 1. Mobile Label (Hidden on Desktop) */
+    .mobile-label { display: none; }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; position: static; max-height: none; border-right: none; border-bottom: 1px solid #1a202c; }
+      .main { max-width: 100%; padding: 1rem 1rem 2rem; }
+
+      /* Force table elements to behave like blocks */
+      .table-wrapper { max-height: none; border: none; overflow: visible; }
+      table, thead, tbody, th, td, tr { display: block; }
+      
+      /* Hide Table Headers */
+      thead tr { position: absolute; top: -9999px; left: -9999px; }
+      
+      /* Style the Row as a "Card" */
+      tbody tr { 
+        background: var(--bg-panel-soft);
+        margin-bottom: 1.5rem; 
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        padding: 1.25rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      }
+
+      /* Style the Cells */
+      td { 
+        border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.05); 
+        padding: 0.5rem 0;
+        text-align: left !important;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; 
+      }
+      td:last-child { border-bottom: none; }
+
+      /* Reveal Labels */
+      .mobile-label {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        margin-right: 10px;
+        min-width: 80px; 
+      }
+
+      /* Name & Image (First Cell) */
+      td:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center !important;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+      }
+      td:first-child .mobile-label { display: none; } /* Hide label for name */
+      
+      td:first-child div { font-size: 1.3rem !important; margin-bottom: 10px; }
+      .card-thumbnail { max-height: 200px; width: auto; }
+
+      /* Details Block */
+      td:nth-child(5) { 
+          display: block; 
+          margin-top: 0.5rem;
+          background: rgba(0,0,0,0.2);
+          padding: 10px;
+          border-radius: 8px;
+      }
+      td:nth-child(5) .mobile-label {
+          display: block;
+          margin-bottom: 5px;
+          border-bottom: 1px solid #333;
+          padding-bottom: 2px;
+          width: 100%;
+      }
+      
+      .detail-text { text-align: left; }
+    }
+
+  </style>
+</head>
+<body>
+  <button id="mobile-menu-btn" aria-label="Toggle Menu">&#9776;</button>
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+    <div class="main-inner">
+      <section>
+        <h2>Official Shop</h2>
+        <p class="section-subtitle">
+          Support Mystik Creatures™ by grabbing some official merchandise!
+        </p>
+
+        <p style="margin: -1rem 0 2rem; font-size: 0.88rem; color: var(--text-muted);">
+          <strong style="color: var(--accent);">Giving Back:</strong> A portion of proceeds from select products supports <strong>Mental Health America</strong> through Threadless' charitable giving program. <a href="legal.html#terms" style="color: var(--accent); text-decoration: underline;"><strong><u>Learn more.</u></strong></a>
+        </p>
+
+        <div class="shop-grid">
+
+          <!-- PRODUCT 1: SHIRT -->
+          <a href="https://mystikcreatures.threadless.com/designs/mystik-creatures-tcg-logo-apparel" target="_blank" class="product-card">
+            <div class="product-image">
+               <span class="badge">New</span>
+               <img src="ShirtModel.png" alt="Mystik T-Shirt">
+            </div>
+            <div class="product-title">Mystik Logo T-Shirt</div>
+            <div class="product-type">Apparel</div>
+            <div class="buy-btn">Buy Now</div>
+          </a>
+
+          <!-- PRODUCT 2: PLAYMAT -->
+          <a href="https://mystikcreatures.threadless.com/designs/mystik-creatures-tcg-desk-mat" target="_blank" class="product-card">
+            <div class="product-image">
+               <span class="badge">Best Seller</span>
+               <img src="DeskMat.jpg" alt="Desk Mat">
+            </div>
+            <div class="product-title">Official Desk Mat</div>
+            <div class="product-type">Accessories</div>
+            <div class="buy-btn">Buy Now</div>
+          </a>
+
+          <!-- PRODUCT 3: STICKERS (ADDED 'NEW' BADGE HERE) -->
+          <a href="https://mystikcreatures.threadless.com/designs/mystik-creatures-tcg-logo-merch" target="_blank" class="product-card">
+            <div class="product-image">
+               <img src="LogoStickers.jpg" alt="Stickers">
+            </div>
+            <div class="product-title">Stickers</div>
+            <div class="product-type">Stickers</div>
+            <div class="buy-btn">Buy Now</div>
+          </a>
+
+          <!-- PRODUCT 4: POSTER (REMOVED 'NEW' BADGE) -->
+          <a href="https://mystikcreatures.threadless.com/designs/mystik-creatures-tcg-desk-mat-stand-or-fall/accessories/mouse-pad/desk-mat" target="_blank" class="product-card">
+            <div class="product-image">
+               <img src="DeskMat2.jpg" alt="Desk Mat">
+            </div>
+            <div class="product-title">Official Desk Mat</div>
+            <div class="product-type">Accessories</div>
+            <div class="buy-btn">Buy Now</div>
+          </a>
+
+        </div>
+
+      </section>
+    </div>
+  </main>
+  <script src="sidebar.js"></script>
+  <script src="footer.js"></script>
+</body>
+</html>
