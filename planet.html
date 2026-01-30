@@ -2506,6 +2506,7 @@
             if (e.target.tagName === 'IMG' && 
                 !e.target.closest('#pan-modal') && 
                 !e.target.closest('#location-label') &&
+                !e.target.closest('.sidebar-powers') &&
                 e.target.id !== 'cardPreviewImg') {
                 e.preventDefault();
             }
