@@ -2489,9 +2489,16 @@
 
         // Image Protection
         document.addEventListener('contextmenu', function(e) {
-            if (e.target.tagName === 'IMG') {
+            e.preventDefault();
+            return false;
+        });
+
+        // Disable keyboard shortcuts for DevTools
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C')) ||
+                (e.ctrlKey && e.key === 'u')) {
                 e.preventDefault();
-                return false;
             }
         });
 
