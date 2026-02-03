@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
         !e.target.closest('.sidebar') &&
         !e.target.classList.contains('card-thumbnail') && 
         !e.target.closest('.card-item-image') &&
+        !e.target.closest('.product-image') &&
         e.target.id !== 'modal-image') {
       e.preventDefault();
     }
