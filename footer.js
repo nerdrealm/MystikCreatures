@@ -1,9 +1,16 @@
 document.addEventListener("DOMContentLoaded", function() {
     
   document.addEventListener('contextmenu', function(e) {
-    if (e.target.tagName === 'IMG') {
+    e.preventDefault();
+    return false;
+  });
+
+  // Disable keyboard shortcuts for DevTools
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C')) ||
+        (e.ctrlKey && e.key === 'u')) {
       e.preventDefault();
-      return false;
     }
   });
 
@@ -15,10 +22,10 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   document.addEventListener('touchstart', function(e) {
-    if (e.target.tagName === 'IMG' && 
+      if (e.target.tagName === 'IMG' && 
+        !e.target.closest('.sidebar') &&
         !e.target.classList.contains('card-thumbnail') && 
         !e.target.closest('.card-item-image') &&
-        !e.target.closest('.sidebar-powers') &&
         e.target.id !== 'modal-image') {
       e.preventDefault();
     }
