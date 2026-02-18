@@ -1005,7 +1005,17 @@
         let selectedTypes = new Set();
         let selectedBosses = new Set();
         let currentCreatureSort = 'desc';
-        
+        let isLocked = false;
+
+        function showLockedPopup(changedThing) {
+            const confirmed = confirm(`Changes to ${changedThing} cannot be made after a deck has been generated.\n\nClick OK to start over and reset the page, or Cancel to stay on your current deck.`);
+            if (confirmed) {
+                document.getElementById('output').style.display = 'none';
+                isLocked = false;
+                checkButtons();
+            }
+        }
+
         // Strict Boss -> Secret Dependency Map
         const BOSS_SECRET_MAP = {
             "Werelephant": "Moonlight Awakening",
@@ -1118,11 +1128,18 @@
                 archContainer.appendChild(radio);
                 archContainer.appendChild(label);
                 radio.addEventListener('change', checkButtons);
+                label.addEventListener('click', (e) => {
+                    if (isLocked) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        showLockedPopup(`Deck Archetype`);
+                    }
+                }, true);
             });
 
             document.getElementById('generate-btn').onclick = runGeneration;
             document.getElementById('start-custom-btn').onclick = startCustomBuilder;
-            document.getElementById('reroll-btn').onclick = runGeneration;
+            document.getElementById('reroll-btn').onclick = () => { isLocked = false; runGeneration(); };
             document.getElementById('edit-btn').onclick = openDeckEditor;
             document.getElementById('copy-btn').onclick = copyDeckToClipboard;
             
@@ -1133,7 +1150,6 @@
                     setTimeout(() => target.blur(), 100); 
                 }
             });
-        
         }
 
         // --- MODE SELECTION ---
@@ -1168,6 +1184,7 @@
             selectedTypes.clear();
             document.querySelectorAll('.type-bubble').forEach(b => b.classList.remove('selected', 'disabled'));
             document.querySelectorAll('input[name="archetype"]').forEach(r => r.checked = false);
+            isLocked = false;
             checkButtons();
         }
 
@@ -1181,6 +1198,7 @@
         }
 
         function toggleType(el, type) {
+            if (isLocked) { showLockedPopup(`Deck Type`); return; }
             if (type === 'Blank') {
                 if (!selectedTypes.has('Blank')) {
                     selectedTypes.clear();
@@ -1232,6 +1250,7 @@
                 b.className = 'boss-bubble';
                 b.textContent = boss.name;
                 b.onclick = () => {
+                    if (isLocked) { showLockedPopup(`Level 10 Creatures`); return; }
                     if(!selectedBosses.has(boss.script_uuid) && selectedBosses.size >= 3) { alert("Max 3 bosses."); return; }
                     b.classList.toggle('selected');
                     selectedBosses.has(boss.script_uuid) ? selectedBosses.delete(boss.script_uuid) : selectedBosses.add(boss.script_uuid);
@@ -1470,6 +1489,7 @@
                 enforceDeckIntegrity(deck);
                 sanitizeDeck(deck);
                 renderDeck(deck, themeStr, archetype);
+                isLocked = true;
                 document.getElementById('output').style.display = 'block';
                 document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
             } catch (e) {
