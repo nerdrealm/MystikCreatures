@@ -1925,7 +1925,7 @@ const CARDS = [
     "id": 42,
     "name": "Bristleback",
     "supertype": "Creature",
-    "types": ["Earth"],
+    "types": ["Earth", "Forest"],
     "level": 10,
     "hp": 7000,
     "rarity": "Borderless",
