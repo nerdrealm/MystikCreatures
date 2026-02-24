@@ -96,8 +96,9 @@ document.addEventListener("DOMContentLoaded", function() {
     // Ensure the sidebar and main content sit above the particles
     const style = document.createElement('style');
     style.innerHTML = `
-        .sidebar, .main { position: relative; z-index: 1; }
-        #image-modal, .editor-modal { z-index: 10000; } /* Keep modals safely on top */
+        .main { position: relative; z-index: 1; }
+        .sidebar { z-index: 9999 !important; } /* High enough to beat main, doesn't break sticky/fixed position */
+        #image-modal, .editor-modal { z-index: 10000 !important; } /* Keep modals safely on top */
     `;
     document.head.appendChild(style);
 
@@ -130,7 +131,7 @@ document.addEventListener("DOMContentLoaded", function() {
     ];
 
     // Responsive Orb Count (fewer on mobile to save battery/CPU)
-    const ORB_COUNT = width < 800 ? 30 : 65;
+    const ORB_COUNT = width < 800 ? 45 : 65;
     const orbs = [];
 
     // 6. ORB CLASS (Handles organic Parallax movement)
@@ -162,7 +163,10 @@ document.addEventListener("DOMContentLoaded", function() {
             // Appearance
             this.color = elementColors[Math.floor(Math.random() * elementColors.length)];
             // Opacity is influenced by Z-depth (closer = brighter, max 25% opacity so it's not distracting)
-            this.opacity = (Math.random() * 0.15 + 0.05) * this.z;
+            const isMobile = width < 800;
+            this.opacity = isMobile
+                ? (Math.random() * 0.25 + 0.1) * this.z   // brighter on mobile
+                : (Math.random() * 0.15 + 0.05) * this.z;  // original desktop
         }
 
         update() {
@@ -201,13 +205,14 @@ document.addEventListener("DOMContentLoaded", function() {
         ctx.clearRect(0, 0, width, height);
 
         // Blending mode 'screen' makes overlapping orbs glow together beautifully
-        ctx.globalCompositeOperation = 'screen';
+        ctx.globalCompositeOperation = 'source-over'; // Default blending for better performance and less distraction
 
         for (let i = 0; i < orbs.length; i++) {
             orbs[i].update();
             orbs[i].draw(ctx);
         }
 
+        ctx.globalCompositeOperation = 'source-over'; // Reset after drawing orbs
         requestAnimationFrame(animate);
     }
 
