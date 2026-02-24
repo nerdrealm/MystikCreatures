@@ -32,6 +32,11 @@
     .pill-Wind    { border-color: #87CEEB; color: #87CEEB; background: rgba(135, 206, 235, 0.15); }
     .pill-Blank   { border-color: #718096; color: #a0aec0; background: rgba(113, 128, 150, 0.15); }
 
+    /* Secret Subtype Pills */
+    .pill-Magik   { border-color: #f472b6; color: #f472b6; background: rgba(244, 114, 182, 0.15); }
+    .pill-Terrain { border-color: #c9a84c; color: #c9a84c; background: rgba(201, 168, 76, 0.15); }
+    .pill-Spell   { border-color: #94a3b8; color: #94a3b8; background: rgba(148, 163, 184, 0.15); }
+
     /* --- MATCHING TEXT COLORS (For Numbers) --- */
     .text-Dark    { color: #a569bd; font-weight: bold; }
     .text-Earth   { color: #e0cdae; font-weight: bold; }
@@ -819,7 +824,7 @@
           const subtype = (c.subtypes || []).map(t => `<span class="pill pill-${t}">${t}</span>`).join(' ');
           
           cardHTML += '<div class="card-item-stats">';
-          cardHTML += `<div class="stat-box"><div class="stat-label">Subtype</div><div class="stat-value">${subtype}</div></div>`;
+          cardHTML += `<div class="stat-box"><div class="stat-label"></div><div class="stat-value">${subtype}</div></div>`;
           cardHTML += '</div>';
 
           cardHTML += `<div class="card-item-details">${c.effectText || ''}</div>`;
@@ -923,7 +928,7 @@
                 <div style="margin-bottom: 10px;"><span style="font-weight:bold; font-size:1.2rem; ${getNameStyle(c)}">${c.name}</span></div>
                 ${imgHTML}
             </td>
-            <td><span class="mobile-label">Subtype:</span> <div style="text-align:right">${subtype}</div></td>
+            <td><span class="mobile-label"></span> <div style="text-align:right">${subtype}</div></td>
             <td><span class="mobile-label">Effect:</span> <div class="detail-text">${c.effectText || ''}</div></td>
             <td><span class="mobile-label">Rarity:</span> <div style="text-align:right">${rarityDisplay}</div></td>
             <td><span class="mobile-label">Set ID:</span> <div style="text-align:right">${c.collectionNumber || c.setId || '—'}</div></td>
